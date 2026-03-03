@@ -686,6 +686,11 @@ class CustomerProfile(BaseDocument):
         """Generate deterministic _key from customer ID."""
         return customer_id.lower().replace(' ', '_').replace('-', '_')
 
+    @property
+    def id(self) -> str:
+        """Alias for _key for backward compatibility with endpoints."""
+        return self._key
+
 
 class ScanSession(BaseDocument):
     """
