@@ -849,6 +849,171 @@ class ScanFinding(BaseDocument):
         return v.upper() if v else None
 
 
+# ========== Phase 2: Enrichment Models ==========
+
+class ThreatIntelligence(BaseModel):
+    """
+    Threat intelligence chain for a CWE.
+
+    Contains: CWE → CAPEC → ATT&CK chain
+    """
+
+    cwe: Weakness
+    capecs: List[AttackPattern] = Field(default_factory=list)
+    attack_techniques: List[ATTACKTechnique] = Field(default_factory=list)
+
+
+class EnrichedFinding(BaseModel):
+    """
+    Scan finding enriched with vulnerability intelligence.
+
+    Used in /v1/enrich response.
+    """
+
+    finding: ScanFinding
+    cve_details: Optional[Vulnerability] = None
+    epss_score: Optional[EPSSHistory] = None
+    kev_entry: Optional[KEVEntry] = None
+    threat_intelligence: Optional[ThreatIntelligence] = None
+
+
+class EnrichmentMetadata(BaseModel):
+    """
+    Enrichment coverage statistics.
+    """
+
+    cve_enrichment_coverage: float = 0.0  # Percentage of CVE findings enriched
+    epss_coverage: float = 0.0  # Percentage with EPSS scores
+    kev_coverage: float = 0.0  # Percentage in CISA KEV
+    threat_intel_coverage: float = 0.0  # Percentage with threat intel
+
+
+class EnrichRequest(BaseModel):
+    """
+    Request model for /v1/enrich endpoint.
+    """
+
+    scan_session_id: str = Field(..., description="Scan session _key to enrich")
+    include_threat_intel: bool = Field(True, description="Include CWE → CAPEC → ATT&CK chain")
+    include_kev: bool = Field(True, description="Include CISA KEV status")
+    include_epss: bool = Field(True, description="Include EPSS scores")
+
+
+class EnrichResponse(BaseModel):
+    """
+    Response model for /v1/enrich endpoint.
+    """
+
+    scan_session_id: str
+    total_findings: int
+    enriched_findings: List[EnrichedFinding]
+    enrichment_metadata: EnrichmentMetadata
+
+
+class CompactedFinding(BaseModel):
+    """
+    Compacted finding with deduplication and CWE rollup.
+
+    Used in /v1/compact response.
+    """
+
+    vulnerability_id: Optional[str] = None  # CVE ID or None for non-CVE
+    severity: str
+    occurrences: int
+    affected_locations: List[Dict[str, Any]]  # [{file, line}, ...]
+    cwe_ids: List[str]  # Rolled-up CWE IDs
+    original_cwe_ids: List[str]  # Original CWE IDs before rollup
+
+
+class CompactionMetadata(BaseModel):
+    """
+    Compaction statistics.
+    """
+
+    deduplication_strategy: str  # by_cve, by_cwe
+    cwe_rollup_level: str  # Class, Pillar
+    original_cwe_count: int
+    rolled_up_cwe_count: int
+    cwe_reduction_percentage: float
+
+
+class CompactRequest(BaseModel):
+    """
+    Request model for /v1/compact endpoint.
+    """
+
+    scan_session_id: str = Field(..., description="Scan session _key to compact")
+    deduplication_strategy: str = Field("by_cve", description="Deduplication strategy (by_cve)")
+    cwe_rollup_level: str = Field("Class", description="CWE abstraction level (Class, Pillar)")
+
+
+class CompactResponse(BaseModel):
+    """
+    Response model for /v1/compact endpoint.
+    """
+
+    scan_session_id: str
+    original_finding_count: int
+    compacted_finding_count: int
+    reduction_percentage: float
+    compacted_findings: List[CompactedFinding]
+    compaction_metadata: CompactionMetadata
+
+
+class ControlMapping(BaseModel):
+    """
+    Regulatory control mapping for a finding.
+
+    Used in /v1/map-controls response.
+    """
+
+    finding_id: str  # CVE ID or finding _key
+    cwe_ids: List[str]
+    nist_controls: List[OSCALControl] = Field(default_factory=list)
+    fda_requirements: List[RegulatoryRequirement] = Field(default_factory=list)
+    iso_requirements: List[RegulatoryRequirement] = Field(default_factory=list)
+
+
+class ControlStatistics(BaseModel):
+    """
+    Control mapping statistics.
+    """
+
+    total_findings_mapped: int
+    total_nist_controls: int
+    total_fda_requirements: int
+    total_iso_requirements: int
+    coverage_percentage: Dict[str, float]  # {framework: percentage}
+
+
+class MapControlsRequest(BaseModel):
+    """
+    Request model for /v1/map-controls endpoint.
+    """
+
+    scan_session_id: str = Field(..., description="Scan session _key to map")
+    frameworks: List[str] = Field(
+        default=["NIST 800-53", "FDA 524B", "ISO 27001"],
+        description="Regulatory frameworks to map to"
+    )
+    use_compacted_view: bool = Field(
+        True,
+        description="Use compacted findings (deduplicate + CWE rollup)"
+    )
+
+
+class ControlMappingsResponse(BaseModel):
+    """
+    Response model for /v1/map-controls endpoint.
+    """
+
+    scan_session_id: str
+    frameworks: List[str]
+    control_mappings: List[ControlMapping]
+    control_statistics: ControlStatistics
+    used_compacted_view: bool
+
+
 # ========== Model Registry ==========
 
 MODEL_REGISTRY: Dict[str, type[BaseDocument]] = {
