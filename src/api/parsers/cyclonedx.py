@@ -78,6 +78,7 @@ class CycloneDXParser(BaseScanParser):
         Extract vulnerabilities from CycloneDX components.
 
         CycloneDX 1.4+ supports vulnerabilities array in each component.
+        CycloneDX 1.5+ also supports root-level vulnerabilities array.
 
         Args:
             payload: CycloneDX payload
@@ -97,6 +98,7 @@ class CycloneDXParser(BaseScanParser):
         else:
             tool_name = "Unknown"
 
+        # Extract component-level vulnerabilities (CycloneDX 1.4 style)
         for component in payload.get("components", []):
             component_name = component.get("name", "")
             component_version = component.get("version", "")
@@ -133,6 +135,40 @@ class CycloneDXParser(BaseScanParser):
                 )
 
                 findings.append(finding)
+
+        # Extract root-level vulnerabilities (CycloneDX 1.5 style)
+        for vuln in payload.get("vulnerabilities", []):
+            # Extract CVE ID
+            cve_id = vuln.get("id", "")
+
+            # Extract severity from ratings
+            ratings = vuln.get("ratings", [])
+            severity = "UNKNOWN"
+            if ratings:
+                rating = ratings[0]
+                severity = self._map_severity(rating.get("severity", ""))
+
+            # Extract description
+            description = vuln.get("description", "")
+
+            # Determine location from affects array
+            affects = vuln.get("affects", [])
+            location = "Unknown"
+            if affects:
+                # Use first affected reference (ref is usually purl)
+                location = affects[0].get("ref", "Unknown")
+
+            finding = ParsedFinding(
+                cve_id=cve_id,
+                severity=severity,
+                description=description,
+                location=location,
+                tool_name=tool_name,
+                scan_type="cyclonedx",
+                raw_data=vuln
+            )
+
+            findings.append(finding)
 
         self.logger.debug(
             "Extracted CycloneDX findings",

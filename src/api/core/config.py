@@ -41,6 +41,9 @@ class CloudSettings(Settings):
     API_KEY_MIN_LENGTH: int = 32
     API_KEY_HASH_ROUNDS: int = 12  # bcrypt rounds
 
+    # ========== LLM Integration ==========
+    ANTHROPIC_API_KEY: Optional[str] = None  # Required for Phase 1+ features
+
     # ========== Rate Limiting ==========
     RATE_LIMIT_ENABLED: bool = True
     RATE_LIMIT_REQUESTS_PER_MINUTE: int = 100

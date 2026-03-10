@@ -109,3 +109,93 @@ class ScanFindingResponse(BaseModel):
                 "created_at": "2026-03-02T10:05:30Z"
             }
         }
+
+
+class VEXGenerationResponse(BaseModel):
+    """
+    Response model for POST /v1/scan/{session_id}/vex.
+
+    Returns VEX (Vulnerability Exploitability eXchange) document.
+    """
+
+    scan_session_id: str = Field(
+        ...,
+        description="Scan session identifier this VEX was generated for"
+    )
+
+    vex_document: dict = Field(
+        ...,
+        description="CycloneDX VEX document (JSON format)"
+    )
+
+    vulnerabilities_assessed: int = Field(
+        ...,
+        description="Number of vulnerabilities assessed in this VEX"
+    )
+
+    generated_at: str = Field(
+        ...,
+        description="When VEX was generated (ISO 8601)"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "scan_session_id": "scan_abc123",
+                "vex_document": {
+                    "bomFormat": "CycloneDX",
+                    "specVersion": "1.5",
+                    "version": 1,
+                    "vulnerabilities": [
+                        {
+                            "id": "CVE-2021-44228",
+                            "analysis": {
+                                "state": "not_affected",
+                                "justification": "vulnerable_code_not_in_execute_path",
+                                "detail": "Log4j is included but logging is disabled"
+                            }
+                        }
+                    ]
+                },
+                "vulnerabilities_assessed": 5,
+                "generated_at": "2026-03-06T10:15:00Z"
+            }
+        }
+
+
+class CPEMatchingResponse(BaseModel):
+    """
+    Response model for POST /v1/scan/{session_id}/cpe-match.
+
+    Returns CPE matching results for SBOM components.
+    """
+
+    scan_session_id: str = Field(
+        ...,
+        description="Scan session identifier CPE matching was performed for"
+    )
+
+    components_processed: int = Field(
+        ...,
+        description="Number of components analyzed for CPE matching"
+    )
+
+    cpe_mappings_created: int = Field(
+        ...,
+        description="Number of matched_by_cpe edges created"
+    )
+
+    completed_at: str = Field(
+        ...,
+        description="When CPE matching completed (ISO 8601)"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "scan_session_id": "scan_abc123",
+                "components_processed": 150,
+                "cpe_mappings_created": 142,
+                "completed_at": "2026-03-06T11:30:00Z"
+            }
+        }

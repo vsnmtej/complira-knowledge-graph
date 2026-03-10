@@ -33,6 +33,10 @@ class ParsedFinding(BaseModel):
     scan_type: str  # "sarif" | "cyclonedx" | "osv" | "vex"
     raw_data: Dict[str, Any]  # Original finding for traceability
 
+    def __getitem__(self, key: str):
+        """Support dictionary-style access for backward compatibility."""
+        return getattr(self, key)
+
 
 class ParsedScanData(BaseModel):
     """
@@ -46,6 +50,10 @@ class ParsedScanData(BaseModel):
     findings: List[ParsedFinding]
     components: List[Dict[str, Any]]  # SBOMs only (empty for SAST/DAST)
     metadata: Dict[str, Any]
+
+    def __getitem__(self, key: str):
+        """Support dictionary-style access for backward compatibility."""
+        return getattr(self, key)
 
 
 # ========== Protocols (DIP) ==========

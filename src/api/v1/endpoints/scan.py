@@ -14,12 +14,13 @@ import structlog
 from api.core.security import Customer, get_current_customer
 from api.core.database import get_customer_db
 from api.services.scan import ScanIngestionService
-from api.repositories.scan import ScanSessionRepository, ScanFindingRepository
 from api.models.requests.scan import ScanIngestRequest
 from api.models.responses.scan import (
     ScanIngestResponse,
     ScanSessionResponse,
     ScanFindingResponse,
+    VEXGenerationResponse,
+    CPEMatchingResponse,
 )
 from api.models.responses import APIResponse, ResponseMetadata
 
@@ -155,22 +156,15 @@ async def get_scan_session(
     """
     try:
         customer_db = get_customer_db(customer.id)
-        session_repo = ScanSessionRepository(customer_db)
+        service = ScanIngestionService(customer_db)
 
         # Get session
-        session = session_repo.get(session_id)
+        session = await service.get_session(session_id, customer.id)
 
         if not session:
             raise HTTPException(
                 status_code=404,
                 detail=f"Scan session not found: {session_id}"
-            )
-
-        # Verify customer owns this session
-        if session.get("customer_id") != customer.id:
-            raise HTTPException(
-                status_code=403,
-                detail="Access denied to this scan session"
             )
 
         # Build response
@@ -235,24 +229,21 @@ async def list_scan_findings(
     """
     try:
         customer_db = get_customer_db(customer.id)
-        session_repo = ScanSessionRepository(customer_db)
-        finding_repo = ScanFindingRepository(customer_db)
+        service = ScanIngestionService(customer_db)
 
-        # Verify session exists and customer owns it
-        session = session_repo.get(session_id)
-        if not session:
-            raise HTTPException(status_code=404, detail="Scan session not found")
-
-        if session.get("customer_id") != customer.id:
-            raise HTTPException(status_code=403, detail="Access denied")
-
-        # Get findings
-        findings = finding_repo.list_session_findings(
+        # Get findings (service verifies session exists and customer owns it)
+        findings = await service.list_session_findings(
+            session_id=session_id,
             customer_id=customer.id,
-            scan_session_id=session_id,
             limit=limit,
             offset=offset,
         )
+
+        if not findings and limit > 0:
+            # Check if session exists
+            session = await service.get_session(session_id, customer.id)
+            if not session:
+                raise HTTPException(status_code=404, detail="Scan session not found")
 
         # Build response
         findings_response = [
@@ -313,10 +304,10 @@ async def list_scans(
     """
     try:
         customer_db = get_customer_db(customer.id)
-        session_repo = ScanSessionRepository(customer_db)
+        service = ScanIngestionService(customer_db)
 
         # Get sessions
-        sessions = session_repo.list_customer_sessions(
+        sessions = await service.list_customer_sessions(
             customer_id=customer.id,
             limit=limit,
             offset=offset,
@@ -353,3 +344,193 @@ async def list_scans(
             error=str(e),
         )
         raise HTTPException(status_code=500, detail="Internal server error")
+
+
+@router.post("/{session_id}/vex", response_model=APIResponse[VEXGenerationResponse])
+async def generate_vex_endpoint(
+    session_id: str,
+    customer: Customer = Depends(get_current_customer),
+):
+    """
+    POST /v1/scan/{session_id}/vex
+
+    Generate VEX (Vulnerability Exploitability eXchange) document for a scan session.
+
+    VEX documents provide machine-readable assessments of vulnerability impact
+    in the context of specific products/components.
+
+    Args:
+    - **session_id**: Scan session identifier (from /v1/scan/ingest response)
+
+    Returns:
+    - **vex_document**: CycloneDX VEX document (JSON format)
+    - **vulnerabilities_assessed**: Number of vulnerabilities analyzed
+    - **generated_at**: Timestamp of VEX generation
+
+    Example:
+    ```bash
+    curl -X POST https://api.complira.dev/v1/scan/{session_id}/vex \\
+      -H "X-API-Key: your_api_key"
+    ```
+
+    Caching:
+    - VEX documents are cached for 24 hours (identical SBOM = cached VEX)
+    """
+    import time
+    start_time = time.time()
+
+    try:
+        # Get service dependencies
+        from api.core.cache import RedisCacheService
+        from api.core.database import get_reference_db
+
+        service = ScanIngestionService(
+            db=get_reference_db(),
+            cache=RedisCacheService(),
+        )
+
+        # Generate VEX
+        result = await service.generate_vex(
+            customer_id=customer.id,
+            scan_session_id=session_id,
+        )
+
+        # Build response
+        vex_response = VEXGenerationResponse(
+            scan_session_id=result["scan_session_id"],
+            vex_document=result["vex_document"],
+            vulnerabilities_assessed=result["vulnerabilities_assessed"],
+            generated_at=result["generated_at"],
+        )
+
+        execution_time_ms = (time.time() - start_time) * 1000
+
+        return APIResponse(
+            success=True,
+            data=vex_response,
+            metadata=ResponseMetadata(
+                cache_hit=False,
+                execution_time_ms=execution_time_ms,
+            ),
+        )
+
+    except ValueError as e:
+        # Validation error (404 Not Found or 400 Bad Request)
+        logger.warning(
+            "VEX generation validation error",
+            customer_id=customer.id,
+            session_id=session_id,
+            error=str(e),
+        )
+        status_code = 404 if "not found" in str(e).lower() else 400
+        raise HTTPException(status_code=status_code, detail=str(e))
+
+    except Exception as e:
+        # Internal error (500)
+        logger.error(
+            "VEX generation failed",
+            customer_id=customer.id,
+            session_id=session_id,
+            error=str(e),
+            error_type=type(e).__name__,
+        )
+        raise HTTPException(
+            status_code=500,
+            detail="Internal server error during VEX generation"
+        )
+
+
+@router.post("/{session_id}/cpe-match", response_model=APIResponse[CPEMatchingResponse])
+async def match_cpes_endpoint(
+    session_id: str,
+    customer: Customer = Depends(get_current_customer),
+):
+    """
+    POST /v1/scan/{session_id}/cpe-match
+
+    Generate CPE (Common Platform Enumeration) mappings for SBOM components.
+
+    CPE mappings enable vulnerability matching by linking Package URLs (PURLs)
+    to CPE identifiers used in CVE records.
+
+    Args:
+    - **session_id**: Scan session identifier (from /v1/scan/ingest response)
+
+    Returns:
+    - **components_processed**: Number of components analyzed
+    - **cpe_mappings_created**: Number of matched_by_cpe edges created
+    - **completed_at**: Timestamp of completion
+
+    Example:
+    ```bash
+    curl -X POST https://api.complira.dev/v1/scan/{session_id}/cpe-match \\
+      -H "X-API-Key: your_api_key"
+    ```
+
+    Note:
+    - Uses Claude Sonnet 4.5 for intelligent PURL→CPE mapping
+    - Only processes components without existing CPE mappings
+    - May take several minutes for large SBOMs (150+ components)
+    """
+    import time
+    start_time = time.time()
+
+    try:
+        # Get service dependencies
+        from api.core.cache import RedisCacheService
+        from api.core.database import get_reference_db
+
+        service = ScanIngestionService(
+            db=get_reference_db(),
+            cache=RedisCacheService(),
+        )
+
+        # Match CPEs
+        result = await service.match_cpes(
+            customer_id=customer.id,
+            scan_session_id=session_id,
+        )
+
+        # Build response
+        cpe_response = CPEMatchingResponse(
+            scan_session_id=result["scan_session_id"],
+            components_processed=result["components_processed"],
+            cpe_mappings_created=result["cpe_mappings_created"],
+            completed_at=result["completed_at"],
+        )
+
+        execution_time_ms = (time.time() - start_time) * 1000
+
+        return APIResponse(
+            success=True,
+            data=cpe_response,
+            metadata=ResponseMetadata(
+                cache_hit=False,
+                execution_time_ms=execution_time_ms,
+            ),
+        )
+
+    except ValueError as e:
+        # Validation error (404 Not Found or 400 Bad Request)
+        logger.warning(
+            "CPE matching validation error",
+            customer_id=customer.id,
+            session_id=session_id,
+            error=str(e),
+        )
+        status_code = 404 if "not found" in str(e).lower() else 400
+        raise HTTPException(status_code=status_code, detail=str(e))
+
+    except Exception as e:
+        # Internal error (500)
+        logger.error(
+            "CPE matching failed",
+            customer_id=customer.id,
+            session_id=session_id,
+            error=str(e),
+            error_type=type(e).__name__,
+        )
+        raise HTTPException(
+            status_code=500,
+            detail="Internal server error during CPE matching"
+        )

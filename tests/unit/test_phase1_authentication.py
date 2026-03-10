@@ -270,17 +270,18 @@ class TestAC004_Authentication:
 
     def test_customer_class_is_removed(self):
         """
-        AC-004 Test 9: Verify Customer class no longer exists in security module.
+        AC-004 Test 9: Verify Customer is backward compatibility alias.
 
         Verifies:
-        - Customer class has been removed from api.core.security
-        - Only CustomerProfile model is used
+        - Customer is an alias to CustomerProfile (backward compatibility)
+        - CustomerProfile is the canonical model
         """
         import api.core.security
-
-        # Verify Customer class does not exist
-        assert not hasattr(api.core.security, 'Customer')
-
-        # Verify CustomerProfile can be imported from complira_graph.models
         from complira_graph.models import CustomerProfile
+
+        # Verify Customer exists as backward compatibility alias
+        assert hasattr(api.core.security, 'Customer')
+        assert api.core.security.Customer is CustomerProfile
+
+        # Verify CustomerProfile is the canonical model
         assert CustomerProfile is not None

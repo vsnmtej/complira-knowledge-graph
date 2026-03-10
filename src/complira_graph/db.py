@@ -3,16 +3,24 @@ ArangoDB connection management and schema initialization.
 
 This module handles:
 - Database connection pooling
-- Schema creation (22 document collections, 27 edge collections for v1.0)
+- Schema creation (27 document collections, 35 edge collections for v1.0 + Phase 3A)
 - Index management
 - Health checks
 
-v1.0 Scope: Open data sources only
-- Core Vulnerability Intelligence (6 doc, 7 edge)
+v1.0 + Phase 3A Scope:
+- Core Vulnerability Intelligence (6 doc, 6 edge)
+- Phase 3A: VulnCheck Intelligence (5 doc, 9 edge) ← NEW
 - Threat & Attack Frameworks (5 doc, 7 edge)
 - Compliance & Regulatory (5 doc, 4 edge)
 - Software Identity & Supply Chain (5 doc, 5 edge)
-- System Collections (1 doc, 4 edge)
+- System Collections (2 doc, 4 edge)
+
+Phase 3A VulnCheck Integration:
+- exploit_intelligence, ransomware_families, botnets, exploit_chains, eol_products
+- has_exploit_intelligence, exploited_by_ransomware, exploited_by_botnet, exploited_by_threat_actor
+- chain_includes_vuln, component_eol_status, ransomware_uses_technique
+- botnet_uses_technique, vuln_triggers_requirement
+- Note: canary_observations removed (402 Payment Required - requires Exploit & Vulnerability Intelligence subscription)
 
 Deferred to v2.0:
 - Scanner Evidence Layers 0-4 (8 doc, 10 edge)
@@ -30,15 +38,24 @@ from .config import get_settings
 
 logger = structlog.get_logger()
 
-# ========== Document Collections (22 total - v1.0 scope + system) ==========
+# ========== Document Collections (29 total - v1.0 scope + Phase 3A + system) ==========
 DOCUMENT_COLLECTIONS = [
-    # Core Vulnerability Intelligence (6 collections)
+    # Core Vulnerability Intelligence (8 collections)
     "vulnerabilities",           # CVE records (NVD, OSV, GHSA)
     "weaknesses",                # CWE records with hierarchy
     "kev_entries",               # CISA Known Exploited Vulnerabilities
     "vulncheck_kev_entries",     # VulnCheck extended KEV data
-    "exploit_modules",           # Metasploit, ExploitDB, Nuclei, PoC-in-GitHub
+    "exploit_modules",           # Metasploit, ExploitDB exploits
+    "nuclei_templates",          # Nuclei vulnerability detection templates
+    "poc_repositories",          # PoC-in-GitHub proof-of-concept repositories
     "epss_history",              # Time-series EPSS scores
+
+    # Phase 3A: VulnCheck Intelligence (5 collections)
+    "exploit_intelligence",      # VulnCheck per-CVE exploit maturity data (NVD2)
+    "ransomware_families",       # Ransomware groups with CVE attribution
+    "botnets",                   # Botnet campaigns with CVE attribution
+    "exploit_chains",            # Multi-CVE attack sequences for threat modeling
+    "eol_products",              # End-of-life products for FDA compliance tracking
 
     # Threat & Attack Frameworks (5 collections)
     "attack_techniques",         # MITRE ATT&CK techniques
@@ -68,7 +85,7 @@ DOCUMENT_COLLECTIONS = [
     "customer_profiles",         # Customer metadata and authentication
 ]
 
-# ========== Edge Collections (26 total - v1.0 scope) ==========
+# ========== Edge Collections (35 total - v1.0 scope + Phase 3A) ==========
 EDGE_COLLECTIONS = [
     # Core Vulnerability Intelligence (6 edges)
     "has_weakness",              # Vulnerability → CWE
@@ -77,6 +94,17 @@ EDGE_COLLECTIONS = [
     "aliases",                   # Vulnerability ↔ Vulnerability (CVE/GHSA/OSV equivalence)
     "affects",                   # Vulnerability → component/CPE (with version ranges)
     "has_epss",                  # Vulnerability → EPSS history entry (time-series in epss_history collection)
+
+    # Phase 3A: VulnCheck Intelligence (9 edges)
+    "has_exploit_intelligence",      # Vulnerability → exploit_intelligence
+    "exploited_by_ransomware",       # Vulnerability → ransomware_families
+    "exploited_by_botnet",           # Vulnerability → botnets
+    "exploited_by_threat_actor",     # Vulnerability → threat_groups
+    "chain_includes_vuln",           # exploit_chains → Vulnerability
+    "component_eol_status",          # Component → eol_products
+    "ransomware_uses_technique",     # ransomware_families → attack_techniques
+    "botnet_uses_technique",         # botnets → attack_techniques
+    "vuln_triggers_requirement",     # Vulnerability → regulatory_requirements (auto-generated)
 
     # Threat & Attack Frameworks (7 edges)
     "technique_exploits_weakness",   # ATT&CK technique → CWE
@@ -129,6 +157,14 @@ INDEXES = {
         {"type": "persistent", "fields": ["source"]},
         {"type": "persistent", "fields": ["cve_ids[*]"]},
     ],
+    "nuclei_templates": [
+        {"type": "persistent", "fields": ["template_id"], "unique": True},
+        {"type": "persistent", "fields": ["cve_ids[*]"]},
+    ],
+    "poc_repositories": [
+        {"type": "persistent", "fields": ["repository_url"], "unique": True},
+        {"type": "persistent", "fields": ["cve_ids[*]"]},
+    ],
     "epss_history": [
         {"type": "persistent", "fields": ["cve_id", "date"], "unique": True},
         {"type": "persistent", "fields": ["date"]},
@@ -144,6 +180,36 @@ INDEXES = {
     "cpe_entries": [
         {"type": "persistent", "fields": ["cpe23"], "unique": True},
     ],
+
+    # Phase 3A: VulnCheck Intelligence indexes
+    "exploit_intelligence": [
+        {"type": "persistent", "fields": ["cve_id"], "unique": True},
+        {"type": "persistent", "fields": ["reported_exploited"]},
+        {"type": "persistent", "fields": ["exploit_maturity"]},
+    ],
+    "ransomware_families": [
+        {"type": "persistent", "fields": ["name"], "unique": True},
+        {"type": "persistent", "fields": ["first_seen"]},
+    ],
+    "botnets": [
+        {"type": "persistent", "fields": ["name"], "unique": True},
+        {"type": "persistent", "fields": ["first_seen"]},
+    ],
+    "exploit_chains": [
+        {"type": "persistent", "fields": ["name"], "unique": True},
+        {"type": "persistent", "fields": ["cve_sequence[*]"]},
+    ],
+    "eol_products": [
+        {"type": "persistent", "fields": ["product", "version"], "unique": True},
+        {"type": "persistent", "fields": ["cpe"]},
+        {"type": "persistent", "fields": ["support_status"]},
+    ],
+    "vulncheck_kev_entries": [
+        {"type": "persistent", "fields": ["cve_id"], "unique": True},
+        {"type": "persistent", "fields": ["date_added"]},
+        {"type": "persistent", "fields": ["vulncheck_first"]},
+    ],
+
     # Additional indexes for other collections can be added as needed
 }
 
@@ -221,7 +287,7 @@ def init_schema(db: Optional[StandardDatabase] = None) -> None:
     """
     Initialize database schema.
 
-    Creates all 20 document collections and 21 edge collections for v1.0.
+    Creates all 28 document collections and 36 edge collections for v1.0 + Phase 3A.
     Creates indexes for performance optimization.
 
     Args:

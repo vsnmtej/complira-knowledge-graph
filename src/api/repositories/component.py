@@ -183,6 +183,34 @@ class ComponentRepository(BaseRepository):
         result = list(cursor)
         return result[0] if result else None
 
+    def get_by_scan_session(
+        self,
+        scan_session_id: str,
+    ) -> List[Dict[str, Any]]:
+        """
+        Get all components for a specific scan session.
+
+        Args:
+            scan_session_id: Scan session identifier
+
+        Returns:
+            list: Component documents from the scan session
+        """
+        query = """
+        FOR component IN customer_components
+            FILTER component.metadata.scan_session_id == @scan_session_id
+            RETURN component
+        """
+
+        cursor = self.db.aql_execute(
+            query,
+            bind_vars={
+                "scan_session_id": scan_session_id,
+            }
+        )
+
+        return list(cursor)
+
     def list_customer_components(
         self,
         customer_id: str,

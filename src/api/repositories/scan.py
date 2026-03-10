@@ -59,7 +59,8 @@ class ScanSessionRepository(BaseRepository):
             ScanSession: Validated scan session model instance
         """
         from datetime import datetime
-        from complira_graph.models import ScanSession
+        # Import from legacy flat models file (not the models package)
+        from complira_graph.models import ScanSession  # models.py, not models/__init__.py
 
         # Create validated model instance
         session = ScanSession(
@@ -112,7 +113,8 @@ class ScanSessionRepository(BaseRepository):
             ScanSession: Updated scan session model
         """
         from datetime import datetime
-        from complira_graph.models import ScanSession
+        # Import from legacy flat models file (not the models package)
+        from complira_graph.models import ScanSession  # models.py, not models/__init__.py
 
         update_data = {
             "status": status,
@@ -364,3 +366,281 @@ class ScanFindingRepository(BaseRepository):
 
         result = list(cursor)
         return result[0] if result else 0
+
+
+class ScanEdgeRepository(BaseRepository):
+    """
+    Repository for scan-related edge collections.
+
+    Handles edges:
+    - finding_to_cve: Finding → CVE relationships
+    - component_to_finding: Component → Finding relationships
+    - matched_by_cpe: Component → CPE mappings
+    """
+
+    def __init__(self, db, collection_name: str):
+        """
+        Initialize scan edge repository.
+
+        Args:
+            db: Database instance (customer database)
+            collection_name: Name of the edge collection
+        """
+        super().__init__(db, collection_name)
+
+    def create_finding_to_cve_edges(
+        self,
+        findings: List[Dict[str, Any]],
+    ) -> int:
+        """
+        Create edges from findings to CVE nodes.
+
+        Args:
+            findings: List of finding documents
+
+        Returns:
+            int: Number of edges created
+        """
+        edges_created = 0
+        for finding in findings:
+            if not finding.get("cve_id"):
+                continue  # Skip findings without CVE ID
+
+            # Create edge from finding to CVE
+            edge = {
+                "_from": f"scan_findings/{finding['_key']}",
+                "_to": f"vulnerabilities/{finding['cve_id']}",
+            }
+
+            try:
+                self.collection.insert(edge, overwrite_mode="ignore")
+                edges_created += 1
+            except Exception as e:
+                logger.debug(
+                    "Failed to create finding→CVE edge",
+                    finding_id=finding["_key"],
+                    cve_id=finding["cve_id"],
+                    error=str(e),
+                )
+
+        logger.info(
+            "Created finding→CVE edges",
+            edges_created=edges_created,
+        )
+
+        return edges_created
+
+    def create_component_to_finding_edges(
+        self,
+        components: List[Dict[str, Any]],
+        findings: List[Dict[str, Any]],
+    ) -> int:
+        """
+        Create edges from components to findings based on location matching.
+
+        Args:
+            components: List of component documents
+            findings: List of finding documents
+
+        Returns:
+            int: Number of edges created
+        """
+        # Build component lookup map
+        component_map = {}
+        for component in components:
+            purl = component.get("purl", "")
+            if purl:
+                component_map[purl] = component
+
+        edges_created = 0
+        for finding in findings:
+            location = finding.get("location", "")
+
+            # Try to match finding location to component PURL
+            matched_component = None
+            for purl, component in component_map.items():
+                # Simple substring match (can be improved with better heuristics)
+                if purl in location or component.get("name", "") in location:
+                    matched_component = component
+                    break
+
+            if matched_component:
+                # Create edge from component to finding
+                edge = {
+                    "_from": f"customer_components/{matched_component['_key']}",
+                    "_to": f"scan_findings/{finding['_key']}",
+                }
+
+                try:
+                    self.collection.insert(edge, overwrite_mode="ignore")
+                    edges_created += 1
+                except Exception as e:
+                    logger.debug(
+                        "Failed to create component→finding edge",
+                        component_key=matched_component["_key"],
+                        finding_id=finding["_key"],
+                        error=str(e),
+                    )
+
+        logger.info(
+            "Created component→finding edges",
+            edges_created=edges_created,
+        )
+
+        return edges_created
+
+    def create_matched_by_cpe_edge(
+        self,
+        component_key: str,
+        cpe_key: str,
+        customer_id: str,
+        confidence: float,
+        provenance: Dict[str, Any],
+    ) -> bool:
+        """
+        Create edge from component to CPE entry.
+
+        Args:
+            component_key: Component document _key
+            cpe_key: CPE entry _key
+            customer_id: Customer identifier
+            confidence: Confidence score (0.0-1.0)
+            provenance: LLM provenance data
+
+        Returns:
+            bool: True if edge created successfully
+        """
+        edge = {
+            "_from": f"customer_components/{component_key}",
+            "_to": f"cpe_entries/{cpe_key}",
+            "customer_id": customer_id,
+            "confidence": confidence,
+            "provenance": provenance,
+        }
+
+        try:
+            self.collection.insert(edge, overwrite_mode="ignore")
+            logger.debug(
+                "Created matched_by_cpe edge",
+                component_key=component_key,
+                cpe_key=cpe_key,
+            )
+            return True
+        except Exception as e:
+            logger.error(
+                "Failed to create matched_by_cpe edge",
+                component_key=component_key,
+                cpe_key=cpe_key,
+                error=str(e),
+            )
+            return False
+
+
+class CPERepository(BaseRepository):
+    """
+    Repository for CPE entries and LLM enrichments.
+
+    Handles:
+    - cpe_entries: CPE (Common Platform Enumeration) mappings
+    - llm_enrichments: LLM-generated enrichment provenance
+    """
+
+    def __init__(self, db, collection_name: str):
+        """
+        Initialize CPE repository.
+
+        Args:
+            db: Database instance (customer database)
+            collection_name: Name of the collection
+        """
+        super().__init__(db, collection_name)
+
+    def insert_cpe_entry(
+        self,
+        customer_id: str,
+        cpe_uri: str,
+        purl: str,
+        vendor: str,
+        product: str,
+        version: str,
+        source: str = "llm",
+    ) -> Dict[str, Any]:
+        """
+        Insert CPE entry.
+
+        Args:
+            customer_id: Customer identifier
+            cpe_uri: CPE URI (e.g., "cpe:2.3:a:vendor:product:version")
+            purl: Package URL
+            vendor: Vendor name
+            product: Product name
+            version: Product version
+            source: Source of CPE mapping (default: "llm")
+
+        Returns:
+            dict: Created or existing CPE entry
+        """
+        from datetime import datetime
+
+        # Generate safe key from CPE URI
+        safe_key = cpe_uri.replace(":", "_").replace("/", "_").replace("*", "ANY")
+
+        cpe_entry = {
+            "_key": safe_key,
+            "customer_id": customer_id,
+            "cpe_uri": cpe_uri,
+            "purl": purl,
+            "vendor": vendor,
+            "product": product,
+            "version": version,
+            "source": source,
+            "created_at": datetime.utcnow().isoformat(),
+        }
+
+        try:
+            result = self.collection.insert(
+                cpe_entry,
+                overwrite_mode="update",
+            )
+            logger.debug(
+                "CPE entry inserted",
+                cpe_uri=cpe_uri,
+                purl=purl,
+            )
+            return cpe_entry
+        except Exception as e:
+            logger.error(
+                "Failed to insert CPE entry",
+                cpe_uri=cpe_uri,
+                error=str(e),
+            )
+            raise
+
+    def insert_llm_enrichment(
+        self,
+        provenance: Dict[str, Any],
+    ) -> bool:
+        """
+        Insert LLM enrichment provenance.
+
+        Args:
+            provenance: LLM provenance data
+
+        Returns:
+            bool: True if inserted successfully
+        """
+        try:
+            # Ensure collection exists
+            if not self.db.has_collection("llm_enrichments"):
+                self.db.create_collection("llm_enrichments", edge=False)
+
+            llm_collection = self.db.collection("llm_enrichments")
+            llm_collection.insert(provenance)
+            logger.debug("LLM enrichment provenance stored")
+            return True
+        except Exception as e:
+            logger.debug(
+                "Failed to store LLM enrichment provenance",
+                error=str(e),
+            )
+            return False

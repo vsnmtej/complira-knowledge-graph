@@ -15,6 +15,10 @@ import structlog
 
 from api.core.config import get_cloud_settings
 from api.core.database import get_database
+from complira_graph.models import CustomerProfile
+
+# Type alias for consistency with endpoint imports
+Customer = CustomerProfile
 
 logger = structlog.get_logger()
 
@@ -72,8 +76,6 @@ async def get_customer_from_api_key(api_key: str):
     Returns:
         CustomerProfile: Validated customer profile model if valid API key, None otherwise
     """
-    from complira_graph.models import CustomerProfile
-
     if not api_key:
         return None
 

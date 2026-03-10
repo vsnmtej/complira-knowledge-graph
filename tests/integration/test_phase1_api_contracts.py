@@ -318,8 +318,8 @@ class TestAC005_APIContracts:
             updated_at="2024-01-15T10:35:00Z",
         )
 
-        # Serialize model
-        model_json = session.model_dump()
+        # Serialize model (by_alias=True to use _key instead of key)
+        model_json = session.model_dump(by_alias=True)
 
         # Expected dict structure (what API returned before Phase 1)
         expected_dict = {

@@ -1,308 +1,256 @@
 """
-Enrichment endpoints (Phase 2).
+Enrichment API endpoints for Phase 1.
 
-POST /v1/enrich - Enrich scan findings with vulnerability intelligence
-POST /v1/compact - Compact findings (deduplicate + CWE rollup)
-POST /v1/map-controls - Map findings to regulatory controls
+Provides graph-based vulnerability intelligence with:
+- Smart risk scoring (CVSS + EPSS + KEV + exploits)
+- Attack path discovery (graph traversal)
+- Compliance mapping (graph relationships)
+
+All data is authoritative - no LLM guessing.
 """
 
-from fastapi import APIRouter, Depends, HTTPException
+from typing import List
+from fastapi import APIRouter, HTTPException, Depends, Query
+from fastapi.responses import JSONResponse
 import structlog
-import time
 
-from api.core.security import Customer, get_current_customer
-from api.core.database import get_reference_db
-from api.core.cache import RedisCacheService
-from api.services.enrichment import EnrichmentService
-from api.services.compaction import CompactionService
-from api.services.control_mapping import ControlMappingService
-from complira_graph.models import (
-    EnrichRequest,
-    EnrichResponse,
-    CompactRequest,
-    CompactResponse,
-    MapControlsRequest,
-    ControlMappingsResponse,
+from api.models.responses.enrichment import (
+    EnrichmentRequest,
+    EnrichmentResponse,
+    CVEEnrichment,
 )
+from api.services.enrichment_service import EnrichmentService
+from api.core.cache import cache
 
 logger = structlog.get_logger()
 
+# Create router
 router = APIRouter()
 
 
-@router.post("/enrich", response_model=EnrichResponse)
-async def enrich_scan_findings(
-    request: EnrichRequest,
-    customer: Customer = Depends(get_current_customer),
-):
-    """
-    POST /v1/enrich
+@router.post(
+    "/enrich",
+    response_model=EnrichmentResponse,
+    summary="Enrich CVEs with graph-based intelligence",
+    description="""
+    Deep enrichment of CVEs with authoritative graph database intelligence.
 
-    Enrich scan findings with vulnerability intelligence.
+    **Features:**
+    - **Smart risk scoring**: CVSS + EPSS + KEV + public exploits
+    - **Attack path discovery**: CVE → CWE → CAPEC → ATT&CK → Threat Groups
+    - **Compliance mapping**: NIST, FDA, ISO frameworks
+    - **All authoritative data**: No LLM guessing
 
-    Enriches findings with:
-    - **CVE Details**: Description, CVSS scores, published date
-    - **EPSS Score**: Exploit prediction probability (0-1)
-    - **KEV Status**: CISA Known Exploited Vulnerabilities catalog
-    - **Threat Intelligence**: CWE → CAPEC → ATT&CK technique chain
+    **Authentication:** None required (uses reference database)
 
-    Args:
-    - **scan_session_id**: Scan session identifier (from /v1/scan/ingest)
-    - **include_threat_intel**: Include CWE → CAPEC → ATT&CK chain (default: true)
-    - **include_kev**: Include CISA KEV status (default: true)
-    - **include_epss**: Include EPSS scores (default: true)
+    **Rate Limits:** 60 requests/minute
 
-    Returns:
-    - **total_findings**: Number of findings enriched
-    - **enriched_findings**: List of findings with enrichment data
-    - **enrichment_metadata**: Coverage statistics (CVE enrichment %, EPSS %, KEV %, threat intel %)
-
-    Example:
-    ```bash
-    curl -X POST https://api.complira.dev/v1/enrich \\
-      -H "X-API-Key: your_api_key" \\
-      -H "Content-Type: application/json" \\
-      -d '{
-        "scan_session_id": "scan_sess_123",
-        "include_threat_intel": true,
-        "include_kev": true,
-        "include_epss": true
-      }'
+    **Example Request:**
+    ```json
+    {
+      "cve_ids": ["CVE-2024-21413", "CVE-2023-44487"],
+      "include_attack_paths": true,
+      "include_compliance": false
+    }
     ```
 
-    Performance:
-    - Expected: ~2-3 seconds for 100 findings (with batch queries)
+    **Example Response:**
+    ```json
+    {
+      "enriched": [
+        {
+          "cve_id": "CVE-2024-21413",
+          "cvss_score": 9.8,
+          "epss_score": 0.85,
+          "in_kev": true,
+          "exploit_count": 3,
+          "risk_score": 0.92,
+          "priority": "CRITICAL",
+          "risk_factors": {
+            "high_epss": true,
+            "actively_exploited": true,
+            "high_cvss": true,
+            "public_exploits": true,
+            "threat_groups_using": true
+          },
+          "cwe_list": ["CWE-89"],
+          "attack_techniques": ["T1190"],
+          "threat_groups": ["APT28", "APT29"],
+          "attack_path": {
+            "path": [...],
+            "defenses": [...]
+          }
+        }
+      ],
+      "total": 1,
+      "processing_time_ms": 250.5
+    }
+    ```
+
+    **Data Sources:**
+    - CVSS scores: NVD authoritative
+    - EPSS scores: FIRST.org exploitation probability
+    - KEV catalog: CISA confirmed active exploitation
+    - ATT&CK: MITRE authoritative techniques
+    - D3FEND: Evidence-based defenses
+    """,
+    tags=["enrichment"],
+)
+async def enrich_cves(request: EnrichmentRequest) -> EnrichmentResponse:
     """
-    start_time = time.time()
+    Enrich CVEs with graph-based intelligence.
 
+    Args:
+        request: Enrichment request with CVE IDs and options
+
+    Returns:
+        Enriched CVE data with authoritative intelligence
+
+    Raises:
+        HTTPException: If validation fails or processing errors occur
+    """
     try:
-        # Initialize service
-        service = EnrichmentService(
-            db=get_reference_db(),
-            cache=RedisCacheService(),
-        )
+        # Validate request
+        if not request.cve_ids:
+            raise HTTPException(
+                status_code=400,
+                detail="cve_ids list cannot be empty"
+            )
 
-        # Enrich scan
-        result = await service.enrich_scan_session(
-            customer_id=customer.id,
-            scan_session_id=request.scan_session_id,
-            include_threat_intel=request.include_threat_intel,
-            include_kev=request.include_kev,
-            include_epss=request.include_epss,
-        )
-
-        execution_time_ms = (time.time() - start_time) * 1000
+        if len(request.cve_ids) > 100:
+            raise HTTPException(
+                status_code=400,
+                detail="Maximum 100 CVEs per request"
+            )
 
         logger.info(
-            "Enrichment request complete",
-            customer_id=customer.id,
-            scan_session_id=request.scan_session_id,
-            total_findings=result.total_findings,
-            execution_time_ms=execution_time_ms,
+            "Enrichment request received (graph-based)",
+            cve_count=len(request.cve_ids),
+            include_attack_paths=request.include_attack_paths,
+            include_compliance=request.include_compliance
         )
 
-        return result
+        # Initialize enrichment service
+        enrichment_service = EnrichmentService()
 
-    except ValueError as e:
-        logger.warning(
-            "Enrichment validation error",
-            customer_id=customer.id,
-            error=str(e),
+        # Perform enrichment
+        result = await enrichment_service.enrich_cves(
+            cve_ids=request.cve_ids,
+            include_attack_paths=request.include_attack_paths,
+            include_compliance=request.include_compliance
         )
-        raise HTTPException(status_code=400, detail=str(e))
 
+        # Convert to response model
+        response = EnrichmentResponse(
+            enriched=result["enriched"],
+            total=result["total"],
+            processing_time_ms=result["processing_time_ms"]
+        )
+
+        logger.info(
+            "Enrichment request completed",
+            enriched_count=response.total,
+            processing_time_ms=response.processing_time_ms
+        )
+
+        return response
+
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(
-            "Enrichment failed",
-            customer_id=customer.id,
+            "Enrichment request failed",
             error=str(e),
-            error_type=type(e).__name__,
+            error_type=type(e).__name__
         )
         raise HTTPException(
             status_code=500,
-            detail="Internal server error during enrichment"
+            detail=f"Enrichment failed: {str(e)}"
         )
 
 
-@router.post("/compact", response_model=CompactResponse)
-async def compact_scan_findings(
-    request: CompactRequest,
-    customer: Customer = Depends(get_current_customer),
-):
+@router.get(
+    "/enrich/{cve_id}",
+    response_model=CVEEnrichment,
+    summary="Enrich single CVE",
+    description="""
+    Convenience endpoint for enriching a single CVE.
+
+    Equivalent to POST /enrich with a single CVE ID.
+
+    **Query Parameters:**
+    - `include_attack_path` (bool): Include attack path traversal (default: false)
+    - `include_compliance` (bool): Include compliance mappings (default: false)
+
+    **Example:**
+    ```
+    GET /v1/enrich/CVE-2024-21413?include_attack_path=true&include_compliance=false
+    ```
+    """,
+    tags=["enrichment"],
+)
+async def enrich_single_cve(
+    cve_id: str,
+    include_attack_path: bool = Query(False, description="Include attack path traversal"),
+    include_compliance: bool = Query(False, description="Include compliance mappings")
+) -> CVEEnrichment:
     """
-    POST /v1/compact
-
-    Compact scan findings (deduplicate + CWE rollup).
-
-    Compaction strategies:
-    - **Deduplication**: Group findings by CVE ID, aggregate affected locations
-    - **CWE Rollup**: Roll up CWEs to higher abstraction levels (Class, Pillar)
+    Enrich a single CVE.
 
     Args:
-    - **scan_session_id**: Scan session identifier
-    - **deduplication_strategy**: Deduplication strategy ("by_cve") - default: "by_cve"
-    - **cwe_rollup_level**: CWE abstraction level ("Class" or "Pillar") - default: "Class"
+        cve_id: CVE identifier
+        include_attack_path: Include attack path analysis
+        include_compliance: Include compliance mappings
 
     Returns:
-    - **original_finding_count**: Number of findings before compaction
-    - **compacted_finding_count**: Number of findings after compaction
-    - **reduction_percentage**: Percentage reduction (0-100)
-    - **compacted_findings**: List of compacted findings
-    - **compaction_metadata**: CWE rollup statistics
+        Enriched CVE data
 
-    Example:
-    ```bash
-    curl -X POST https://api.complira.dev/v1/compact \\
-      -H "X-API-Key: your_api_key" \\
-      -H "Content-Type: application/json" \\
-      -d '{
-        "scan_session_id": "scan_sess_123",
-        "deduplication_strategy": "by_cve",
-        "cwe_rollup_level": "Class"
-      }'
-    ```
-
-    Performance:
-    - Expected: ~1-2 seconds for 100 findings
-    - Read-only (MVP decision D2 - does not modify scan_findings)
+    Raises:
+        HTTPException: If CVE not found or processing fails
     """
-    start_time = time.time()
-
     try:
-        # Initialize service
-        service = CompactionService(
-            db=get_reference_db(),
-            cache=RedisCacheService(),
+        logger.info(
+            "Single CVE enrichment requested",
+            cve_id=cve_id,
+            include_attack_path=include_attack_path,
+            include_compliance=include_compliance
         )
 
-        # Compact findings
-        result = await service.compact_findings(
-            customer_id=customer.id,
-            scan_session_id=request.scan_session_id,
-            deduplication_strategy=request.deduplication_strategy,
-            cwe_rollup_level=request.cwe_rollup_level,
+        # Initialize enrichment service
+        enrichment_service = EnrichmentService()
+
+        # Perform enrichment
+        result = await enrichment_service.enrich_cves(
+            cve_ids=[cve_id],
+            include_attack_paths=include_attack_path,
+            include_compliance=include_compliance
         )
 
-        execution_time_ms = (time.time() - start_time) * 1000
+        if not result["enriched"]:
+            raise HTTPException(
+                status_code=404,
+                detail=f"CVE {cve_id} not found in knowledge graph"
+            )
+
+        enriched_cve = result["enriched"][0]
 
         logger.info(
-            "Compaction request complete",
-            customer_id=customer.id,
-            scan_session_id=request.scan_session_id,
-            original_count=result.original_finding_count,
-            compacted_count=result.compacted_finding_count,
-            execution_time_ms=execution_time_ms,
+            "Single CVE enrichment completed",
+            cve_id=cve_id,
+            processing_time_ms=result["processing_time_ms"]
         )
 
-        return result
+        return enriched_cve
 
-    except ValueError as e:
-        logger.warning(
-            "Compaction validation error",
-            customer_id=customer.id,
-            error=str(e),
-        )
-        raise HTTPException(status_code=400, detail=str(e))
-
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(
-            "Compaction failed",
-            customer_id=customer.id,
-            error=str(e),
-            error_type=type(e).__name__,
+            "Single CVE enrichment failed",
+            cve_id=cve_id,
+            error=str(e)
         )
         raise HTTPException(
             status_code=500,
-            detail="Internal server error during compaction"
-        )
-
-
-@router.post("/map-controls", response_model=ControlMappingsResponse)
-async def map_findings_to_controls(
-    request: MapControlsRequest,
-    customer: Customer = Depends(get_current_customer),
-):
-    """
-    POST /v1/map-controls
-
-    Map scan findings to regulatory controls.
-
-    Supported frameworks:
-    - **NIST 800-53**: Federal Information Security Management Act (FISMA) controls
-    - **FDA 524B**: FDA Software Validation Guidance
-    - **ISO 27001**: Information Security Management System (ISMS) controls
-
-    Args:
-    - **scan_session_id**: Scan session identifier
-    - **frameworks**: List of frameworks to map to (default: ["NIST 800-53", "FDA 524B", "ISO 27001"])
-    - **use_compacted_view**: Use compacted findings for efficiency (default: true)
-
-    Returns:
-    - **control_mappings**: List of findings mapped to controls
-    - **control_statistics**: Aggregate statistics (total controls, coverage %)
-    - **used_compacted_view**: Whether compacted view was used
-
-    Example:
-    ```bash
-    curl -X POST https://api.complira.dev/v1/map-controls \\
-      -H "X-API-Key: your_api_key" \\
-      -H "Content-Type: application/json" \\
-      -d '{
-        "scan_session_id": "scan_sess_123",
-        "frameworks": ["NIST 800-53", "FDA 524B", "ISO 27001"],
-        "use_compacted_view": true
-      }'
-    ```
-
-    Performance:
-    - Expected: ~2-3 seconds for 70 compacted findings
-    - Batch queries for CWE → control mappings
-    """
-    start_time = time.time()
-
-    try:
-        # Initialize service
-        service = ControlMappingService(
-            db=get_reference_db(),
-            cache=RedisCacheService(),
-        )
-
-        # Map controls
-        result = await service.map_controls(
-            customer_id=customer.id,
-            scan_session_id=request.scan_session_id,
-            frameworks=request.frameworks,
-            use_compacted_view=request.use_compacted_view,
-        )
-
-        execution_time_ms = (time.time() - start_time) * 1000
-
-        logger.info(
-            "Control mapping request complete",
-            customer_id=customer.id,
-            scan_session_id=request.scan_session_id,
-            total_mappings=result.control_statistics.total_findings_mapped,
-            execution_time_ms=execution_time_ms,
-        )
-
-        return result
-
-    except ValueError as e:
-        logger.warning(
-            "Control mapping validation error",
-            customer_id=customer.id,
-            error=str(e),
-        )
-        raise HTTPException(status_code=400, detail=str(e))
-
-    except Exception as e:
-        logger.error(
-            "Control mapping failed",
-            customer_id=customer.id,
-            error=str(e),
-            error_type=type(e).__name__,
-        )
-        raise HTTPException(
-            status_code=500,
-            detail="Internal server error during control mapping"
+            detail=f"Enrichment failed: {str(e)}"
         )

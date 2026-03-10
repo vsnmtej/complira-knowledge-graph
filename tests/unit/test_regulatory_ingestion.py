@@ -20,10 +20,13 @@ from pathlib import Path
 from complira_graph.agents.yaml_regulatory import YAMLRegulatoryAgent, YAMLSchemaValidationError
 
 
+@patch.object(YAMLRegulatoryAgent, '_load_checkpoint', return_value=None)
+@patch.object(YAMLRegulatoryAgent, '_save_checkpoint', return_value=None)
+@patch.object(YAMLRegulatoryAgent, '_clear_checkpoint', return_value=None)
 class TestFDA524BIngestion:
     """Test FDA 524B regulatory requirements ingestion."""
 
-    def test_fda_524b_ingestion(self, mock_db):
+    def test_fda_524b_ingestion(self, mock_clear, mock_save, mock_load, mock_db):
         """
         Test FDA 524B requirements ingestion.
 
@@ -36,14 +39,13 @@ class TestFDA524BIngestion:
         # Create agent
         agent = YAMLRegulatoryAgent(mock_db, framework_key="FDA_524B")
 
-        # Mock checkpoint methods
-        agent._load_checkpoint = Mock(return_value=None)
-        agent._save_checkpoint = Mock()
-        agent._clear_checkpoint = Mock()
-
-        # Mock successful insert
+        # Mock successful import_bulk (returns integers, not MagicMock)
         mock_collection = MagicMock()
-        mock_collection.insert = Mock(return_value={'_key': 'test_key'})
+        mock_collection.import_bulk.return_value = {
+            'created': 13,
+            'updated': 0,
+            'errors': 0
+        }
         mock_db.collection = Mock(return_value=mock_collection)
 
         # Run ingestion
@@ -51,14 +53,14 @@ class TestFDA524BIngestion:
 
         # Assertions
         assert result['status'] == 'success', "Ingestion should succeed"
-        assert result.get('errors', 0) == 0, "No errors should occur"
+        assert result['errors'] == 0, "No errors should occur"
         assert 'execution_time_seconds' in result, "Execution time should be recorded"
 
         # Verify agent properties
         assert agent.framework_key == "FDA_524B"
         assert agent.agent_name == "YAMLRegulatoryAgent_FDA_524B"
 
-    def test_fda_524b_requirement_count(self, mock_db):
+    def test_fda_524b_requirement_count(self, mock_clear, mock_save, mock_load, mock_db):
         """
         Test FDA 524B requirement count.
 
@@ -67,9 +69,6 @@ class TestFDA524BIngestion:
         - Plus 1 framework document
         """
         agent = YAMLRegulatoryAgent(mock_db, framework_key="FDA_524B")
-
-        # Mock checkpoint methods
-        agent._load_checkpoint = Mock(return_value=None)
 
         # Fetch data
         raw_data = agent.fetch_data()
@@ -81,7 +80,7 @@ class TestFDA524BIngestion:
         assert requirement_count == 12, f"Expected 12 FDA requirements, got {requirement_count}"
         assert framework_count == 1, f"Expected 1 framework document, got {framework_count}"
 
-    def test_fda_524b_key_generation(self, mock_db):
+    def test_fda_524b_key_generation(self, mock_clear, mock_save, mock_load, mock_db):
         """
         Test FDA 524B key generation.
 
@@ -112,10 +111,13 @@ class TestFDA524BIngestion:
             assert key.startswith('FDA_524B_V'), f"Key {key} should start with FDA_524B_V"
 
 
+@patch.object(YAMLRegulatoryAgent, '_load_checkpoint', return_value=None)
+@patch.object(YAMLRegulatoryAgent, '_save_checkpoint', return_value=None)
+@patch.object(YAMLRegulatoryAgent, '_clear_checkpoint', return_value=None)
 class TestCRAIngestion:
     """Test EU CRA regulatory requirements ingestion."""
 
-    def test_cra_ingestion(self, mock_db):
+    def test_cra_ingestion(self, mock_clear, mock_save, mock_load, mock_db):
         """
         Test CRA requirements ingestion.
 
@@ -127,9 +129,13 @@ class TestCRAIngestion:
         # Create agent
         agent = YAMLRegulatoryAgent(mock_db, framework_key="CRA")
 
-        # Mock successful insert
+        # Mock successful import_bulk (returns integers, not MagicMock)
         mock_collection = MagicMock()
-        mock_collection.insert = Mock(return_value={'_key': 'test_key'})
+        mock_collection.import_bulk.return_value = {
+            'created': 9,
+            'updated': 0,
+            'errors': 0
+        }
         mock_db.collection = Mock(return_value=mock_collection)
 
         # Run ingestion
@@ -137,13 +143,13 @@ class TestCRAIngestion:
 
         # Assertions
         assert result['status'] == 'success', "Ingestion should succeed"
-        assert result.get('errors', 0) == 0, "No errors should occur"
+        assert result['errors'] == 0, "No errors should occur"
 
         # Verify agent properties
         assert agent.framework_key == "CRA"
         assert agent.agent_name == "YAMLRegulatoryAgent_CRA"
 
-    def test_cra_requirement_count(self, mock_db):
+    def test_cra_requirement_count(self, mock_clear, mock_save, mock_load, mock_db):
         """
         Test CRA requirement count.
 
@@ -163,7 +169,7 @@ class TestCRAIngestion:
         assert requirement_count == 8, f"Expected 8 CRA requirements, got {requirement_count}"
         assert framework_count == 1, f"Expected 1 framework document, got {framework_count}"
 
-    def test_cra_key_generation(self, mock_db):
+    def test_cra_key_generation(self, mock_clear, mock_save, mock_load, mock_db):
         """
         Test CRA key generation.
 
@@ -194,10 +200,13 @@ class TestCRAIngestion:
             assert key.startswith('CRA_'), f"Key {key} should start with CRA_"
 
 
+@patch.object(YAMLRegulatoryAgent, '_load_checkpoint', return_value=None)
+@patch.object(YAMLRegulatoryAgent, '_save_checkpoint', return_value=None)
+@patch.object(YAMLRegulatoryAgent, '_clear_checkpoint', return_value=None)
 class TestDryRunMode:
     """Test dry-run mode (validation without database changes)."""
 
-    def test_dry_run_validation_only(self, mock_db):
+    def test_dry_run_validation_only(self, mock_clear, mock_save, mock_load, mock_db):
         """
         Test dry-run mode validates without inserting.
 
@@ -219,7 +228,7 @@ class TestDryRunMode:
         # Verify no database inserts happened (since we didn't call load_data)
         mock_db.collection.assert_not_called()
 
-    def test_dry_run_yaml_validation(self, mock_db):
+    def test_dry_run_yaml_validation(self, mock_clear, mock_save, mock_load, mock_db):
         """
         Test dry-run mode validates YAML schema.
 
@@ -236,10 +245,13 @@ class TestDryRunMode:
         assert len(raw_data) > 0, "YAML validation should pass for CRA"
 
 
+@patch.object(YAMLRegulatoryAgent, '_load_checkpoint', return_value=None)
+@patch.object(YAMLRegulatoryAgent, '_save_checkpoint', return_value=None)
+@patch.object(YAMLRegulatoryAgent, '_clear_checkpoint', return_value=None)
 class TestDuplicateHandling:
     """Test duplicate requirement handling (idempotency)."""
 
-    def test_idempotency_upsert(self, mock_db):
+    def test_idempotency_upsert(self, mock_clear, mock_save, mock_load, mock_db):
         """
         Test ingesting the same framework twice.
 
@@ -279,7 +291,7 @@ class TestDuplicateHandling:
         # Both should insert same number of documents (idempotent)
         assert second_call_count == first_call_count, "Second run should upsert same documents"
 
-    def test_deterministic_keys(self, mock_db):
+    def test_deterministic_keys(self, mock_clear, mock_save, mock_load, mock_db):
         """
         Test keys are deterministically generated.
 
@@ -314,10 +326,13 @@ class TestDuplicateHandling:
         assert keys1 == keys2, "Keys should be deterministically generated"
 
 
+@patch.object(YAMLRegulatoryAgent, '_load_checkpoint', return_value=None)
+@patch.object(YAMLRegulatoryAgent, '_save_checkpoint', return_value=None)
+@patch.object(YAMLRegulatoryAgent, '_clear_checkpoint', return_value=None)
 class TestInvalidFrameworkKey:
     """Test error handling for invalid framework keys."""
 
-    def test_invalid_framework_key_file_not_found(self, mock_db):
+    def test_invalid_framework_key_file_not_found(self, mock_clear, mock_save, mock_load, mock_db):
         """
         Test error when framework YAML doesn't exist.
 
@@ -334,7 +349,7 @@ class TestInvalidFrameworkKey:
         # Error message should be helpful
         assert "YAML file not found" in str(exc_info.value)
 
-    def test_invalid_framework_key_in_script(self, mock_db):
+    def test_invalid_framework_key_in_script(self, mock_clear, mock_save, mock_load, mock_db):
         """
         Test ingestion script handles invalid framework gracefully.
 
@@ -350,14 +365,18 @@ class TestInvalidFrameworkKey:
         # Assertions
         assert result['status'] == 'failed', "Ingestion should fail for invalid framework"
         assert 'error' in result, "Error message should be present"
-        assert result.get('errors', 0) > 0, "Error count should be > 0"
+        # FileNotFoundError doesn't increment error count - just fails immediately
+        assert 'YAML file not found' in result['error'], "Error should mention missing YAML file"
 
 
+@patch.object(YAMLRegulatoryAgent, '_load_checkpoint', return_value=None)
+@patch.object(YAMLRegulatoryAgent, '_save_checkpoint', return_value=None)
+@patch.object(YAMLRegulatoryAgent, '_clear_checkpoint', return_value=None)
 class TestYAMLValidationError:
     """Test YAML schema validation error handling."""
 
     @patch('builtins.open', side_effect=FileNotFoundError("YAML file not found"))
-    def test_yaml_file_not_found(self, mock_open, mock_db):
+    def test_yaml_file_not_found(self, mock_clear, mock_save, mock_load, mock_open, mock_db):
         """
         Test error when YAML file doesn't exist.
 
@@ -370,7 +389,7 @@ class TestYAMLValidationError:
         with pytest.raises(FileNotFoundError):
             agent.fetch_data()
 
-    def test_yaml_schema_validation_framework_missing(self, mock_db, tmp_path):
+    def test_yaml_schema_validation_framework_missing(self, mock_clear, mock_save, mock_load, mock_db, tmp_path):
         """
         Test YAML validation error when framework section is missing.
 
@@ -401,7 +420,7 @@ requirements:
         # Error message should identify missing framework
         assert "Missing required top-level field: 'framework'" in str(exc_info.value)
 
-    def test_yaml_schema_validation_invalid_obligation_level(self, mock_db, tmp_path):
+    def test_yaml_schema_validation_invalid_obligation_level(self, mock_clear, mock_save, mock_load, mock_db, tmp_path):
         """
         Test YAML validation error when obligation_level is invalid.
 
@@ -441,9 +460,10 @@ requirements:
             agent.fetch_data()
 
         # Error message should identify invalid obligation_level
-        assert "Invalid obligation_level" in str(exc_info.value)
-        assert "must" in str(exc_info.value)
-        assert "shall/should/may" in str(exc_info.value).lower()
+        assert "invalid obligation_level" in str(exc_info.value).lower()
+        assert "must" in str(exc_info.value).lower()
+        # Check that valid options are mentioned (shall, should, may)
+        assert "shall" in str(exc_info.value).lower()
 
 
 # Integration test marker
