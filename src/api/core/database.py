@@ -456,6 +456,7 @@ def _create_customer_collections(db: StandardDatabase) -> None:
         "scan_sessions": False,  # Document collection
         "scan_findings": False,  # Document collection
         "customer_components": False,  # Document collection
+        "vex_documents": False,  # Document collection - VEX assessments
         "finding_to_cve": True,  # Edge: finding → vulnerability
         "component_to_finding": True,  # Edge: component → finding
     }
@@ -490,6 +491,10 @@ def _create_customer_collections(db: StandardDatabase) -> None:
         "customer_components": [
             {"fields": ["customer_id"], "unique": False},
             {"fields": ["customer_id", "purl"], "unique": True},
+        ],
+        "vex_documents": [
+            {"fields": ["customer_id"], "unique": False},
+            {"fields": ["customer_id", "created_at"], "unique": False},
         ],
     }
 
