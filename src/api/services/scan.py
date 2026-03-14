@@ -12,7 +12,7 @@ SOLID Principles Applied:
 - OCP: Adding new scan formats requires no changes to this service
 """
 
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 import structlog
 
 from api.services.base import BaseGraphService
@@ -97,6 +97,15 @@ class ScanIngestionService(BaseGraphService):
         from api.core.database import get_customer_db
         customer_db = get_customer_db(customer_id)
 
+        # Validate project_id and repository_id if provided
+        if scan_request.project_id or scan_request.repository_id:
+            await self._validate_hierarchy(
+                customer_db=customer_db,
+                customer_id=customer_id,
+                project_id=scan_request.project_id,
+                repository_id=scan_request.repository_id,
+            )
+
         # Initialize repositories
         session_repo = ScanSessionRepository(customer_db)
         finding_repo = ScanFindingRepository(customer_db)
@@ -113,6 +122,8 @@ class ScanIngestionService(BaseGraphService):
                 **scan_request.metadata,
                 **parsed_data.metadata,
             },
+            project_id=scan_request.project_id,
+            repository_id=scan_request.repository_id,
         )
 
         scan_session_id = scan_session._key  # Use model attribute
@@ -165,6 +176,15 @@ class ScanIngestionService(BaseGraphService):
             findings_count=len(findings_created),
             components_count=len(components_created),
         )
+
+        # Step 8: Update repository stats if repository_id is provided
+        if scan_request.repository_id:
+            await self._update_repository_stats(
+                customer_db=customer_db,
+                customer_id=customer_id,
+                repository_id=scan_request.repository_id,
+                scan_timestamp=parsed_data.scan_timestamp,
+            )
 
         # Return ScanSession model (FastAPI will auto-serialize to JSON)
         return updated_session
@@ -840,4 +860,124 @@ class ScanIngestionService(BaseGraphService):
             customer_id=customer_id,
             limit=limit,
             offset=offset,
+        )
+
+    async def _validate_hierarchy(
+        self,
+        customer_db,
+        customer_id: str,
+        project_id: Optional[str],
+        repository_id: Optional[str],
+    ):
+        """
+        Validate that project_id and repository_id exist and belong to customer.
+
+        Args:
+            customer_db: Customer database instance
+            customer_id: Customer identifier
+            project_id: Optional project identifier
+            repository_id: Optional repository identifier
+
+        Raises:
+            ValueError: If project or repository not found or doesn't belong to customer
+        """
+        # Validate project_id
+        if project_id:
+            project_query = """
+            FOR project IN projects
+                FILTER project.project_id == @project_id
+                FILTER project.customer_id == @customer_id
+                FILTER project.active == true
+                RETURN project
+            """
+            cursor = customer_db.aql.execute(
+                project_query,
+                bind_vars={"project_id": project_id, "customer_id": customer_id}
+            )
+            projects = list(cursor)
+
+            if not projects:
+                raise ValueError(f"Project not found or inactive: {project_id}")
+
+        # Validate repository_id
+        if repository_id:
+            repo_query = """
+            FOR repo IN repositories
+                FILTER repo.repository_id == @repository_id
+                FILTER repo.customer_id == @customer_id
+                FILTER repo.active == true
+                RETURN repo
+            """
+            cursor = customer_db.aql.execute(
+                repo_query,
+                bind_vars={"repository_id": repository_id, "customer_id": customer_id}
+            )
+            repos = list(cursor)
+
+            if not repos:
+                raise ValueError(f"Repository not found or inactive: {repository_id}")
+
+            # If both project_id and repository_id are provided, verify they match
+            if project_id:
+                repo = repos[0]
+                repo_project_id = repo.get("project_id")
+                if repo_project_id != project_id:
+                    raise ValueError(
+                        f"Repository {repository_id} belongs to project {repo_project_id}, "
+                        f"not {project_id}"
+                    )
+
+    async def _update_repository_stats(
+        self,
+        customer_db,
+        customer_id: str,
+        repository_id: str,
+        scan_timestamp: str,
+    ):
+        """
+        Update repository scan_count and last_scan_at.
+
+        Args:
+            customer_db: Customer database instance
+            customer_id: Customer identifier
+            repository_id: Repository identifier
+            scan_timestamp: Scan timestamp (ISO 8601)
+        """
+        from datetime import datetime
+
+        # Update repository stats
+        update_query = """
+        LET repo = FIRST(
+            FOR r IN repositories
+                FILTER r.repository_id == @repository_id
+                FILTER r.customer_id == @customer_id
+                RETURN r
+        )
+        LET scan_count = LENGTH(
+            FOR s IN scan_sessions
+                FILTER s.repository_id == @repository_id
+                FILTER s.customer_id == @customer_id
+                RETURN 1
+        )
+        UPDATE repo WITH {
+            scan_count: scan_count,
+            last_scan_at: @scan_timestamp,
+            updated_at: @updated_at
+        } IN repositories
+        """
+
+        customer_db.aql.execute(
+            update_query,
+            bind_vars={
+                "repository_id": repository_id,
+                "customer_id": customer_id,
+                "scan_timestamp": scan_timestamp,
+                "updated_at": datetime.utcnow().isoformat() + "Z",
+            }
+        )
+
+        self.logger.debug(
+            "Repository stats updated",
+            repository_id=repository_id,
+            scan_timestamp=scan_timestamp,
         )

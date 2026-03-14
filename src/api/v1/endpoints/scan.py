@@ -180,6 +180,8 @@ async def get_scan_session(
             created_at=session["created_at"],
             updated_at=session["updated_at"],
             metadata=session.get("metadata", {}),
+            project_id=session.get("project_id"),
+            repository_id=session.get("repository_id"),
         )
 
         return APIResponse(
@@ -283,6 +285,8 @@ async def list_scans(
     customer: Customer = Depends(get_current_customer),
     limit: int = Query(100, ge=1, le=1000, description="Maximum scans to return"),
     offset: int = Query(0, ge=0, description="Number of scans to skip"),
+    project_id: str = Query(None, description="Filter by project ID"),
+    repository_id: str = Query(None, description="Filter by repository ID"),
 ):
     """
     GET /v1/scans
@@ -292,13 +296,15 @@ async def list_scans(
     Args:
     - **limit**: Maximum scans to return (1-1000, default 100)
     - **offset**: Number of scans to skip (for pagination)
+    - **project_id**: Filter scans by project ID (optional)
+    - **repository_id**: Filter scans by repository ID (optional)
 
     Returns:
     - List of scan sessions sorted by created_at DESC (newest first)
 
     Example:
     ```bash
-    curl 'https://api.complira.dev/v1/scans?limit=20' \\
+    curl 'https://api.complira.dev/v1/scans?limit=20&repository_id=repo_abc123' \\
       -H "X-API-Key: your_api_key"
     ```
     """
@@ -306,11 +312,13 @@ async def list_scans(
         customer_db = get_customer_db(customer.id)
         service = ScanIngestionService(customer_db)
 
-        # Get sessions
+        # Get sessions (filtering will be implemented in service layer)
         sessions = await service.list_customer_sessions(
             customer_id=customer.id,
             limit=limit,
             offset=offset,
+            project_id=project_id,
+            repository_id=repository_id,
         )
 
         # Build response
@@ -327,6 +335,8 @@ async def list_scans(
                 created_at=s["created_at"],
                 updated_at=s["updated_at"],
                 metadata=s.get("metadata", {}),
+                project_id=s.get("project_id"),
+                repository_id=s.get("repository_id"),
             )
             for s in sessions
         ]

@@ -43,6 +43,8 @@ class ScanSessionRepository(BaseRepository):
         scan_timestamp: str,
         scan_type: str,
         metadata: Optional[Dict[str, Any]] = None,
+        project_id: Optional[str] = None,
+        repository_id: Optional[str] = None,
     ):
         """
         Create new scan session with validated model.
@@ -54,6 +56,8 @@ class ScanSessionRepository(BaseRepository):
             scan_timestamp: Scan execution timestamp
             scan_type: Scan type (sarif, cyclonedx, etc.)
             metadata: Optional additional metadata
+            project_id: Optional project identifier (for multi-tenant hierarchy)
+            repository_id: Optional repository identifier (for multi-tenant hierarchy)
 
         Returns:
             ScanSession: Validated scan session model instance
@@ -73,6 +77,8 @@ class ScanSessionRepository(BaseRepository):
             findings_count=0,
             components_count=0,
             metadata=metadata or {},
+            project_id=project_id,
+            repository_id=repository_id,
             created_at=datetime.utcnow().isoformat(),
             updated_at=datetime.utcnow().isoformat(),
         )
@@ -143,36 +149,51 @@ class ScanSessionRepository(BaseRepository):
         customer_id: str,
         limit: int = 100,
         offset: int = 0,
+        project_id: Optional[str] = None,
+        repository_id: Optional[str] = None,
     ):
         """
-        List all scan sessions for a customer.
+        List all scan sessions for a customer, optionally filtered by project/repository.
 
         Args:
             customer_id: Customer identifier
             limit: Maximum number of sessions
             offset: Number of sessions to skip
+            project_id: Optional project identifier filter
+            repository_id: Optional repository identifier filter
 
         Returns:
             List[ScanSession]: List of validated session models sorted by created_at DESC
         """
         from complira_graph.models import ScanSession
 
-        query = """
+        # Build filter conditions
+        filters = ["session.customer_id == @customer_id"]
+        bind_vars = {
+            "customer_id": customer_id,
+            "limit": limit,
+            "offset": offset,
+        }
+
+        if project_id is not None:
+            filters.append("session.project_id == @project_id")
+            bind_vars["project_id"] = project_id
+
+        if repository_id is not None:
+            filters.append("session.repository_id == @repository_id")
+            bind_vars["repository_id"] = repository_id
+
+        filter_clause = " AND ".join(filters)
+
+        query = f"""
         FOR session IN scan_sessions
-            FILTER session.customer_id == @customer_id
+            FILTER {filter_clause}
             SORT session.created_at DESC
             LIMIT @offset, @limit
             RETURN session
         """
 
-        cursor = self.db.aql_execute(
-            query,
-            bind_vars={
-                "customer_id": customer_id,
-                "limit": limit,
-                "offset": offset,
-            }
-        )
+        cursor = self.db.aql_execute(query, bind_vars=bind_vars)
 
         # Convert each dict to validated model
         return [ScanSession(**session) for session in cursor]

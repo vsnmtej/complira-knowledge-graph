@@ -62,6 +62,8 @@ class ScanSessionResponse(BaseModel):
     created_at: str = Field(..., description="When session was created (ISO 8601)")
     updated_at: str = Field(..., description="When session was last updated (ISO 8601)")
     metadata: dict = Field(default_factory=dict, description="Scan metadata")
+    project_id: Optional[str] = Field(None, description="Project ID (if assigned)")
+    repository_id: Optional[str] = Field(None, description="Repository ID (if assigned)")
 
     class Config:
         json_schema_extra = {

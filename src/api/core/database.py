@@ -457,6 +457,8 @@ def _create_customer_collections(db: StandardDatabase) -> None:
         "scan_findings": False,  # Document collection
         "customer_components": False,  # Document collection
         "vex_documents": False,  # Document collection - VEX assessments
+        "projects": False,  # Document collection - Multi-tenant hierarchy
+        "repositories": False,  # Document collection - Multi-tenant hierarchy
         "finding_to_cve": True,  # Edge: finding → vulnerability
         "component_to_finding": True,  # Edge: component → finding
     }
@@ -482,6 +484,8 @@ def _create_customer_collections(db: StandardDatabase) -> None:
         "scan_sessions": [
             {"fields": ["customer_id"], "unique": False},
             {"fields": ["customer_id", "created_at"], "unique": False},
+            {"fields": ["customer_id", "project_id"], "unique": False},
+            {"fields": ["customer_id", "repository_id"], "unique": False},
         ],
         "scan_findings": [
             {"fields": ["customer_id"], "unique": False},
@@ -495,6 +499,17 @@ def _create_customer_collections(db: StandardDatabase) -> None:
         "vex_documents": [
             {"fields": ["customer_id"], "unique": False},
             {"fields": ["customer_id", "created_at"], "unique": False},
+        ],
+        "projects": [
+            {"fields": ["customer_id"], "unique": False},
+            {"fields": ["customer_id", "project_id"], "unique": True},
+            {"fields": ["customer_id", "active"], "unique": False},
+        ],
+        "repositories": [
+            {"fields": ["customer_id"], "unique": False},
+            {"fields": ["customer_id", "repository_id"], "unique": True},
+            {"fields": ["customer_id", "project_id"], "unique": False},
+            {"fields": ["customer_id", "active"], "unique": False},
         ],
     }
 

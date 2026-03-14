@@ -2,7 +2,7 @@
 Scan ingestion request models.
 """
 
-from typing import Literal, Dict, Any
+from typing import Literal, Dict, Any, Optional
 from pydantic import BaseModel, Field
 
 
@@ -31,6 +31,16 @@ class ScanIngestRequest(BaseModel):
     metadata: Dict[str, Any] = Field(
         default_factory=dict,
         description="Optional scan metadata (repository URL, commit SHA, branch, PR number, etc.)"
+    )
+
+    project_id: Optional[str] = Field(
+        None,
+        description="Optional project ID to associate this scan with a project"
+    )
+
+    repository_id: Optional[str] = Field(
+        None,
+        description="Optional repository ID to associate this scan with a repository"
     )
 
     class Config:

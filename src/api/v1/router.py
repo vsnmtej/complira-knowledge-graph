@@ -12,6 +12,9 @@ from api.v1.endpoints import scan
 from api.v1.endpoints import reference
 from api.v1.endpoints import meta
 from api.v1.endpoints import vex
+from api.v1.endpoints import account
+from api.v1.endpoints import projects
+from api.v1.endpoints import repositories
 
 # Phase 1: LLM-powered enrichment (enabled)
 from api.v1.endpoints import enrichment
@@ -29,14 +32,21 @@ api_router = APIRouter()
 # Phase 0: Scan Ingestion
 api_router.include_router(scan.router, prefix="/scan", tags=["scan"])
 
-# Phase 0: VEX Management
+# Phase 0: VEX Management (auth required)
 api_router.include_router(vex.router, prefix="/vex", tags=["vex"])
 
-# Phase 0: Reference Data (no auth required)
+# Phase 0: Reference Data (auth required)
 api_router.include_router(reference.router, prefix="/reference", tags=["reference"])
 
-# Phase 0: Metadata and Data Quality (no auth required)
+# Phase 0: Metadata and Data Quality (auth required)
 api_router.include_router(meta.router, prefix="/meta", tags=["metadata"])
+
+# Phase 0: Account Management (auth required)
+api_router.include_router(account.router, prefix="/account", tags=["account"])
+
+# Phase 0: Project & Repository Management (auth required)
+api_router.include_router(projects.router, prefix="/projects", tags=["projects"])
+api_router.include_router(repositories.router, prefix="/repositories", tags=["repositories"])
 
 # Phase 1: LLM-powered enrichment (enabled)
 api_router.include_router(enrichment.router, prefix="", tags=["enrichment"])
