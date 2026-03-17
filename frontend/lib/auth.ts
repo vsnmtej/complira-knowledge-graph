@@ -131,25 +131,41 @@ export const authOptions: NextAuthOptions = {
         token.refreshToken = compliraUser.refreshToken;
       }
 
-      // Update session (e.g., after profile update)
+      // Update session — handles both profile refresh and token refresh
       if (trigger === "update") {
         try {
-          const response = await fetch(`${API_URL}/v1/auth/me`, {
+          // Try to refresh the access token via backend
+          const refreshResponse = await fetch(`${API_URL}/v1/auth/refresh`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ refresh_token: token.refreshToken }),
+          });
+
+          if (refreshResponse.ok) {
+            const refreshData = await refreshResponse.json();
+            token.accessToken = refreshData.access_token;
+            if (refreshData.refresh_token) {
+              token.refreshToken = refreshData.refresh_token;
+            }
+          }
+
+          // Also refresh user profile data
+          const profileResponse = await fetch(`${API_URL}/v1/auth/me`, {
             headers: {
               Authorization: `Bearer ${token.accessToken}`,
             },
           });
 
-          if (response.ok) {
-            const user = await response.json();
-            token.name = user.name;
-            token.organizationName = user.organization_name;
-            token.role = user.role;
-            token.tier = user.tier;
-            token.frameworks = user.frameworks;
+          if (profileResponse.ok) {
+            const profile = await profileResponse.json();
+            token.name = profile.name;
+            token.organizationName = profile.organization_name;
+            token.role = profile.role;
+            token.tier = profile.tier;
+            token.frameworks = profile.frameworks;
           }
         } catch (error) {
-          console.error("Failed to refresh user data:", error);
+          console.error("Failed to refresh session:", error);
         }
       }
 

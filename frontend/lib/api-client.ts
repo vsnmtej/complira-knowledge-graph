@@ -83,9 +83,7 @@ export async function apiRequest<T>(
     const refreshed = await refreshAccessToken(session.refreshToken);
 
     if (refreshed) {
-      // Update the session with new tokens
-      // Note: This requires a custom update mechanism
-      // For now, we'll just retry with the new token
+      // Retry with the new access token
       response = await fetch(`${API_URL}${endpoint}`, {
         ...options,
         headers: {
@@ -95,10 +93,20 @@ export async function apiRequest<T>(
         },
       });
 
-      // If successful, trigger session update
+      // Trigger NextAuth session update so JWT callback refreshes tokens
       if (response.ok) {
-        // Trigger NextAuth session update
-        await fetch("/api/auth/session?update=true");
+        try {
+          // Use NextAuth's CSRF-protected session update endpoint
+          const csrfResponse = await fetch("/api/auth/csrf");
+          const { csrfToken } = await csrfResponse.json();
+          await fetch("/api/auth/session", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams({ csrfToken }),
+          });
+        } catch {
+          // Session update is best-effort; the retry already succeeded
+        }
       }
     } else {
       // Refresh failed, sign out and redirect to login
