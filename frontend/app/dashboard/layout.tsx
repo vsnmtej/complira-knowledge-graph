@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
-import { LayoutDashboard, Key, LogOut, FileSearch, Shield, FolderKanban, GitBranch, BookOpen } from "lucide-react";
+import { LayoutDashboard, Key, LogOut, FileSearch, Shield, FolderKanban, GitBranch, BookOpen, UserCircle } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function DashboardLayout({
@@ -100,6 +100,17 @@ export default function DashboardLayout({
               </span>
             </div>
           </div>
+          <Link
+            href="/dashboard/profile"
+            className={`w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
+              pathname === "/dashboard/profile"
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:text-foreground hover:bg-accent"
+            }`}
+          >
+            <UserCircle className="h-4 w-4" />
+            My Profile
+          </Link>
           <ThemeToggle />
           <button
             onClick={() => {

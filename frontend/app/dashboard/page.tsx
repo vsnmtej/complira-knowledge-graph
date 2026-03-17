@@ -3,9 +3,10 @@
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { format } from "date-fns";
-import { Key, FileSearch, ShieldAlert, CheckCircle2, ArrowRight, Clock } from "lucide-react";
+import { Key, FileSearch, ShieldAlert, CheckCircle2, ArrowRight, Clock, Database, GitBranch } from "lucide-react";
 import { listTokens } from "@/lib/api/tokens";
 import { listScans, type ScanSession } from "@/lib/api/scans";
+import { getStats, getCoverage } from "@/lib/api/meta";
 
 export default function DashboardPage() {
   // Fetch tokens
@@ -18,6 +19,17 @@ export default function DashboardPage() {
   const { data: scansData, isLoading: scansLoading } = useQuery({
     queryKey: ["scans"],
     queryFn: () => listScans({ limit: 5 }),
+  });
+
+  // Fetch knowledge graph stats
+  const { data: statsData } = useQuery({
+    queryKey: ["meta-stats"],
+    queryFn: () => getStats(),
+  });
+
+  const { data: coverageData } = useQuery({
+    queryKey: ["meta-coverage"],
+    queryFn: () => getCoverage(),
   });
 
   const tokens = tokensData?.tokens || [];
@@ -54,12 +66,12 @@ export default function DashboardPage() {
       href: "/dashboard/scans",
     },
     {
-      name: "Compliance",
-      value: "-",
-      subtext: "Status",
-      icon: CheckCircle2,
+      name: "Knowledge Graph",
+      value: statsData?.data?.total_documents ? (statsData.data.total_documents / 1000).toFixed(0) + "K" : "-",
+      subtext: statsData?.data?.total_edges ? (statsData.data.total_edges / 1000000).toFixed(1) + "M edges" : "Documents",
+      icon: Database,
       color: "text-green-500",
-      href: "/dashboard",
+      href: "/dashboard/reference",
     },
   ];
 
@@ -156,6 +168,41 @@ export default function DashboardPage() {
                 </div>
               </Link>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Knowledge Graph Coverage */}
+      {coverageData?.data && (
+        <div className="rounded-lg border border-border bg-card shadow-sm">
+          <div className="p-6 border-b border-border flex items-center justify-between">
+            <h2 className="text-xl font-semibold">Knowledge Graph Coverage</h2>
+            <Link
+              href="/dashboard/reference"
+              className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+            >
+              Explore
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+          <div className="p-6 grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
+            {[
+              { label: "CVEs", key: "vulnerabilities" },
+              { label: "CWEs", key: "weaknesses" },
+              { label: "ATT&CK", key: "attack_techniques" },
+              { label: "KEV", key: "kev_entries" },
+              { label: "EPSS", key: "epss_history" },
+            ].map((item) => {
+              const count = (coverageData.data as unknown as Record<string, number>)[item.key];
+              return (
+                <div key={item.key} className="text-center p-3 rounded-lg bg-muted/30">
+                  <p className="text-2xl font-bold">
+                    {count != null ? (count > 1000 ? (count / 1000).toFixed(0) + "K" : count) : "-"}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">{item.label}</p>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
