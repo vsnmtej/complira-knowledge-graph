@@ -43,3 +43,4 @@ reportlab==4.0.9  # PDF generation
 
 # ========== Development Dependencies ==========
 # (Install separately with: pip install -r requirements-dev.txt)
+slowapi>=0.1.9

@@ -7,7 +7,7 @@ services:
     ports:
       - "8529:8529"
     environment:
-      ARANGO_ROOT_PASSWORD: ${ARANGO_PASSWORD:-CompliraSecurePassword123!}
+      ARANGO_ROOT_PASSWORD: ${ARANGO_PASSWORD:?Set ARANGO_PASSWORD in .env}
       ARANGO_STORAGE_ENGINE: rocksdb
     volumes:
       - arangodb_data:/var/lib/arangodb3
@@ -99,10 +99,10 @@ services:
     container_name: complira-grafana
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "3001:3000"
     environment:
       GF_SECURITY_ADMIN_USER: admin
-      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:?Set GRAFANA_PASSWORD in .env}
       GF_INSTALL_PLUGINS: grafana-clock-panel,grafana-simple-json-datasource
       GF_AUTH_ANONYMOUS_ENABLED: "false"
       GF_SERVER_ROOT_URL: http://localhost:3000
@@ -119,6 +119,66 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+
+  # ========== Complira API ==========
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: complira-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      ARANGO_URL: http://arangodb:8529
+      ARANGO_USERNAME: root
+      ARANGO_PASSWORD: ${ARANGO_PASSWORD:?Set ARANGO_PASSWORD in .env}
+      ARANGO_DATABASE: complira_graph
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:?Set JWT_SECRET_KEY in .env}
+      CORS_ALLOW_ORIGINS: ${CORS_ALLOW_ORIGINS:-["http://localhost:3000"]}
+    networks:
+      - complira-network
+    depends_on:
+      arangodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ========== Complira Frontend ==========
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+    container_name: complira-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:?Set NEXTAUTH_SECRET in .env}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://api:8000}
+    networks:
+      - complira-network
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
 
 # ========== Networks ==========
 networks:

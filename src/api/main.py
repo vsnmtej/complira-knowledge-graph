@@ -8,9 +8,12 @@ Creates and configures the FastAPI application with:
 - Health check endpoints
 """
 
+import os
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
 import structlog
 
 logger = structlog.get_logger()
@@ -23,22 +26,64 @@ def create_app() -> FastAPI:
     Returns:
         FastAPI: Configured application instance
     """
+    from api.core.config import get_cloud_settings
+    settings = get_cloud_settings()
+
+    is_production = os.environ.get("ENVIRONMENT", "development") == "production"
+
     app = FastAPI(
         title="Complira Knowledge Graph API",
         description="Multi-tenant cybersecurity compliance intelligence platform",
         version="0.1.0",
-        docs_url="/docs",
-        redoc_url="/redoc",
+        docs_url=None if is_production else "/docs",
+        redoc_url=None if is_production else "/redoc",
     )
 
-    # CORS middleware (configure allowed origins based on environment)
+    # GZip compression for responses > 500 bytes
+    app.add_middleware(GZipMiddleware, minimum_size=500)
+
+    # Trusted host validation in production
+    if is_production:
+        allowed_hosts = os.environ.get("ALLOWED_HOSTS", "").split(",")
+        if allowed_hosts and allowed_hosts[0]:
+            app.add_middleware(TrustedHostMiddleware, allowed_hosts=allowed_hosts)
+
+    # CORS middleware — uses config values (defaults to ["*"] in dev, restrict in production)
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],  # TODO: Restrict in production
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
+        allow_origins=settings.CORS_ALLOW_ORIGINS,
+        allow_credentials=settings.CORS_ALLOW_CREDENTIALS,
+        allow_methods=settings.CORS_ALLOW_METHODS,
+        allow_headers=settings.CORS_ALLOW_HEADERS,
     )
+
+    # Rate limiting
+    if settings.RATE_LIMIT_ENABLED:
+        try:
+            from slowapi import Limiter, _rate_limit_exceeded_handler
+            from slowapi.util import get_remote_address
+            from slowapi.errors import RateLimitExceeded
+
+            limiter = Limiter(
+                key_func=get_remote_address,
+                default_limits=[f"{settings.RATE_LIMIT_REQUESTS_PER_MINUTE}/minute"],
+            )
+            app.state.limiter = limiter
+            app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+        except ImportError:
+            logger.warning("slowapi not installed, rate limiting disabled")
+
+    # Security headers middleware
+    @app.middleware("http")
+    async def add_security_headers(request: Request, call_next):
+        response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        if is_production:
+            response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        return response
 
     # Exception handlers
     @app.exception_handler(Exception)
@@ -65,14 +110,20 @@ def create_app() -> FastAPI:
             }
         )
 
-    # Health check endpoint
+    # Health check endpoint with DB connectivity
     @app.get("/health")
     async def health_check():
         """Health check endpoint for load balancers."""
-        return {
-            "status": "healthy",
-            "version": "0.1.0",
-        }
+        health = {"status": "healthy", "version": "0.1.0"}
+        try:
+            from api.core.database import get_database
+            db = get_database()
+            db.version()
+            health["database"] = "connected"
+        except Exception:
+            health["database"] = "disconnected"
+            health["status"] = "degraded"
+        return health
 
     # Root endpoint
     @app.get("/")

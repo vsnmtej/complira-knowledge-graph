@@ -8,8 +8,9 @@ Extends complira_graph.config.Settings with cloud-specific settings:
 - Rate limiting
 """
 
+import os
 from complira_graph.config import Settings
-from pydantic import Field
+from pydantic import Field, model_validator
 from typing import Optional
 
 
@@ -74,10 +75,25 @@ class CloudSettings(Settings):
     API_DEBUG: bool = False
 
     # ========== CORS Configuration ==========
+    # In production, set CORS_ALLOW_ORIGINS='["https://app.complira.com"]'
     CORS_ALLOW_ORIGINS: list = Field(default_factory=lambda: ["*"])
     CORS_ALLOW_CREDENTIALS: bool = True
-    CORS_ALLOW_METHODS: list = Field(default_factory=lambda: ["*"])
-    CORS_ALLOW_HEADERS: list = Field(default_factory=lambda: ["*"])
+    CORS_ALLOW_METHODS: list = Field(default_factory=lambda: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"])
+    CORS_ALLOW_HEADERS: list = Field(default_factory=lambda: ["Authorization", "Content-Type", "X-API-Key"])
+
+    @model_validator(mode="after")
+    def validate_production_settings(self):
+        """Reject insecure defaults in production."""
+        if os.environ.get("ENVIRONMENT") == "production":
+            if self.JWT_SECRET_KEY == "INSECURE_DEFAULT_SECRET_CHANGE_IN_PRODUCTION":
+                raise ValueError("JWT_SECRET_KEY must be set to a secure random value in production")
+            if len(self.JWT_SECRET_KEY) < 32:
+                raise ValueError("JWT_SECRET_KEY must be at least 32 characters in production")
+            if self.CORS_ALLOW_ORIGINS == ["*"]:
+                raise ValueError("CORS_ALLOW_ORIGINS must not be wildcard ['*'] in production")
+            if self.API_DEBUG:
+                raise ValueError("API_DEBUG must be False in production")
+        return self
 
     # ========== Performance Tuning ==========
     MAX_GRAPH_TRAVERSAL_DEPTH: int = 6
