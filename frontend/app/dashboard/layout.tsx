@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
-import { LayoutDashboard, Key, LogOut, FileSearch, Shield, FolderKanban, GitBranch, BookOpen, UserCircle } from "lucide-react";
+import { LayoutDashboard, Key, LogOut, FileSearch, Shield, FolderKanban, GitBranch, BookOpen, UserCircle, Zap, Settings } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function DashboardLayout({
@@ -45,6 +45,8 @@ export default function DashboardLayout({
     { name: "Projects", href: "/dashboard/projects", icon: FolderKanban },
     { name: "Repositories", href: "/dashboard/repositories", icon: GitBranch },
     { name: "Reference", href: "/dashboard/reference", icon: BookOpen },
+    { name: "Enrichment", href: "/dashboard/enrichment", icon: Zap },
+    { name: "Settings", href: "/dashboard/settings", icon: Settings },
     { name: "API Tokens", href: "/dashboard/tokens", icon: Key },
   ];
 

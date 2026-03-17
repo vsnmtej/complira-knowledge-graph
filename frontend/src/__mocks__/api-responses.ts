@@ -205,10 +205,11 @@ export const mockErrors = {
 };
 
 // Export all mocks
-export default {
+const allMocks = {
   scanIngest: mockScanIngestResponse,
   scanSession: mockScanSessionResponse,
   scanFindings: mockScanFindingsResponse,
   scansList: mockScansListResponse,
   errors: mockErrors,
 };
+export default allMocks;

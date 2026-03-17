@@ -56,7 +56,7 @@ export default function ShowTokenDialog({
                 Important: Save This Token Now!
               </h2>
               <p className="text-yellow-200/90 mt-2 font-medium">
-                This is the ONLY time you'll see this token. Copy it now and
+                This is the ONLY time you&apos;ll see this token. Copy it now and
                 store it securely. Once you close this dialog, the token cannot
                 be retrieved.
               </p>
@@ -139,10 +139,10 @@ export default function ShowTokenDialog({
             />
             <div className="text-sm">
               <div className="text-white font-medium">
-                I've copied and securely stored this token
+                I&apos;ve copied and securely stored this token
               </div>
               <div className="text-slate-400 text-xs mt-1">
-                I understand I won't be able to see it again
+                I understand I won&apos;t be able to see it again
               </div>
             </div>
           </label>
@@ -161,7 +161,7 @@ export default function ShowTokenDialog({
                 onClick={handleClose}
                 className="px-6 py-2 bg-slate-700 hover:bg-slate-600 text-white font-medium rounded-md transition-colors"
               >
-                I'll Copy It Later...
+                I&apos;ll Copy It Later...
               </button>
             )}
           </div>
