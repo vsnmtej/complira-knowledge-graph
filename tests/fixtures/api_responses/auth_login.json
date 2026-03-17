@@ -1,0 +1,18 @@
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhYmMxMjNkZWY0NTZnaGk3ODkiLCJlbWFpbCI6ImpvaG4uZG9lQGV4YW1wbGUuY29tIiwib3JnX2lkIjoib3JnX3h5ejc4OWprbDAxMm1ubyIsInJvbGUiOiJvd25lciIsInR5cGUiOiJhY2Nlc3MiLCJpYXQiOjE3MDUzMTc2MDAsImV4cCI6MTcwNTMxODUwMH0.k9j8h7g6f5d4s3a2q1w0e9r8t7y6u5i4o3p2l1k0j9h8",
+  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhYmMxMjNkZWY0NTZnaGk3ODkiLCJ0eXBlIjoicmVmcmVzaCIsImlhdCI6MTcwNTMxNzYwMCwiZXhwIjoxNzA1OTIyNDAwfQ.x8c7v6b5n4m3z2a1s0d9f8g7h6j5k4l3p2o1i0u9y8t7",
+  "token_type": "bearer",
+  "expires_in": 900,
+  "user": {
+    "id": "users/abc123def456ghi789",
+    "email": "john.doe@example.com",
+    "name": "John Doe",
+    "email_verified": true,
+    "organization_id": "org_xyz789jkl012mno",
+    "organization_name": "Acme Corp",
+    "role": "owner",
+    "tier": "professional",
+    "frameworks": ["FDA_524B", "IEC_62304", "ISO_13485"],
+    "created_at": "2024-01-15T10:30:00Z"
+  }
+}

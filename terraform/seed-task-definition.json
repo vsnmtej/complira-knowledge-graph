@@ -1,0 +1,61 @@
+{
+  "family": "complira-seed-prod",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "4096",
+  "memory": "16384",
+  "executionRoleArn": "arn:aws:iam::669003566167:role/complira-ecs-task-execution-prod",
+  "taskRoleArn": "arn:aws:iam::669003566167:role/complira-ecs-task-prod",
+  "containerDefinitions": [
+    {
+      "name": "seed",
+      "image": "669003566167.dkr.ecr.us-east-1.amazonaws.com/complira-api-prod:latest",
+      "essential": true,
+      "command": ["bash", "-c", "echo y | python /app/scripts/seed_reference_database.py"],
+      "environment": [
+        {
+          "name": "ARANGO_URL",
+          "value": "http://10.0.100.77:8529"
+        },
+        {
+          "name": "ARANGO_USERNAME",
+          "value": "root"
+        },
+        {
+          "name": "ARANGO_PASSWORD",
+          "value": "9juEnAdGogyhaNUGtXC9JBvgbvMNbWhF"
+        },
+        {
+          "name": "ARANGO_DATABASE",
+          "value": "complira_reference"
+        }
+      ],
+      "secrets": [
+        {
+          "name": "NVD_API_KEY",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:669003566167:secret:complira/nvd-api-key-prod-fzyj6v"
+        },
+        {
+          "name": "GITHUB_TOKEN",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:669003566167:secret:complira/github-token-prod-g3hKAL"
+        },
+        {
+          "name": "VULNCHECK_API_KEY",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:669003566167:secret:complira/vulncheck-api-key-prod-VUaCPe"
+        },
+        {
+          "name": "ANTHROPIC_API_KEY",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:669003566167:secret:complira/anthropic-api-key-prod-XpxNUf"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/complira-seed-prod",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "seed"
+        }
+      }
+    }
+  ]
+}

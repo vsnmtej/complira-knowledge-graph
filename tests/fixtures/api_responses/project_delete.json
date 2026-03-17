@@ -1,0 +1,13 @@
+{
+  "success": true,
+  "data": {
+    "project_id": "proj_abc123def456ghi789",
+    "name": "Backend Services",
+    "deleted_at": "2024-01-22T17:00:00Z",
+    "message": "Project 'Backend Services' has been deleted. Associated repositories have been unassigned."
+  },
+  "metadata": {
+    "cache_hit": false,
+    "execution_time_ms": 54.67
+  }
+}

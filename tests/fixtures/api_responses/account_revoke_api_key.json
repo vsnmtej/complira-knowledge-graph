@@ -1,0 +1,13 @@
+{
+  "success": true,
+  "data": {
+    "key_id": "key_abc123def456ghi789jkl012mno345pq",
+    "revoked": true,
+    "revoked_at": "2024-01-15T15:30:00Z",
+    "message": "API key has been revoked and can no longer be used"
+  },
+  "metadata": {
+    "cache_hit": false,
+    "execution_time_ms": 23.5
+  }
+}

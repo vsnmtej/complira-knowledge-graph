@@ -1,0 +1,73 @@
+{
+  "success": true,
+  "data": {
+    "keys": [
+      {
+        "key_id": "key_abc123def456ghi789jkl012mno345pq",
+        "name": "Production Server",
+        "description": "Main production deployment",
+        "key_prefix": "ak_live_abc123",
+        "created_at": "2024-01-15T10:00:00Z",
+        "expires_at": "2024-04-15T10:00:00Z",
+        "last_used_at": "2024-01-15T14:28:00Z",
+        "revoked": false,
+        "revoked_at": null,
+        "revoked_reason": null
+      },
+      {
+        "key_id": "key_def456ghi789jkl012mno345pqr678st",
+        "name": "Development Environment",
+        "description": "Local development testing",
+        "key_prefix": "ak_test_def456",
+        "created_at": "2024-01-10T10:00:00Z",
+        "expires_at": null,
+        "last_used_at": null,
+        "revoked": false,
+        "revoked_at": null,
+        "revoked_reason": null
+      },
+      {
+        "key_id": "key_ghi789jkl012mno345pqr678stu901vwx",
+        "name": "Revoked CI/CD Key",
+        "description": "Old GitHub Actions key",
+        "key_prefix": "ak_live_ghi789",
+        "created_at": "2024-01-01T10:00:00Z",
+        "expires_at": "2025-01-01T10:00:00Z",
+        "last_used_at": "2024-01-05T10:00:00Z",
+        "revoked": true,
+        "revoked_at": "2024-01-05T15:00:00Z",
+        "revoked_reason": "Compromised key - rotating to new credentials"
+      },
+      {
+        "key_id": "key_jkl012mno345pqr678stu901vwx234yza",
+        "name": "Staging Environment",
+        "description": "Pre-production testing",
+        "key_prefix": "ak_live_jkl012",
+        "created_at": "2024-01-12T08:30:00Z",
+        "expires_at": "2024-07-12T08:30:00Z",
+        "last_used_at": "2024-01-14T16:45:00Z",
+        "revoked": false,
+        "revoked_at": null,
+        "revoked_reason": null
+      },
+      {
+        "key_id": "key_mno345pqr678stu901vwx234yza567bcd",
+        "name": "Revoked Temporary Key",
+        "description": "Short-lived key for contractor access",
+        "key_prefix": "ak_live_mno345",
+        "created_at": "2023-12-20T12:00:00Z",
+        "expires_at": "2024-01-20T12:00:00Z",
+        "last_used_at": "2023-12-28T09:15:00Z",
+        "revoked": true,
+        "revoked_at": "2023-12-28T17:00:00Z",
+        "revoked_reason": "Contractor engagement ended"
+      }
+    ],
+    "total": 5,
+    "active": 3
+  },
+  "metadata": {
+    "cache_hit": false,
+    "execution_time_ms": 12.8
+  }
+}

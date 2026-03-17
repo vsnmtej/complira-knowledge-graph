@@ -1,0 +1,35 @@
+{
+  "empty_cve_list": {
+    "detail": "cve_ids list cannot be empty"
+  },
+  "too_many_cves": {
+    "detail": "Maximum 100 CVEs per request"
+  },
+  "invalid_cve_format": {
+    "detail": "Invalid CVE ID format. Expected format: CVE-YYYY-NNNNN"
+  },
+  "cve_not_found": {
+    "detail": "CVE CVE-9999-99999 not found in knowledge graph"
+  },
+  "unauthorized": {
+    "detail": "Invalid or missing API key"
+  },
+  "enrichment_service_error": {
+    "detail": "Enrichment failed: Database connection error"
+  },
+  "invalid_request": {
+    "detail": "Invalid request: missing required field 'cve_ids'"
+  },
+  "rate_limit_exceeded": {
+    "detail": "Rate limit exceeded. Maximum 60 requests per minute."
+  },
+  "database_timeout": {
+    "detail": "Enrichment failed: Database query timeout after 30s"
+  },
+  "invalid_attack_path_option": {
+    "detail": "include_attack_paths must be a boolean value"
+  },
+  "invalid_compliance_option": {
+    "detail": "include_compliance must be a boolean value"
+  }
+}

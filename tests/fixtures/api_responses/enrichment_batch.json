@@ -1,0 +1,229 @@
+{
+  "enriched": [
+    {
+      "cve_id": "CVE-2024-21413",
+      "description": "Microsoft Outlook Remote Code Execution Vulnerability - allows remote attackers to execute arbitrary code via specially crafted emails",
+      "cvss_score": 9.8,
+      "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+      "cvss_severity": "CRITICAL",
+      "epss_score": 0.89,
+      "in_kev": true,
+      "exploit_count": 3,
+      "published_date": "2024-02-13T00:00:00Z",
+      "last_modified": "2024-02-20T00:00:00Z",
+      "risk_score": 0.95,
+      "priority": "CRITICAL",
+      "risk_factors": {
+        "high_epss": true,
+        "actively_exploited": true,
+        "high_cvss": true,
+        "public_exploits": true,
+        "threat_groups_using": true
+      },
+      "cwe_list": ["CWE-416"],
+      "attack_techniques": ["T1190", "T1203"],
+      "threat_groups": ["APT28", "APT29"],
+      "attack_path": {
+        "path": [
+          {
+            "stage": "vulnerability",
+            "node": "CVE-2024-21413",
+            "name": "Microsoft Outlook RCE",
+            "description": "Remote code execution vulnerability in Microsoft Outlook"
+          },
+          {
+            "stage": "weakness",
+            "node": "CWE-416",
+            "name": "Use After Free",
+            "description": "Memory corruption vulnerability allowing arbitrary code execution"
+          },
+          {
+            "stage": "attack_pattern",
+            "node": "CAPEC-10",
+            "name": "Buffer Overflow via Environment Variables",
+            "description": "Memory corruption attack pattern"
+          },
+          {
+            "stage": "technique",
+            "node": "T1190",
+            "name": "Exploit Public-Facing Application",
+            "description": "Initial access via exploitation of public-facing applications"
+          },
+          {
+            "stage": "threat_groups",
+            "nodes": ["APT28", "APT29"],
+            "name": "Active Threat Groups",
+            "description": "Known threat groups actively exploiting this vulnerability"
+          }
+        ],
+        "defenses": [
+          {
+            "d3fend_id": "D3-IAM",
+            "name": "Inbound Application Traffic Monitoring",
+            "description": "Monitor inbound application traffic for anomalous patterns",
+            "coverage": ["T1190"]
+          },
+          {
+            "d3fend_id": "D3-PM",
+            "name": "Process Monitoring",
+            "description": "Monitor process execution for suspicious activity",
+            "coverage": ["T1203"]
+          }
+        ]
+      },
+      "compliance": {
+        "nist_controls": ["SI-2", "RA-5", "CM-8", "SA-11"],
+        "frameworks": ["FDA_524B", "NIST_800_53", "ISO_27001"]
+      },
+      "enriched_at": "2024-03-17T10:00:00.000Z"
+    },
+    {
+      "cve_id": "CVE-2023-44487",
+      "description": "HTTP/2 Rapid Reset Attack - enables attackers to cause denial of service by exploiting stream cancellation",
+      "cvss_score": 7.5,
+      "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+      "cvss_severity": "HIGH",
+      "epss_score": 0.82,
+      "in_kev": true,
+      "exploit_count": 5,
+      "published_date": "2023-10-10T00:00:00Z",
+      "last_modified": "2023-10-25T00:00:00Z",
+      "risk_score": 0.88,
+      "priority": "CRITICAL",
+      "risk_factors": {
+        "high_epss": true,
+        "actively_exploited": true,
+        "high_cvss": false,
+        "public_exploits": true,
+        "threat_groups_using": true
+      },
+      "cwe_list": ["CWE-400"],
+      "attack_techniques": ["T1499"],
+      "threat_groups": ["FIN7", "Lazarus Group"],
+      "attack_path": {
+        "path": [
+          {
+            "stage": "vulnerability",
+            "node": "CVE-2023-44487",
+            "name": "HTTP/2 Rapid Reset",
+            "description": "Denial of service via HTTP/2 stream manipulation"
+          },
+          {
+            "stage": "weakness",
+            "node": "CWE-400",
+            "name": "Uncontrolled Resource Consumption",
+            "description": "Application fails to properly limit resource consumption"
+          },
+          {
+            "stage": "attack_pattern",
+            "node": "CAPEC-130",
+            "name": "Excessive Allocation",
+            "description": "Force application to allocate excessive resources"
+          },
+          {
+            "stage": "technique",
+            "node": "T1499",
+            "name": "Endpoint Denial of Service",
+            "description": "Denial of service targeting endpoints"
+          },
+          {
+            "stage": "threat_groups",
+            "nodes": ["FIN7", "Lazarus Group"],
+            "name": "Active Threat Groups",
+            "description": "Known threat groups using this technique"
+          }
+        ],
+        "defenses": [
+          {
+            "d3fend_id": "D3-RTR",
+            "name": "Relay Pattern Analysis",
+            "description": "Analyze traffic relay patterns for anomalies",
+            "coverage": ["T1499"]
+          }
+        ]
+      },
+      "compliance": {
+        "nist_controls": ["SI-2", "SC-5", "SC-7"],
+        "frameworks": ["FDA_524B", "NIST_800_53"]
+      },
+      "enriched_at": "2024-03-17T10:00:00.500Z"
+    },
+    {
+      "cve_id": "CVE-2021-44228",
+      "description": "Apache Log4j2 Remote Code Execution (Log4Shell) - allows remote code execution via JNDI lookup",
+      "cvss_score": 10.0,
+      "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+      "cvss_severity": "CRITICAL",
+      "epss_score": 0.975,
+      "in_kev": true,
+      "exploit_count": 47,
+      "published_date": "2021-12-10T00:00:00Z",
+      "last_modified": "2021-12-15T00:00:00Z",
+      "risk_score": 0.99,
+      "priority": "CRITICAL",
+      "risk_factors": {
+        "high_epss": true,
+        "actively_exploited": true,
+        "high_cvss": true,
+        "public_exploits": true,
+        "threat_groups_using": true
+      },
+      "cwe_list": ["CWE-502", "CWE-917"],
+      "attack_techniques": ["T1190", "T1059"],
+      "threat_groups": ["APT28", "APT29", "Lazarus Group", "FIN7"],
+      "enriched_at": "2024-03-17T10:00:01.000Z"
+    },
+    {
+      "cve_id": "CVE-2024-12345",
+      "description": "Example Medium Severity Vulnerability - information disclosure in web application",
+      "cvss_score": 5.3,
+      "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+      "cvss_severity": "MEDIUM",
+      "epss_score": 0.35,
+      "in_kev": false,
+      "exploit_count": 0,
+      "published_date": "2024-03-01T00:00:00Z",
+      "last_modified": "2024-03-10T00:00:00Z",
+      "risk_score": 0.42,
+      "priority": "MEDIUM",
+      "risk_factors": {
+        "high_epss": false,
+        "actively_exploited": false,
+        "high_cvss": false,
+        "public_exploits": false,
+        "threat_groups_using": false
+      },
+      "cwe_list": ["CWE-200"],
+      "attack_techniques": ["T1592"],
+      "threat_groups": [],
+      "enriched_at": "2024-03-17T10:00:01.500Z"
+    },
+    {
+      "cve_id": "CVE-2024-00001",
+      "description": "Low Severity Configuration Issue - default credentials not properly enforced",
+      "cvss_score": 3.5,
+      "cvss_vector": "CVSS:3.1/AV:L/AC:H/PR:H/UI:R/S:U/C:L/I:L/A:N",
+      "cvss_severity": "LOW",
+      "epss_score": 0.02,
+      "in_kev": false,
+      "exploit_count": 0,
+      "published_date": "2024-01-15T00:00:00Z",
+      "last_modified": "2024-01-20T00:00:00Z",
+      "risk_score": 0.15,
+      "priority": "LOW",
+      "risk_factors": {
+        "high_epss": false,
+        "actively_exploited": false,
+        "high_cvss": false,
+        "public_exploits": false,
+        "threat_groups_using": false
+      },
+      "cwe_list": ["CWE-798"],
+      "attack_techniques": [],
+      "threat_groups": [],
+      "enriched_at": "2024-03-17T10:00:02.000Z"
+    }
+  ],
+  "total": 5,
+  "processing_time_ms": 420.75
+}

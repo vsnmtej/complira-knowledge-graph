@@ -1,0 +1,14 @@
+{
+  "401_unauthorized": {
+    "detail": "Invalid or missing API key"
+  },
+  "404_scan_not_found": {
+    "detail": "Scan session not found: 19051940"
+  },
+  "400_validation_error": {
+    "detail": "cve_id must start with one of ['CVE-', 'GHSA-', 'RUSTSEC-', 'PYSEC-', 'GO-', 'GHSL-'] if provided"
+  },
+  "500_internal_error": {
+    "detail": "Internal server error during scan ingestion"
+  }
+}

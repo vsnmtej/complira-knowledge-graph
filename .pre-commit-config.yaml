@@ -1,0 +1,79 @@
+repos:
+  # Local custom checks for architectural patterns
+  - repo: local
+    hooks:
+      - id: check-direct-db-access
+        name: Check for direct database access
+        entry: python scripts/check_direct_db_access.py
+        language: python
+        types: [python]
+        pass_filenames: false
+        always_run: true
+
+      - id: check-import-patterns
+        name: Validate import patterns
+        entry: python scripts/check_import_patterns.py
+        language: python
+        types: [python]
+        pass_filenames: false
+        always_run: true
+
+      - id: check-repository-usage
+        name: Ensure repositories are used
+        entry: python scripts/check_repository_usage.py
+        language: python
+        types: [python]
+        pass_filenames: false
+        always_run: true
+
+  # Standard Python code quality checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: check-json
+      - id: check-merge-conflict
+      - id: detect-private-key
+
+  # Python formatting with ruff
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.9
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+
+  # Python formatting with black
+  - repo: https://github.com/psf/black
+    rev: 23.12.1
+    hooks:
+      - id: black
+        language_version: python3.11
+
+  # Type checking with mypy
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.8.0
+    hooks:
+      - id: mypy
+        args: [--ignore-missing-imports, --no-strict-optional]
+        additional_dependencies: [types-all]
+        files: ^src/
+
+  # Security checks with bandit
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.6
+    hooks:
+      - id: bandit
+        args: [-c, pyproject.toml]
+        additional_dependencies: ["bandit[toml]"]
+        files: ^src/
+
+  # Import sorting with isort
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        args: [--profile, black]

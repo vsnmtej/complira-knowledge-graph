@@ -1,0 +1,173 @@
+{
+  "success": true,
+  "data": {
+    "cve_id": "CVE-2024-27351",
+    "description": "A critical remote code execution vulnerability exists in the popular web framework when processing specially crafted serialized objects. An unauthenticated attacker can exploit this vulnerability by sending a malicious HTTP request containing a crafted payload, leading to arbitrary code execution with the privileges of the application. This vulnerability has been actively exploited in ransomware campaigns targeting enterprise applications.",
+    "cvss_score": 9.8,
+    "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+    "severity": "CRITICAL",
+    "published_date": "2024-03-15T10:00:00Z",
+    "last_modified_date": "2024-03-16T14:30:00Z",
+    "epss": {
+      "score": 0.95432,
+      "percentile": 0.99234,
+      "date": "2024-03-17"
+    },
+    "kev": {
+      "in_kev": true,
+      "known_ransomware": true,
+      "due_date": "2024-04-05T00:00:00Z",
+      "notes": "Actively exploited in ransomware campaigns targeting healthcare and financial sectors. Patch immediately."
+    },
+    "weaknesses": [
+      {
+        "cwe_id": "CWE-502",
+        "name": "Deserialization of Untrusted Data",
+        "description": "The software deserializes untrusted data without sufficiently verifying that the resulting data will be valid."
+      },
+      {
+        "cwe_id": "CWE-20",
+        "name": "Improper Input Validation",
+        "description": "The product receives input or data, but it does not validate or incorrectly validates that the input has the properties that are required to process the data safely and correctly."
+      }
+    ],
+    "attack_patterns": [
+      {
+        "capec_id": "CAPEC-586",
+        "name": "Object Injection",
+        "description": "An adversary exploits a weakness in input validation by injecting serialized objects in order to alter the behavior of the application."
+      },
+      {
+        "capec_id": "CAPEC-233",
+        "name": "Privilege Escalation",
+        "description": "An adversary exploits a weakness enabling them to elevate their privilege and perform an action that they are not supposed to be authorized to perform."
+      }
+    ],
+    "attack_techniques": [
+      {
+        "technique_id": "T1190",
+        "name": "Exploit Public-Facing Application",
+        "description": "Adversaries may attempt to take advantage of a weakness in an Internet-facing computer or program using software, data, or commands in order to cause unintended or unanticipated behavior.",
+        "tactics": ["initial-access"]
+      },
+      {
+        "technique_id": "T1059",
+        "name": "Command and Scripting Interpreter",
+        "description": "Adversaries may abuse command and script interpreters to execute commands, scripts, or binaries.",
+        "tactics": ["execution"]
+      },
+      {
+        "technique_id": "T1068",
+        "name": "Exploitation for Privilege Escalation",
+        "description": "Adversaries may exploit software vulnerabilities in an attempt to elevate privileges.",
+        "tactics": ["privilege-escalation"]
+      }
+    ],
+    "nist_controls": [
+      {
+        "control_id": "SI-10",
+        "title": "Information Input Validation",
+        "family": "System and Information Integrity",
+        "description": "Check the validity of the following information inputs: [Assignment: organization-defined information inputs to the system]."
+      },
+      {
+        "control_id": "SC-7",
+        "title": "Boundary Protection",
+        "family": "System and Communications Protection",
+        "description": "Monitor and control communications at the external managed interfaces to the system and at key internal managed interfaces within the system."
+      },
+      {
+        "control_id": "CM-7",
+        "title": "Least Functionality",
+        "family": "Configuration Management",
+        "description": "Configure the system to provide only mission essential capabilities."
+      },
+      {
+        "control_id": "SI-4",
+        "title": "System Monitoring",
+        "family": "System and Information Integrity",
+        "description": "Monitor the system to detect attacks and indicators of potential attacks."
+      },
+      {
+        "control_id": "AC-6",
+        "title": "Least Privilege",
+        "family": "Access Control",
+        "description": "Employ the principle of least privilege, allowing only authorized accesses for users which are necessary to accomplish assigned organizational tasks."
+      }
+    ],
+    "regulatory_requirements": [
+      {
+        "framework": "EU_CRA",
+        "requirement_id": "ANNEX_I_1_a",
+        "description": "Critical vulnerability with active exploitation in KEV catalog - immediate remediation required",
+        "severity": "CRITICAL"
+      },
+      {
+        "framework": "FDA_524B",
+        "requirement_id": "SECTION_524B_2_a",
+        "description": "Known exploited vulnerability in medical device software - must be reported within 72 hours",
+        "severity": "CRITICAL"
+      },
+      {
+        "framework": "IEC_62304",
+        "requirement_id": "7.1.2",
+        "description": "Security vulnerability requiring immediate risk analysis and mitigation for medical device software",
+        "severity": "CRITICAL"
+      }
+    ],
+    "d3fend_defenses": [
+      {
+        "technique_id": "D3-IAA",
+        "name": "Input Validation Analysis",
+        "description": "Analyzing input to ensure it conforms to expected format and range before processing."
+      },
+      {
+        "technique_id": "D3-DNSDL",
+        "name": "DNS Denylisting",
+        "description": "Blocking DNS requests to known malicious domains used in exploitation campaigns."
+      },
+      {
+        "technique_id": "D3-NTA",
+        "name": "Network Traffic Analysis",
+        "description": "Analyzing network traffic to detect exploitation attempts and command-and-control communications."
+      },
+      {
+        "technique_id": "D3-PLA",
+        "name": "Process Lineage Analysis",
+        "description": "Analyzing process execution chains to detect suspicious spawning patterns indicative of exploitation."
+      }
+    ],
+    "threat_groups": [
+      {
+        "group_id": "G0034",
+        "name": "Sandworm Team",
+        "description": "Russian state-sponsored group known for destructive attacks"
+      }
+    ],
+    "exploits": [
+      {
+        "exploit_id": "EDB-51234",
+        "name": "Web Framework RCE PoC",
+        "type": "exploit",
+        "platform": "linux"
+      },
+      {
+        "exploit_id": "MSF-2024-001",
+        "name": "Metasploit Module - Web Framework Deserialization RCE",
+        "type": "metasploit",
+        "platform": "multi"
+      }
+    ],
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2024-27351",
+      "https://github.com/advisories/GHSA-xxxx-yyyy-zzzz",
+      "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+      "https://www.exploit-db.com/exploits/51234"
+    ]
+  },
+  "metadata": {
+    "cache_hit": false,
+    "execution_time_ms": 234.56,
+    "api_version": "v1"
+  }
+}

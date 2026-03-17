@@ -1,0 +1,83 @@
+{
+  "cve_id": "CVE-2024-21413",
+  "description": "Microsoft Outlook Remote Code Execution Vulnerability - allows remote attackers to execute arbitrary code via specially crafted emails",
+  "cvss_score": 9.8,
+  "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+  "cvss_severity": "CRITICAL",
+  "epss_score": 0.89,
+  "in_kev": true,
+  "exploit_count": 3,
+  "published_date": "2024-02-13T00:00:00Z",
+  "last_modified": "2024-02-20T00:00:00Z",
+  "risk_score": 0.95,
+  "priority": "CRITICAL",
+  "risk_factors": {
+    "high_epss": true,
+    "actively_exploited": true,
+    "high_cvss": true,
+    "public_exploits": true,
+    "threat_groups_using": true
+  },
+  "cwe_list": ["CWE-416"],
+  "attack_techniques": ["T1190", "T1203"],
+  "threat_groups": ["APT28", "APT29"],
+  "attack_path": {
+    "path": [
+      {
+        "stage": "vulnerability",
+        "node": "CVE-2024-21413",
+        "name": "Microsoft Outlook RCE",
+        "description": "Remote code execution vulnerability in Microsoft Outlook"
+      },
+      {
+        "stage": "weakness",
+        "node": "CWE-416",
+        "name": "Use After Free",
+        "description": "Memory corruption vulnerability allowing arbitrary code execution"
+      },
+      {
+        "stage": "attack_pattern",
+        "node": "CAPEC-10",
+        "name": "Buffer Overflow via Environment Variables",
+        "description": "Memory corruption attack pattern"
+      },
+      {
+        "stage": "technique",
+        "node": "T1190",
+        "name": "Exploit Public-Facing Application",
+        "description": "Initial access via exploitation of public-facing applications"
+      },
+      {
+        "stage": "threat_groups",
+        "nodes": ["APT28", "APT29"],
+        "name": "Active Threat Groups",
+        "description": "Known threat groups actively exploiting this vulnerability"
+      }
+    ],
+    "defenses": [
+      {
+        "d3fend_id": "D3-IAM",
+        "name": "Inbound Application Traffic Monitoring",
+        "description": "Monitor inbound application traffic for anomalous patterns",
+        "coverage": ["T1190"]
+      },
+      {
+        "d3fend_id": "D3-PM",
+        "name": "Process Monitoring",
+        "description": "Monitor process execution for suspicious activity",
+        "coverage": ["T1203"]
+      },
+      {
+        "d3fend_id": "D3-MPA",
+        "name": "Memory Protection Analysis",
+        "description": "Analyze memory protection mechanisms",
+        "coverage": ["CWE-416"]
+      }
+    ]
+  },
+  "compliance": {
+    "nist_controls": ["SI-2", "RA-5", "CM-8", "SA-11"],
+    "frameworks": ["FDA_524B", "NIST_800_53", "ISO_27001", "IEC_62304"]
+  },
+  "enriched_at": "2024-03-17T10:00:00.000Z"
+}

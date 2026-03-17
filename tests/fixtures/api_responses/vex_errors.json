@@ -1,0 +1,32 @@
+{
+  "vex_not_found": {
+    "detail": "VEX document not found: vex_nonexistent_123"
+  },
+  "vex_invalid_cve_format": {
+    "detail": "Invalid CVE ID format. Must match pattern: CVE-YYYY-NNNN+"
+  },
+  "vex_empty_vulnerabilities": {
+    "detail": "Vulnerabilities list cannot be empty. At least one vulnerability assessment required."
+  },
+  "vex_cve_not_found_in_document": {
+    "detail": "CVE not found in VEX document: CVE-9999-9999"
+  },
+  "vex_invalid_state": {
+    "detail": "Invalid VEX state. Must be one of: exploitable, in_triage, not_affected, resolved, false_positive"
+  },
+  "vex_invalid_justification": {
+    "detail": "Invalid justification. Must be one of: code_not_present, code_not_reachable, requires_configuration, requires_dependency, requires_environment, protected_by_compiler, protected_at_runtime, protected_at_perimeter, protected_by_mitigating_control"
+  },
+  "vex_justification_without_not_affected": {
+    "detail": "Justification can only be provided when state is 'not_affected'"
+  },
+  "vex_unauthorized": {
+    "detail": "Authentication required. Please provide a valid X-API-Key header."
+  },
+  "vex_forbidden": {
+    "detail": "You do not have permission to access this VEX document."
+  },
+  "vex_internal_error": {
+    "detail": "Internal server error during VEX creation"
+  }
+}

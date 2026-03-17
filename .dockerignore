@@ -1,0 +1,77 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+env/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Data
+*.csv
+*.json
+*.xml
+data/
+
+# Tickets and planning
+tickets/
+references/
+
+# Test files
+test_*.py
+*_test.py
+tests/
+
+# Development
+.env.local
+.env.development
+monitoring/
+scripts/test_*.py
+scripts/debug_*.py
+scripts/check_*.py
+scripts/cleanup_*.py
+scripts/enhance_*.py
+scripts/populate_*.py
+scripts/visualize_*.py
+scripts/migrate_*.py
+scripts/backfill_*.py
+scripts/insert_*.py
+scripts/demo_*.py
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+coverage.xml
+api_server.log
+
+# Docker
+docker-compose*.yml
+Dockerfile*
+!Dockerfile

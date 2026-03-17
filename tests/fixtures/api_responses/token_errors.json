@@ -1,0 +1,29 @@
+{
+  "token_not_found": {
+    "detail": "Token token_abc123 not found"
+  },
+  "forbidden_regular_user": {
+    "detail": "Only organization owners and admins can create API tokens"
+  },
+  "forbidden_admin_delete": {
+    "detail": "Only organization owners can permanently delete API tokens"
+  },
+  "invalid_scopes": {
+    "detail": "Invalid scope: invalid:scope. Allowed: scan:write, scan:read, reference:read, vex:generate, admin:all"
+  },
+  "token_limit_exceeded": {
+    "detail": "Organization has reached maximum token limit (100 active tokens)"
+  },
+  "token_already_revoked": {
+    "detail": "Token is already revoked"
+  },
+  "invalid_grace_period": {
+    "detail": "Grace period must be between 1 and 168 hours (7 days)"
+  },
+  "unauthorized": {
+    "detail": "Invalid or missing authentication credentials"
+  },
+  "validation_error": {
+    "detail": "Request validation failed. Check your request body."
+  }
+}

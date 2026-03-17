@@ -1,0 +1,71 @@
+{
+  "tokens": [
+    {
+      "id": "token_abc123",
+      "organization_id": "org_xyz789",
+      "created_by_user_id": "users/user123",
+      "name": "CI/CD Pipeline Token",
+      "description": "GitHub Actions for main repository",
+      "token_prefix": "complira_tk_abc123",
+      "scopes": ["scan:write", "reference:read"],
+      "rate_limit": 1000,
+      "created_at": "2024-01-15T10:00:00Z",
+      "expires_at": "2025-01-15T10:00:00Z",
+      "last_used": "2024-01-15T14:28:00Z",
+      "revoked": false,
+      "revoked_at": null,
+      "revoked_by_user_id": null
+    },
+    {
+      "id": "token_def456",
+      "organization_id": "org_xyz789",
+      "created_by_user_id": "users/user123",
+      "name": "Development Token",
+      "description": "Local development and testing",
+      "token_prefix": "complira_tk_test_def456",
+      "scopes": ["scan:read"],
+      "rate_limit": 100,
+      "created_at": "2024-01-10T10:00:00Z",
+      "expires_at": "2024-04-10T10:00:00Z",
+      "last_used": null,
+      "revoked": false,
+      "revoked_at": null,
+      "revoked_by_user_id": null
+    },
+    {
+      "id": "token_ghi789",
+      "organization_id": "org_xyz789",
+      "created_by_user_id": "users/admin456",
+      "name": "VEX Generation Service",
+      "description": "Automated VEX document generation",
+      "token_prefix": "complira_tk_ghi789",
+      "scopes": ["scan:read", "reference:read", "vex:generate"],
+      "rate_limit": 500,
+      "created_at": "2024-01-05T10:00:00Z",
+      "expires_at": "2024-07-05T10:00:00Z",
+      "last_used": "2024-01-14T22:15:00Z",
+      "revoked": false,
+      "revoked_at": null,
+      "revoked_by_user_id": null
+    },
+    {
+      "id": "token_old123",
+      "organization_id": "org_xyz789",
+      "created_by_user_id": "users/olduser",
+      "name": "Deprecated Integration Token",
+      "description": "Legacy integration (revoked for security)",
+      "token_prefix": "complira_tk_old123",
+      "scopes": ["admin:all"],
+      "rate_limit": 10000,
+      "created_at": "2023-06-01T10:00:00Z",
+      "expires_at": "2024-06-01T10:00:00Z",
+      "last_used": "2023-12-20T08:00:00Z",
+      "revoked": true,
+      "revoked_at": "2024-01-05T09:30:00Z",
+      "revoked_by_user_id": "users/admin456"
+    }
+  ],
+  "total": 4,
+  "page": 1,
+  "page_size": 20
+}
