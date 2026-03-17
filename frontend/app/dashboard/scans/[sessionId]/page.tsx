@@ -64,9 +64,11 @@ export default function ScanDetailsPage() {
   const findings = findingsData?.data || [];
 
   // Generate VEX mutation
+  const [vexError, setVexError] = useState<string | null>(null);
   const vexMutation = useMutation({
     mutationFn: () => generateVEX(sessionId),
     onSuccess: (data) => {
+      setVexError(null);
       // Download VEX document
       const vexJson = JSON.stringify(data.data.vex_document, null, 2);
       const blob = new Blob([vexJson], { type: "application/json" });
@@ -78,6 +80,14 @@ export default function ScanDetailsPage() {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
+    },
+    onError: (error: any) => {
+      const msg = error?.data?.detail || error?.message || "VEX generation failed";
+      if (msg.includes("not found") || msg.includes("customer") || msg.includes("Anthropic")) {
+        setVexError("VEX auto-generation requires a provisioned tenant database and LLM API key. Use manual VEX creation instead.");
+      } else {
+        setVexError(msg);
+      }
     },
   });
 
@@ -237,6 +247,36 @@ export default function ScanDetailsPage() {
           </div>
         </div>
       </div>
+
+      {/* VEX/CPE Error Messages */}
+      {vexError && (
+        <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-destructive">
+              <AlertCircle className="h-5 w-5" />
+              <p className="font-medium text-sm">{vexError}</p>
+            </div>
+            <Link
+              href="/dashboard/vex/new"
+              className="inline-flex items-center gap-1 px-3 py-1.5 text-xs bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+            >
+              <Shield className="h-3 w-3" />
+              Create VEX Manually
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {cpeMutation.isError && (
+        <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4">
+          <div className="flex items-center gap-2 text-destructive">
+            <AlertCircle className="h-5 w-5" />
+            <p className="font-medium text-sm">
+              CPE matching failed: {(cpeMutation.error as any)?.message || "Unknown error"}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Scan Info Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
