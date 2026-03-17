@@ -32,7 +32,7 @@ class TestGraphEnrichmentService:
         # Get a few CVEs that we know exist
         query = """
         FOR v IN vulnerabilities
-        LIMIT 5
+        LIMIT 15
         RETURN v._key
         """
         cursor = db.aql.execute(query)
@@ -180,13 +180,21 @@ class TestGraphEnrichmentService:
         print(f"     In KEV: {enriched.in_kev}")
 
     @pytest.mark.asyncio
-    async def test_cwe_relationships(self, enrichment_service, test_cves):
+    async def test_cwe_relationships(self, enrichment_service, db):
         """Test CWE relationship traversal."""
-        if not test_cves:
-            pytest.skip("No CVEs in database")
+        # Find CVEs that have CWE edges directly
+        query = """
+        FOR e IN has_weakness
+            LIMIT 5
+            RETURN PARSE_IDENTIFIER(e._from).key
+        """
+        cursor = db.aql.execute(query)
+        cves_with_cwe = list(cursor)
 
-        # Find a CVE with CWE relationships
-        for cve_id in test_cves:
+        if not cves_with_cwe:
+            pytest.skip("No CVEs with CWE relationships found in has_weakness edges")
+
+        for cve_id in cves_with_cwe:
             result = await enrichment_service.enrich_cves(
                 cve_ids=[cve_id],
                 include_attack_paths=False,
@@ -195,12 +203,12 @@ class TestGraphEnrichmentService:
 
             if result["total"] > 0 and len(result["enriched"][0].cwe_list) > 0:
                 enriched = result["enriched"][0]
-                print(f"\n🔍 Testing CWE relationships for {cve_id}")
+                print(f"\n  Testing CWE relationships for {cve_id}")
                 print(f"  CWEs found: {enriched.cwe_list}")
                 assert len(enriched.cwe_list) > 0
                 return
 
-        pytest.skip("No CVEs with CWE relationships found")
+        pytest.skip("No CVEs with enrichable CWE relationships found")
 
     @pytest.mark.asyncio
     async def test_performance(self, enrichment_service, test_cves):

@@ -10,6 +10,17 @@ import time
 from complira_graph.db import get_db, init_schema
 
 
+def _connect_db():
+    """Attempt DB connection, skip test if unavailable."""
+    try:
+        db = get_db()
+        # Verify connection is actually live
+        db.version()
+        return db
+    except Exception as e:
+        pytest.skip(f"ArangoDB not available: {e}")
+
+
 @pytest.mark.performance
 @pytest.mark.slow
 @pytest.mark.requires_db
@@ -19,7 +30,7 @@ class TestBlastRadiusPerformance:
     @pytest.fixture(scope='class', autouse=True)
     def setup_test_data(self):
         """Setup test data for performance testing."""
-        db = get_db()
+        db = _connect_db()
         init_schema(db)
 
         # Insert test CVE
@@ -158,7 +169,7 @@ class TestAggregationPerformance:
 
     def test_collection_count_performance(self):
         """Test that collection counts can be retrieved quickly."""
-        db = get_db()
+        db = _connect_db()
 
         start_time = time.time()
 
@@ -181,7 +192,7 @@ class TestAggregationPerformance:
 
     def test_cvss_aggregation_performance(self):
         """Test CVSS score aggregation performance."""
-        db = get_db()
+        db = _connect_db()
 
         query = """
         FOR v IN vulnerabilities

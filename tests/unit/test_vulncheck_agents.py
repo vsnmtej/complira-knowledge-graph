@@ -166,7 +166,7 @@ def test_vulncheck_kev_agent_transform_data(
     kev_doc = transformed[0]
     assert kev_doc["type"] == "document"
     assert kev_doc["collection"] == "vulncheck_kev_entries"
-    assert kev_doc["data"]["_key"] == "cve_2024_1234"  # Normalized format (lowercase, underscores)
+    assert kev_doc["data"]["_key"] == "CVE_2024_1234"  # Normalized format (uppercase, underscores)
     assert kev_doc["data"]["cve_id"] == "CVE-2024-1234"  # Original format (hyphens)
     assert kev_doc["data"]["vendor_project"] == "Test Vendor"
 
@@ -213,7 +213,7 @@ def test_vulncheck_nvd2_agent_transform_single_cve(
 
     exploit_doc = agent.transform_data(cve_entry)
 
-    assert exploit_doc["_key"] == "cve_2024_5678"  # Normalized format (lowercase, underscores)
+    assert exploit_doc["_key"] == "CVE_2024_5678"  # Normalized format (uppercase, underscores)
     assert exploit_doc["cve_id"] == "CVE-2024-5678"  # Original format (hyphens)
     assert exploit_doc["reported_exploited"] is True
     assert exploit_doc["exploit_maturity"] == "weaponized"
@@ -290,7 +290,7 @@ def test_vulncheck_ransomware_agent_transform_data(
     cve_edge = transformed[1]
     assert cve_edge["type"] == "edge"
     assert cve_edge["collection"] == "exploited_by_ransomware"
-    assert "cve_2024_1234" in cve_edge["data"]["_from"]  # Normalized format (lowercase, underscores)
+    assert "CVE_2024_1234" in cve_edge["data"]["_from"]  # Normalized format (uppercase, underscores)
 
     # Check TTP edge
     ttp_edges = [t for t in transformed if t["collection"] == "ransomware_uses_technique"]

@@ -17,48 +17,48 @@ class TestCVEIDNormalization:
     """Test CVE ID normalization."""
 
     def test_normalize_standard_cve(self):
-        assert normalize_cve_id('CVE-2024-1234') == 'cve_2024_1234'
+        assert normalize_cve_id('CVE-2024-1234') == 'CVE_2024_1234'
 
     def test_normalize_lowercase_cve(self):
-        assert normalize_cve_id('cve-2024-1234') == 'cve_2024_1234'
+        assert normalize_cve_id('cve-2024-1234') == 'CVE_2024_1234'
 
     def test_normalize_uppercase_cve(self):
-        assert normalize_cve_id('CVE-2024-1234') == 'cve_2024_1234'
+        assert normalize_cve_id('CVE-2024-1234') == 'CVE_2024_1234'
 
     def test_normalize_cve_with_leading_zeros(self):
-        assert normalize_cve_id('CVE-2024-0001') == 'cve_2024_0001'
+        assert normalize_cve_id('CVE-2024-0001') == 'CVE_2024_0001'
 
     def test_normalize_cve_long_id(self):
-        assert normalize_cve_id('CVE-2024-123456') == 'cve_2024_123456'
+        assert normalize_cve_id('CVE-2024-123456') == 'CVE_2024_123456'
 
 
 class TestCWEIDNormalization:
     """Test CWE ID normalization."""
 
     def test_normalize_standard_cwe(self):
-        assert normalize_cwe_id('CWE-79') == 'cwe_79'
+        assert normalize_cwe_id('CWE-79') == 'CWE_79'
 
     def test_normalize_lowercase_cwe(self):
-        assert normalize_cwe_id('cwe-79') == 'cwe_79'
+        assert normalize_cwe_id('cwe-79') == 'CWE_79'
 
     def test_normalize_cwe_with_leading_zeros(self):
-        assert normalize_cwe_id('CWE-001') == 'cwe_001'
+        assert normalize_cwe_id('CWE-001') == 'CWE_001'
 
     def test_normalize_cwe_long_id(self):
-        assert normalize_cwe_id('CWE-1234') == 'cwe_1234'
+        assert normalize_cwe_id('CWE-1234') == 'CWE_1234'
 
 
 class TestCAPECIDNormalization:
     """Test CAPEC ID normalization."""
 
     def test_normalize_standard_capec(self):
-        assert normalize_capec_id('CAPEC-66') == 'capec_66'
+        assert normalize_capec_id('CAPEC-66') == 'CAPEC_66'
 
     def test_normalize_lowercase_capec(self):
-        assert normalize_capec_id('capec-66') == 'capec_66'
+        assert normalize_capec_id('capec-66') == 'CAPEC_66'
 
     def test_normalize_capec_with_leading_zeros(self):
-        assert normalize_capec_id('CAPEC-001') == 'capec_001'
+        assert normalize_capec_id('CAPEC-001') == 'CAPEC_001'
 
 
 class TestATTACKIDNormalization:

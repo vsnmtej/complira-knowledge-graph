@@ -325,6 +325,8 @@ class TestAC005_APIContracts:
         expected_dict = {
             "_key": "session_test",
             "customer_id": "customer_test",
+            "project_id": None,
+            "repository_id": None,
             "tool_name": "Semgrep",
             "tool_version": "1.0.0",
             "scan_timestamp": "2024-01-15T10:30:00Z",

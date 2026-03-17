@@ -177,7 +177,7 @@ class TestAC004_Authentication:
 
         # Verify exception details
         assert exc_info.value.status_code == 401
-        assert "Missing API key" in exc_info.value.detail
+        assert "Authentication required" in exc_info.value.detail
 
     @pytest.mark.asyncio
     async def test_get_current_customer_raises_401_for_invalid_key(self, mock_db):

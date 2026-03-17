@@ -481,28 +481,81 @@ class TestRegulatoryIngestionIntegration:
         """
         Test full FDA 524B ingestion with real database.
 
-        Requires:
-        - ArangoDB running on localhost:8529
-        - complira_graph database exists
-
         Validates:
-        - 12 requirements inserted
+        - Requirements inserted
         - All requirements queryable
         - No errors
         """
-        pytest.skip("Integration test: Requires real database")
+        try:
+            from complira_graph.db import get_db
+            db = get_db()
+            db.version()  # Verify connectivity
+        except Exception as e:
+            pytest.skip(f"ArangoDB not available: {e}")
+
+        from complira_graph.agents.yaml_regulatory import YAMLRegulatoryAgent
+        from pathlib import Path
+
+        yaml_path = Path(__file__).parent.parent / "src" / "complira_graph" / "agents"
+        data_path = Path(__file__).resolve().parent.parent.parent / "data" / "regulations" / "fda_524b.yaml"
+
+        if not data_path.exists():
+            pytest.skip(f"FDA YAML not found at {data_path}")
+
+        agent = YAMLRegulatoryAgent(db, "FDA_524B")
+        result = agent.run()
+
+        assert result["status"] == "success"
+        assert result["total"] > 0
+
+        # Verify requirements are queryable
+        query = """
+        FOR r IN regulatory_requirements
+            FILTER r.framework == "FDA_524B"
+            RETURN r
+        """
+        if db.has_collection("regulatory_requirements"):
+            cursor = db.aql.execute(query)
+            requirements = list(cursor)
+            assert len(requirements) > 0, "FDA requirements should be queryable"
 
     def test_full_cra_ingestion_with_db(self):
         """
         Test full CRA ingestion with real database.
 
-        Requires:
-        - ArangoDB running on localhost:8529
-        - complira_graph database exists
-
         Validates:
-        - 8 requirements inserted
+        - Requirements inserted
         - All requirements queryable
         - No errors
         """
-        pytest.skip("Integration test: Requires real database")
+        try:
+            from complira_graph.db import get_db
+            db = get_db()
+            db.version()  # Verify connectivity
+        except Exception as e:
+            pytest.skip(f"ArangoDB not available: {e}")
+
+        from complira_graph.agents.cra import CRAAgent
+        from pathlib import Path
+
+        data_path = Path(__file__).resolve().parent.parent.parent / "data" / "regulations" / "cra.yaml"
+
+        if not data_path.exists():
+            pytest.skip(f"CRA YAML not found at {data_path}")
+
+        agent = CRAAgent(db)
+        result = agent.run()
+
+        assert result["status"] == "success"
+        assert result["total"] > 0
+
+        # Verify requirements are queryable
+        query = """
+        FOR r IN regulatory_requirements
+            FILTER r.framework == "CRA"
+            RETURN r
+        """
+        if db.has_collection("regulatory_requirements"):
+            cursor = db.aql.execute(query)
+            requirements = list(cursor)
+            assert len(requirements) > 0, "CRA requirements should be queryable"

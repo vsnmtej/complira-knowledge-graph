@@ -21,6 +21,7 @@ from api.models.responses.enrichment import (
 )
 from api.services.enrichment_service import EnrichmentService
 from api.core.cache import cache
+from api.core.security import Customer, get_current_customer
 
 logger = structlog.get_logger()
 
@@ -41,7 +42,7 @@ router = APIRouter()
     - **Compliance mapping**: NIST, FDA, ISO frameworks
     - **All authoritative data**: No LLM guessing
 
-    **Authentication:** None required (uses reference database)
+    **Authentication:** Required (X-API-Key header)
 
     **Rate Limits:** 60 requests/minute
 
@@ -96,7 +97,10 @@ router = APIRouter()
     """,
     tags=["enrichment"],
 )
-async def enrich_cves(request: EnrichmentRequest) -> EnrichmentResponse:
+async def enrich_cves(
+    request: EnrichmentRequest,
+    customer: Customer = Depends(get_current_customer)
+) -> EnrichmentResponse:
     """
     Enrich CVEs with graph-based intelligence.
 
@@ -192,7 +196,8 @@ async def enrich_cves(request: EnrichmentRequest) -> EnrichmentResponse:
 async def enrich_single_cve(
     cve_id: str,
     include_attack_path: bool = Query(False, description="Include attack path traversal"),
-    include_compliance: bool = Query(False, description="Include compliance mappings")
+    include_compliance: bool = Query(False, description="Include compliance mappings"),
+    customer: Customer = Depends(get_current_customer)
 ) -> CVEEnrichment:
     """
     Enrich a single CVE.

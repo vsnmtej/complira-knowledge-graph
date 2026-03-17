@@ -19,8 +19,12 @@ from api.v1.endpoints import repositories
 # Phase 1: LLM-powered enrichment (enabled)
 from api.v1.endpoints import enrichment
 
-# Phase 2+: Temporarily disabled until models are implemented
-# from api.v1.endpoints import enrich
+# Phase 5: Authentication (Web UI)
+from api.v1.endpoints import auth
+from api.v1.endpoints import tokens
+
+# Phase 3A-B: Regulatory trigger enrichment
+from api.v1.endpoints import enrich
 
 # Future phases:
 # from api.v1.endpoints import blast_radius, epss_velocity, portfolio_risk
@@ -51,11 +55,17 @@ api_router.include_router(repositories.router, prefix="/repositories", tags=["re
 # Phase 1: LLM-powered enrichment (enabled)
 api_router.include_router(enrichment.router, prefix="", tags=["enrichment"])
 
+# Phase 5: Authentication (Web UI) - No auth required on auth endpoints
+api_router.include_router(auth.router)
+
+# Phase 5: API Token Management (auth required)
+api_router.include_router(tokens.router, prefix="", tags=["tokens"])
+
 # Phase 2+: Enrichment Pipeline (temporarily disabled)
 # (scan session-based enrichment will be re-added in Phase 2)
 
-# Phase 3A-B: Regulatory Trigger Service (temporarily disabled)
-# api_router.include_router(enrich.router, prefix="", tags=["regulatory-triggers"])
+# Phase 3A-B: Regulatory Trigger Service
+api_router.include_router(enrich.router, prefix="", tags=["regulatory-triggers"])
 
 # Future endpoints (Phase 3+):
 # api_router.include_router(blast_radius.router, prefix="/blast-radius", tags=["blast-radius"])

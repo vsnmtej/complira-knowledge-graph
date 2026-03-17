@@ -80,13 +80,13 @@ def normalize_capec_id(capec_id: str) -> str:
         capec_id: CAPEC ID (e.g., "CAPEC-66")
 
     Returns:
-        str: Normalized key (e.g., "capec_66")
+        str: Normalized key (e.g., "CAPEC_66")
 
     Examples:
         >>> normalize_capec_id("CAPEC-66")
-        'capec_66'
+        'CAPEC_66'
     """
-    return capec_id.replace("-", "_").lower()
+    return capec_id.replace("-", "_").upper()
 
 
 def normalize_ghsa_id(ghsa_id: str) -> str:

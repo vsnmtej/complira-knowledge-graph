@@ -11,6 +11,7 @@ import uuid
 import structlog
 
 from api.services.base import BaseGraphService, IDatabase, ICacheService
+from api.repositories.vex import VEXRepository
 from api.models.requests.vex import (
     VEXDocumentRequest,
     VEXUpdateRequest,
@@ -58,6 +59,7 @@ class VEXService(BaseGraphService):
         super().__init__(db=customer_db, cache=cache)
         self.customer_db = customer_db
         self.reference_db = reference_db
+        self.vex_repo = VEXRepository(customer_db)
         self.logger = structlog.get_logger(service="VEXService")
 
     # ========================================================================
@@ -126,8 +128,7 @@ class VEXService(BaseGraphService):
         }
 
         # Store in customer database
-        collection = self.customer_db.collection("vex_documents")
-        collection.insert(vex_document)
+        self.vex_repo.insert_vex(vex_document)
 
         self.logger.info(
             "VEX document created",
@@ -331,11 +332,7 @@ class VEXService(BaseGraphService):
             "updated_at": now,
         }
 
-        collection = self.customer_db.collection("vex_documents")
-        collection.update(
-            {"_key": vex_id, "customer_id": customer_id},
-            update_doc,
-        )
+        self.vex_repo.update_vex(vex_id, customer_id, update_doc)
 
         self.logger.info(
             "VEX document updated",
@@ -485,8 +482,7 @@ class VEXService(BaseGraphService):
             raise ValueError(f"VEX document not found: {vex_id}")
 
         # Delete
-        collection = self.customer_db.collection("vex_documents")
-        collection.delete({"_key": vex_id, "customer_id": customer_id})
+        self.vex_repo.delete_vex(vex_id, customer_id)
 
         self.logger.info(
             "VEX document deleted",
