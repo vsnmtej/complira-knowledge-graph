@@ -128,7 +128,7 @@ export async function generateVEX(sessionId: string): Promise<{
     generated_at: string;
   };
 }> {
-  return apiRequest(` /v1/scan/${sessionId}/vex`, {
+  return apiRequest(`/v1/scan/${sessionId}/vex`, {
     method: "POST",
   });
 }

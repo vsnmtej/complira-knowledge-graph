@@ -37,7 +37,7 @@ export default function RotateTokenDialog({
       onSuccess(
         response.new_token,
         response.token_prefix,
-        response.expires_at
+        response.new_token_expires_at
       );
     } catch (err: any) {
       setError(err.message || "Failed to rotate token");
