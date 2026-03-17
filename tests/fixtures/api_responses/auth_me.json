@@ -1,0 +1,12 @@
+{
+  "id": "users/abc123def456ghi789",
+  "email": "john.doe@example.com",
+  "name": "John Doe",
+  "email_verified": true,
+  "organization_id": "org_xyz789jkl012mno",
+  "organization_name": "Acme Corp",
+  "role": "owner",
+  "tier": "professional",
+  "frameworks": ["FDA_524B", "IEC_62304", "ISO_13485"],
+  "created_at": "2024-01-15T10:30:00Z"
+}

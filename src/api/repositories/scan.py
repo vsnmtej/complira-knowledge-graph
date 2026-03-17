@@ -193,7 +193,7 @@ class ScanSessionRepository(BaseRepository):
             RETURN session
         """
 
-        cursor = self.db.aql_execute(query, bind_vars=bind_vars)
+        cursor = self.db.aql.execute(query, bind_vars=bind_vars)
 
         # Convert each dict to validated model
         return [ScanSession(**session) for session in cursor]
@@ -341,7 +341,7 @@ class ScanFindingRepository(BaseRepository):
             RETURN finding
         """
 
-        cursor = self.db.aql_execute(
+        cursor = self.db.aql.execute(
             query,
             bind_vars={
                 "customer_id": customer_id,
@@ -351,8 +351,8 @@ class ScanFindingRepository(BaseRepository):
             }
         )
 
-        # Convert each dict to validated model
-        return [ScanFinding(**finding) for finding in cursor]
+        # Convert each dict to validated model, then back to dict for API consumption
+        return [ScanFinding(**finding).model_dump(by_alias=True) for finding in cursor]
 
     def count_session_findings(
         self,
@@ -377,7 +377,7 @@ class ScanFindingRepository(BaseRepository):
             RETURN count
         """
 
-        cursor = self.db.aql_execute(
+        cursor = self.db.aql.execute(
             query,
             bind_vars={
                 "customer_id": customer_id,

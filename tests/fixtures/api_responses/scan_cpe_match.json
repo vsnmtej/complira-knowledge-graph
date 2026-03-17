@@ -1,0 +1,13 @@
+{
+  "success": true,
+  "data": {
+    "scan_session_id": "19051940",
+    "components_processed": 59,
+    "cpe_mappings_created": 52,
+    "completed_at": "2026-03-17T11:30:00Z"
+  },
+  "metadata": {
+    "cache_hit": false,
+    "execution_time_ms": 45678.90
+  }
+}

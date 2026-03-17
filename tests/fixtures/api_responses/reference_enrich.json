@@ -1,0 +1,235 @@
+{
+  "success": true,
+  "data": [
+    {
+      "cve_id": "CVE-2024-27351",
+      "description": "Critical remote code execution vulnerability in web framework",
+      "cvss_score": 9.8,
+      "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+      "severity": "CRITICAL",
+      "published_date": "2024-03-15T10:00:00Z",
+      "last_modified_date": "2024-03-16T14:30:00Z",
+      "epss": {
+        "score": 0.95432,
+        "percentile": 0.99234,
+        "date": "2024-03-17"
+      },
+      "kev": {
+        "in_kev": true,
+        "known_ransomware": true,
+        "due_date": "2024-04-05T00:00:00Z",
+        "notes": "Actively exploited in ransomware campaigns"
+      },
+      "weaknesses": [
+        {
+          "cwe_id": "CWE-502",
+          "name": "Deserialization of Untrusted Data",
+          "description": "The software deserializes untrusted data"
+        }
+      ],
+      "attack_patterns": [
+        {
+          "capec_id": "CAPEC-586",
+          "name": "Object Injection",
+          "description": "Exploiting unsafe deserialization"
+        }
+      ],
+      "attack_techniques": [
+        {
+          "technique_id": "T1190",
+          "name": "Exploit Public-Facing Application",
+          "description": "Adversaries exploit internet-facing systems",
+          "tactics": ["initial-access"]
+        }
+      ],
+      "nist_controls": [
+        {
+          "control_id": "SI-10",
+          "title": "Information Input Validation",
+          "family": "System and Information Integrity",
+          "description": "Check validity of information inputs"
+        },
+        {
+          "control_id": "SC-7",
+          "title": "Boundary Protection",
+          "family": "System and Communications Protection",
+          "description": "Monitor and control communications at boundaries"
+        }
+      ],
+      "regulatory_requirements": [
+        {
+          "framework": "EU_CRA",
+          "requirement_id": "ANNEX_I_1_a",
+          "description": "Critical vulnerability with active exploitation",
+          "severity": "CRITICAL"
+        }
+      ],
+      "d3fend_defenses": [
+        {
+          "technique_id": "D3-IAA",
+          "name": "Input Validation Analysis",
+          "description": "Analyze input for malicious content"
+        }
+      ],
+      "threat_groups": [],
+      "exploits": [
+        {
+          "exploit_id": "EDB-51234",
+          "name": "Web Framework RCE PoC",
+          "type": "exploit",
+          "platform": "linux"
+        }
+      ],
+      "references": [
+        "https://nvd.nist.gov/vuln/detail/CVE-2024-27351"
+      ]
+    },
+    {
+      "cve_id": "CVE-2024-1234",
+      "description": "Cross-site scripting (XSS) vulnerability in admin panel",
+      "cvss_score": 6.1,
+      "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N",
+      "severity": "MEDIUM",
+      "published_date": "2024-01-10T10:00:00Z",
+      "last_modified_date": "2024-01-11T14:30:00Z",
+      "epss": {
+        "score": 0.00234,
+        "percentile": 0.45123,
+        "date": "2024-03-17"
+      },
+      "kev": {
+        "in_kev": false
+      },
+      "weaknesses": [
+        {
+          "cwe_id": "CWE-79",
+          "name": "Cross-site Scripting (XSS)",
+          "description": "Improper neutralization of input during web page generation"
+        }
+      ],
+      "attack_patterns": [
+        {
+          "capec_id": "CAPEC-18",
+          "name": "XSS Targeting Non-Script Elements",
+          "description": "Embedding malicious scripts in non-script elements"
+        }
+      ],
+      "attack_techniques": [
+        {
+          "technique_id": "T1566",
+          "name": "Phishing",
+          "description": "Adversaries send malicious links to gain access",
+          "tactics": ["initial-access"]
+        }
+      ],
+      "nist_controls": [
+        {
+          "control_id": "SI-10",
+          "title": "Information Input Validation",
+          "family": "System and Information Integrity",
+          "description": "Check validity of information inputs"
+        },
+        {
+          "control_id": "SI-15",
+          "title": "Information Output Filtering",
+          "family": "System and Information Integrity",
+          "description": "Validate and sanitize information output"
+        }
+      ],
+      "regulatory_requirements": [],
+      "d3fend_defenses": [
+        {
+          "technique_id": "D3-OTF",
+          "name": "Outbound Traffic Filtering",
+          "description": "Filter outbound traffic to prevent data exfiltration"
+        }
+      ],
+      "threat_groups": [],
+      "exploits": [],
+      "references": [
+        "https://nvd.nist.gov/vuln/detail/CVE-2024-1234"
+      ]
+    },
+    {
+      "cve_id": "CVE-2023-45678",
+      "description": "SQL injection vulnerability in search functionality",
+      "cvss_score": 8.6,
+      "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:L",
+      "severity": "HIGH",
+      "published_date": "2023-11-20T08:00:00Z",
+      "last_modified_date": "2023-11-21T10:15:00Z",
+      "epss": {
+        "score": 0.12345,
+        "percentile": 0.78901,
+        "date": "2024-03-17"
+      },
+      "kev": {
+        "in_kev": false
+      },
+      "weaknesses": [
+        {
+          "cwe_id": "CWE-89",
+          "name": "SQL Injection",
+          "description": "Improper neutralization of special elements used in SQL commands"
+        }
+      ],
+      "attack_patterns": [
+        {
+          "capec_id": "CAPEC-66",
+          "name": "SQL Injection",
+          "description": "Exploiting inadequate input validation to inject SQL commands"
+        }
+      ],
+      "attack_techniques": [
+        {
+          "technique_id": "T1190",
+          "name": "Exploit Public-Facing Application",
+          "description": "Adversaries exploit internet-facing systems",
+          "tactics": ["initial-access"]
+        },
+        {
+          "technique_id": "T1213",
+          "name": "Data from Information Repositories",
+          "description": "Adversaries leverage information repositories to access sensitive data",
+          "tactics": ["collection"]
+        }
+      ],
+      "nist_controls": [
+        {
+          "control_id": "SI-10",
+          "title": "Information Input Validation",
+          "family": "System and Information Integrity",
+          "description": "Check validity of information inputs"
+        },
+        {
+          "control_id": "SC-7",
+          "title": "Boundary Protection",
+          "family": "System and Communications Protection",
+          "description": "Monitor and control communications at boundaries"
+        }
+      ],
+      "regulatory_requirements": [],
+      "d3fend_defenses": [
+        {
+          "technique_id": "D3-IAA",
+          "name": "Input Validation Analysis",
+          "description": "Analyze input for malicious content"
+        }
+      ],
+      "threat_groups": [],
+      "exploits": [],
+      "references": [
+        "https://nvd.nist.gov/vuln/detail/CVE-2023-45678"
+      ]
+    },
+    {
+      "cve_id": "CVE-9999-99999",
+      "error": "CVE not found"
+    }
+  ],
+  "metadata": {
+    "cache_hit": false,
+    "execution_time_ms": 456.78,
+    "api_version": "v1"
+  }
+}

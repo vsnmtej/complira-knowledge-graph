@@ -1,0 +1,13 @@
+{
+  "success": true,
+  "data": {
+    "repository_id": "repo_abc123xyz789def",
+    "name": "backend-api",
+    "deleted_at": "2024-03-17T11:00:00Z",
+    "message": "Repository 'backend-api' has been deleted. Historical scan data is preserved."
+  },
+  "metadata": {
+    "cache_hit": false,
+    "execution_time_ms": 31.4
+  }
+}

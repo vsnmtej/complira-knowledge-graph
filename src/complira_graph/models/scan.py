@@ -51,7 +51,7 @@ class ScanSession(BaseModel):
     )
     scan_type: str = Field(
         ...,
-        description="Scan format type (sarif, cyclonedx)",
+        description="Scan type (sast, dast, sca, container, sbom, iac) or format (sarif, cyclonedx)",
     )
     status: str = Field(
         default="processing",
@@ -101,7 +101,7 @@ class ScanSession(BaseModel):
     @classmethod
     def validate_scan_type(cls, v: str) -> str:
         """Validate scan_type is supported."""
-        supported_types = ["sarif", "cyclonedx"]
+        supported_types = ["sast", "dast", "sca", "container", "sbom", "iac", "sarif", "cyclonedx"]
         if v not in supported_types:
             raise ValueError(f"scan_type must be one of {supported_types}")
         return v
@@ -198,10 +198,23 @@ class ScanFinding(BaseModel):
     @field_validator("cve_id")
     @classmethod
     def validate_cve_id(cls, v: Optional[str]) -> Optional[str]:
-        """Validate CVE ID format if provided."""
-        if v and not v.upper().startswith("CVE-"):
-            raise ValueError("cve_id must start with 'CVE-' if provided")
-        return v.upper() if v else None
+        """Validate vulnerability ID format if provided.
+
+        Accepts:
+        - CVE-* (Common Vulnerabilities and Exposures)
+        - GHSA-* (GitHub Security Advisories)
+        - Other vulnerability identifier formats
+        """
+        if v:
+            v_upper = v.upper()
+            # Accept CVE, GHSA, and other common vulnerability ID prefixes
+            valid_prefixes = ["CVE-", "GHSA-", "RUSTSEC-", "PYSEC-", "GO-", "GHSL-"]
+            if not any(v_upper.startswith(prefix) for prefix in valid_prefixes):
+                raise ValueError(
+                    f"cve_id must start with one of {valid_prefixes} if provided"
+                )
+            return v_upper
+        return None
 
     @property
     def _key(self) -> Optional[str]:

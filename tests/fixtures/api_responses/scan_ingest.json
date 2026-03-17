@@ -1,0 +1,13 @@
+{
+  "success": true,
+  "data": {
+    "scan_session_id": "19051940",
+    "findings_count": 78,
+    "components_count": 59,
+    "status": "completed"
+  },
+  "metadata": {
+    "cache_hit": false,
+    "execution_time_ms": 1234.56
+  }
+}

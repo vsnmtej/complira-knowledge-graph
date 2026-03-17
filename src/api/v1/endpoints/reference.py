@@ -1,5 +1,5 @@
 """
-Reference data endpoints (no authentication required, no customer data stored).
+Reference data endpoints (authentication required).
 
 GET /v1/reference/cve/{cve_id} - Get CVE details with enrichment
 GET /v1/reference/enrich - Batch enrich multiple CVEs
@@ -7,12 +7,13 @@ GET /v1/reference/cwe/{cwe_id} - Get CWE weakness details
 GET /v1/reference/controls/{cve_id} - Get mapped NIST 800-53 controls
 """
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Depends
 from typing import List, Optional, Dict, Any
 import structlog
 
 from api.core.database import get_reference_db
 from api.core.cache import cache
+from api.core.security import Customer, get_current_customer
 from api.models.responses import APIResponse, ResponseMetadata
 from complira_graph.utils.keys import normalize_cve_id, normalize_cwe_id
 
@@ -23,13 +24,16 @@ router = APIRouter()
 
 @router.get("/cve/{cve_id}")
 @cache(ttl=21600)  # 6 hour cache for reference data
-async def get_cve_details(cve_id: str):
+async def get_cve_details(
+    cve_id: str,
+    customer: Customer = Depends(get_current_customer)
+):
     """
     GET /v1/reference/cve/{cve_id}
 
     Get CVE details with threat intelligence enrichment.
 
-    **No authentication required** - public reference data only.
+    **Authentication required** - Provide X-API-Key header.
 
     Returns:
     - CVE details (description, CVSS score, severity)
@@ -46,8 +50,8 @@ async def get_cve_details(cve_id: str):
 
     Example:
     ```bash
-    # No API key needed!
-    curl https://api.complira.dev/v1/reference/cve/CVE-2024-1234
+    curl https://api.complira.dev/v1/reference/cve/CVE-2024-1234 \
+      -H "X-API-Key: your_api_key"
     ```
 
     Use case: GitHub Action finds CVE-2024-1234 locally, queries this endpoint
@@ -223,14 +227,15 @@ async def get_cve_details(cve_id: str):
 @router.get("/enrich")
 @cache(ttl=21600)
 async def batch_enrich_cves(
-    cve_ids: str = Query(..., description="Comma-separated CVE IDs (e.g., CVE-2024-1234,CVE-2024-5678)")
+    cve_ids: str = Query(..., description="Comma-separated CVE IDs (e.g., CVE-2024-1234,CVE-2024-5678)"),
+    customer: Customer = Depends(get_current_customer)
 ):
     """
     GET /v1/reference/enrich?cve_ids=CVE-2024-1234,CVE-2024-5678
 
     Batch enrich multiple CVEs with threat intelligence.
 
-    **No authentication required** - public reference data only.
+    **Authentication required** - Provide X-API-Key header.
 
     Returns:
     - Array of enriched CVE data (same as /v1/reference/cve/{cve_id})
@@ -291,13 +296,16 @@ async def batch_enrich_cves(
 
 @router.get("/cwe/{cwe_id}")
 @cache(ttl=21600)
-async def get_cwe_details(cwe_id: str):
+async def get_cwe_details(
+    cwe_id: str,
+    customer: Customer = Depends(get_current_customer)
+):
     """
     GET /v1/reference/cwe/{cwe_id}
 
     Get CWE weakness details.
 
-    **No authentication required** - public reference data only.
+    **Authentication required** - Provide X-API-Key header.
 
     Returns:
     - CWE details (name, description, extended_description)
@@ -306,7 +314,8 @@ async def get_cwe_details(cwe_id: str):
 
     Example:
     ```bash
-    curl https://api.complira.dev/v1/reference/cwe/CWE-89
+    curl https://api.complira.dev/v1/reference/cwe/CWE-89 \
+      -H "X-API-Key: your_api_key"
     ```
     """
     try:
@@ -381,13 +390,16 @@ async def get_cwe_details(cwe_id: str):
 
 @router.get("/controls/{cve_id}")
 @cache(ttl=21600)
-async def get_mapped_controls(cve_id: str):
+async def get_mapped_controls(
+    cve_id: str,
+    customer: Customer = Depends(get_current_customer)
+):
     """
     GET /v1/reference/controls/{cve_id}
 
     Get NIST 800-53 controls and regulatory requirements mapped to a CVE.
 
-    **No authentication required** - public reference data only.
+    **Authentication required** - Provide X-API-Key header.
 
     Returns:
     - NIST 800-53 controls (via CVE → CWE → CAPEC → ATT&CK → Control path)

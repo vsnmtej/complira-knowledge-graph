@@ -1,15 +1,16 @@
 """
-Metadata and data quality endpoints.
+Metadata and data quality endpoints (authentication required).
 
 GET /v1/meta/coverage - Data coverage and quality metrics
 GET /v1/meta/stats - Database statistics
 """
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from typing import Dict, Any
 import structlog
 
 from api.core.database import get_reference_db
+from api.core.security import Customer, get_current_customer
 from api.models.responses import APIResponse, ResponseMetadata
 
 logger = structlog.get_logger()
@@ -18,11 +19,15 @@ router = APIRouter()
 
 
 @router.get("/coverage")
-async def get_data_coverage():
+async def get_data_coverage(
+    customer: Customer = Depends(get_current_customer)
+):
     """
     GET /v1/meta/coverage
 
     Returns data quality and coverage metrics for the knowledge graph.
+
+    **Authentication required** - Provide X-API-Key header.
 
     Metrics include:
     - CVE enrichment funnel (CVE → CWE → CAPEC → ATT&CK → Controls)
@@ -139,11 +144,15 @@ async def get_data_coverage():
 
 
 @router.get("/stats")
-async def get_database_stats():
+async def get_database_stats(
+    customer: Customer = Depends(get_current_customer)
+):
     """
     GET /v1/meta/stats
 
     Returns basic database statistics.
+
+    **Authentication required** - Provide X-API-Key header.
     """
     try:
         db = get_reference_db()

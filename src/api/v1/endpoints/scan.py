@@ -90,12 +90,12 @@ async def ingest_scan_endpoint(
             scan_request=request,
         )
 
-        # Build response
+        # Build response (result is ScanSession Pydantic model)
         scan_response = ScanIngestResponse(
-            scan_session_id=result["scan_session_id"],
-            findings_count=result["findings_count"],
-            components_count=result["components_count"],
-            status=result["status"],
+            scan_session_id=result.session_id,  # Use model attribute
+            findings_count=result.findings_count,
+            components_count=result.components_count,
+            status=result.status,
         )
 
         execution_time_ms = (time.time() - start_time) * 1000
@@ -155,8 +155,13 @@ async def get_scan_session(
     ```
     """
     try:
+        from api.core.cache import RedisCacheService
+
         customer_db = get_customer_db(customer.id)
-        service = ScanIngestionService(customer_db)
+        service = ScanIngestionService(
+            db=customer_db,
+            cache=RedisCacheService(),
+        )
 
         # Get session
         session = await service.get_session(session_id, customer.id)
@@ -230,8 +235,13 @@ async def list_scan_findings(
     ```
     """
     try:
+        from api.core.cache import RedisCacheService
+
         customer_db = get_customer_db(customer.id)
-        service = ScanIngestionService(customer_db)
+        service = ScanIngestionService(
+            db=customer_db,
+            cache=RedisCacheService(),
+        )
 
         # Get findings (service verifies session exists and customer owns it)
         findings = await service.list_session_findings(
@@ -309,8 +319,13 @@ async def list_scans(
     ```
     """
     try:
+        from api.core.cache import RedisCacheService
+
         customer_db = get_customer_db(customer.id)
-        service = ScanIngestionService(customer_db)
+        service = ScanIngestionService(
+            db=customer_db,
+            cache=RedisCacheService(),
+        )
 
         # Get sessions (filtering will be implemented in service layer)
         sessions = await service.list_customer_sessions(
@@ -321,22 +336,22 @@ async def list_scans(
             repository_id=repository_id,
         )
 
-        # Build response
+        # Build response (sessions are ScanSession Pydantic models)
         sessions_response = [
             ScanSessionResponse(
-                session_id=s["_key"],
-                tool_name=s["tool_name"],
-                tool_version=s["tool_version"],
-                scan_type=s.get("scan_type", "unknown"),
-                scan_timestamp=s["scan_timestamp"],
-                status=s["status"],
-                findings_count=s["findings_count"],
-                components_count=s.get("components_count", 0),
-                created_at=s["created_at"],
-                updated_at=s["updated_at"],
-                metadata=s.get("metadata", {}),
-                project_id=s.get("project_id"),
-                repository_id=s.get("repository_id"),
+                session_id=s.session_id,
+                tool_name=s.tool_name,
+                tool_version=s.tool_version,
+                scan_type=s.scan_type,
+                scan_timestamp=s.scan_timestamp,
+                status=s.status,
+                findings_count=s.findings_count,
+                components_count=s.components_count,
+                created_at=s.created_at,
+                updated_at=s.updated_at,
+                metadata=s.metadata,
+                project_id=s.project_id,
+                repository_id=s.repository_id,
             )
             for s in sessions
         ]

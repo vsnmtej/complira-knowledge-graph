@@ -1,0 +1,63 @@
+{
+  "success": true,
+  "data": [
+    {
+      "session_id": "19051940",
+      "tool_name": "syft",
+      "tool_version": "v1.31.0",
+      "scan_type": "sbom",
+      "scan_timestamp": "2025-01-15T10:30:00Z",
+      "status": "completed",
+      "findings_count": 78,
+      "components_count": 59,
+      "created_at": "2025-01-15T10:30:00Z",
+      "updated_at": "2025-01-15T10:32:15Z",
+      "metadata": {
+        "repository": "fda-cybersecurity-docs",
+        "branch": "main"
+      },
+      "project_id": null,
+      "repository_id": null
+    },
+    {
+      "session_id": "19051939",
+      "tool_name": "semgrep",
+      "tool_version": "1.45.0",
+      "scan_type": "sast",
+      "scan_timestamp": "2025-01-14T15:20:00Z",
+      "status": "completed",
+      "findings_count": 12,
+      "components_count": 0,
+      "created_at": "2025-01-14T15:20:00Z",
+      "updated_at": "2025-01-14T15:21:30Z",
+      "metadata": {
+        "repository": "fda-cybersecurity-docs",
+        "branch": "main"
+      },
+      "project_id": null,
+      "repository_id": null
+    },
+    {
+      "session_id": "19051938",
+      "tool_name": "trivy",
+      "tool_version": "0.48.0",
+      "scan_type": "container",
+      "scan_timestamp": "2025-01-13T09:15:00Z",
+      "status": "completed",
+      "findings_count": 245,
+      "components_count": 152,
+      "created_at": "2025-01-13T09:15:00Z",
+      "updated_at": "2025-01-13T09:18:45Z",
+      "metadata": {
+        "image": "python:3.11-slim",
+        "digest": "sha256:abc123..."
+      },
+      "project_id": null,
+      "repository_id": null
+    }
+  ],
+  "metadata": {
+    "cache_hit": false,
+    "execution_time_ms": 23.45
+  }
+}

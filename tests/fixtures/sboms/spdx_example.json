@@ -1,0 +1,80 @@
+{
+  "@context": "https://spdx.org/spdxdocs/3.0.0",
+  "@type": "SoftwareBillOfMaterials",
+  "spdxVersion": "SPDX-3.0",
+  "creationInfo": {
+    "created": "2025-08-20T12:21:33.121697",
+    "creators": [
+      "Organization: Anchore, Inc",
+      "Tool: syft-1.31.0"
+    ],
+    "licenseListVersion": "3.27"
+  },
+  "name": ".",
+  "dataLicense": "CC0-1.0",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "documentNamespace": "https://anchore.com/syft/dir/ecf3da99-6656-4b5c-8f1a-fbfd4abf5fdf",
+  "packages": [
+    {
+      "SPDXID": "SPDXRef-Package-python-rich-93b4eb6a2d0a7b50",
+      "name": "rich",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "versionInfo": "13.5.2",
+      "supplier": "NOASSERTION",
+      "originator": null,
+      "primaryPackagePurpose": "LIBRARY",
+      "validUntilDate": null,
+      "securityAssessment": {
+        "assessmentDate": "2025-08-20T12:21:33.121719",
+        "vulnerabilityCount": 0
+      },
+      "purl": "pkg:pypi/rich@13.5.2"
+    },
+    {
+      "SPDXID": "SPDXRef-DocumentRoot-Directory-.",
+      "name": ".",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "versionInfo": null,
+      "supplier": "NOASSERTION",
+      "originator": null,
+      "primaryPackagePurpose": "LIBRARY",
+      "validUntilDate": null,
+      "securityAssessment": {
+        "assessmentDate": "2025-08-20T12:21:33.121720",
+        "vulnerabilityCount": 0
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "spdxElementId": "SPDXRef-Package-python-rich-93b4eb6a2d0a7b50",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-File-requirements.txt-26ca2b7dc025d550"
+    },
+    {
+      "spdxElementId": "SPDXRef-DocumentRoot-Directory-.",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-Package-python-rich-93b4eb6a2d0a7b50"
+    },
+    {
+      "spdxElementId": "SPDXRef-DOCUMENT",
+      "relationshipType": "DESCRIBES",
+      "relatedSpdxElement": "SPDXRef-DocumentRoot-Directory-."
+    }
+  ],
+  "vulnerabilities": [],
+  "aiPackages": [],
+  "buildInfo": {
+    "buildType": "source",
+    "buildTool": "syft",
+    "buildDate": "2025-08-20T12:21:33.121717"
+  }
+}

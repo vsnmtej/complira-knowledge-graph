@@ -1,0 +1,27 @@
+{
+  "success": true,
+  "data": {
+    "session_id": "19051940",
+    "tool_name": "syft",
+    "tool_version": "v1.31.0",
+    "scan_type": "sbom",
+    "scan_timestamp": "2025-01-15T10:30:00Z",
+    "status": "completed",
+    "findings_count": 78,
+    "components_count": 59,
+    "created_at": "2025-01-15T10:30:00Z",
+    "updated_at": "2025-01-15T10:32:15Z",
+    "metadata": {
+      "repository": "fda-cybersecurity-docs",
+      "branch": "main",
+      "bom_format": "CycloneDX",
+      "spec_version": "1.6"
+    },
+    "project_id": null,
+    "repository_id": null
+  },
+  "metadata": {
+    "cache_hit": false,
+    "execution_time_ms": 45.23
+  }
+}

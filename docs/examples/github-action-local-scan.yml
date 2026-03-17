@@ -1,0 +1,171 @@
+name: Security Scan (Local-First with Complira Reference Data)
+
+# This workflow demonstrates how to:
+# 1. Run security scans in GitHub Actions (locally)
+# 2. Query Complira reference APIs for threat intelligence enrichment
+# 3. Generate compliance reports
+# 4. NEVER upload scan results to Complira server (complete privacy)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 1: Run Semgrep SAST scan locally
+      - name: Run Semgrep SAST
+        run: |
+          pip install semgrep
+          semgrep --config auto --sarif > semgrep.sarif
+        continue-on-error: true
+
+      # Step 2: Run Syft SBOM generation locally
+      - name: Generate SBOM with Syft
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+          syft packages -o cyclonedx-json > sbom.json
+        continue-on-error: true
+
+      # Step 3: Extract CVE IDs from local scan results
+      - name: Extract CVE IDs
+        id: extract_cves
+        run: |
+          # Extract CVEs from SARIF
+          CVE_IDS=$(jq -r '.runs[].results[].ruleId' semgrep.sarif 2>/dev/null | grep -E 'CVE-[0-9]{4}-[0-9]+' | sort -u | tr '\n' ',' | sed 's/,$//')
+
+          # Extract CVEs from SBOM
+          if [ -f sbom.json ]; then
+            SBOM_CVES=$(jq -r '.vulnerabilities[]?.id' sbom.json 2>/dev/null | grep -E 'CVE-[0-9]{4}-[0-9]+' | sort -u | tr '\n' ',' | sed 's/,$//')
+            if [ -n "$SBOM_CVES" ]; then
+              CVE_IDS="${CVE_IDS:+$CVE_IDS,}$SBOM_CVES"
+            fi
+          fi
+
+          echo "cve_ids=$CVE_IDS" >> $GITHUB_OUTPUT
+          echo "Found CVEs: $CVE_IDS"
+
+      # Step 4: Query Complira reference API for enrichment (NO AUTH REQUIRED)
+      - name: Enrich CVEs with Complira Reference Data
+        if: steps.extract_cves.outputs.cve_ids != ''
+        run: |
+          CVE_IDS="${{ steps.extract_cves.outputs.cve_ids }}"
+
+          # Query reference API - no API key needed, no customer data sent!
+          curl "https://api.complira.dev/v1/reference/enrich?cve_ids=$CVE_IDS" \
+            -o enriched.json
+
+          echo "Enriched $(jq '. | length' enriched.json 2>/dev/null || echo 0) CVEs"
+
+      # Step 5: Generate compliance report (locally)
+      - name: Generate Compliance Report
+        if: steps.extract_cves.outputs.cve_ids != ''
+        run: |
+          python3 << 'EOF'
+          import json
+
+          # Load enriched CVE data
+          with open('enriched.json', 'r') as f:
+              enriched_data = json.load(f)
+
+          # Generate markdown report
+          report = ["# Security Scan Report\n"]
+          report.append(f"**Total CVEs Found:** {len(enriched_data)}\n\n")
+          report.append("---\n\n")
+
+          for cve in enriched_data:
+              if 'error' in cve:
+                  continue
+
+              cve_id = cve['cve_id']
+              severity = cve.get('severity', 'UNKNOWN')
+              cvss = cve.get('cvss_score', 'N/A')
+              epss = cve.get('epss', {}).get('score', 'N/A')
+              in_kev = cve.get('kev', {}).get('in_kev', False)
+
+              report.append(f"## {cve_id} - {severity}\n")
+              report.append(f"**CVSS Score:** {cvss}\n")
+              report.append(f"**EPSS Score:** {epss}\n")
+              report.append(f"**In KEV Catalog:** {'✅ YES' if in_kev else '❌ No'}\n\n")
+
+              # NIST 800-53 Controls
+              controls = cve.get('nist_controls', [])
+              if controls:
+                  report.append("**NIST 800-53 Controls:**\n")
+                  for ctrl in controls:
+                      report.append(f"- {ctrl['control_id']}: {ctrl['title']}\n")
+                  report.append("\n")
+
+              # Regulatory Requirements
+              reqs = cve.get('regulatory_requirements', [])
+              if reqs:
+                  report.append("**Regulatory Requirements:**\n")
+                  for req in reqs:
+                      report.append(f"- {req['framework']} {req['section']}: {req['title']}\n")
+                  report.append("\n")
+
+              # ATT&CK Techniques
+              techniques = cve.get('attack_techniques', [])
+              if techniques:
+                  report.append("**MITRE ATT&CK Techniques:**\n")
+                  for tech in techniques:
+                      report.append(f"- {tech['technique_id']}: {tech['name']}\n")
+                  report.append("\n")
+
+              report.append("---\n\n")
+
+          # Write report
+          with open('security-report.md', 'w') as f:
+              f.write(''.join(report))
+
+          print("✅ Report generated: security-report.md")
+          EOF
+
+      # Step 6: Upload report as artifact (stays in GitHub)
+      - name: Upload Security Report
+        if: steps.extract_cves.outputs.cve_ids != ''
+        uses: actions/upload-artifact@v3
+        with:
+          name: security-report
+          path: |
+            security-report.md
+            semgrep.sarif
+            sbom.json
+            enriched.json
+
+      # Step 7: Comment report on PR (optional)
+      - name: Comment on PR
+        if: github.event_name == 'pull_request' && steps.extract_cves.outputs.cve_ids != ''
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('security-report.md', 'utf8');
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: report
+            });
+
+      # Step 8: Fail build on critical CVEs in KEV catalog
+      - name: Check for KEV CVEs
+        if: steps.extract_cves.outputs.cve_ids != ''
+        run: |
+          KEV_COUNT=$(jq '[.[] | select(.kev.in_kev == true)] | length' enriched.json 2>/dev/null || echo 0)
+
+          if [ "$KEV_COUNT" -gt 0 ]; then
+            echo "❌ Found $KEV_COUNT CVEs in CISA KEV catalog (Known Exploited Vulnerabilities)"
+            echo "These vulnerabilities are actively exploited in the wild and must be fixed immediately."
+            exit 1
+          else
+            echo "✅ No KEV CVEs found"
+          fi

@@ -131,7 +131,9 @@ class ComponentRepository(BaseRepository):
                 return_new=True,
             )
 
-            created_count = len([r for r in results if 'new' in r])
+            # Filter results - handle both successful results (dict) and errors
+            successful_results = [r for r in results if isinstance(r, dict) and 'new' in r]
+            created_count = len(successful_results)
 
             logger.info(
                 "Bulk created components",
@@ -140,7 +142,7 @@ class ComponentRepository(BaseRepository):
                 skipped=len(components) - created_count,
             )
 
-            return [r.get('new', {}) for r in results if 'new' in r]
+            return [r.get('new', {}) for r in successful_results]
 
         except Exception as e:
             logger.error(

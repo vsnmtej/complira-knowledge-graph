@@ -105,14 +105,18 @@ class CycloneDXParser(BaseScanParser):
             component_purl = component.get("purl", "")
 
             for vuln in component.get("vulnerabilities", []):
-                # Extract CVE ID
-                cve_id = vuln.get("id", "")  # e.g., CVE-2021-44228
+                # Extract CVE ID (try both 'id' and 'cve_id' fields)
+                cve_id = vuln.get("cve_id") or vuln.get("id", "")
 
-                # Extract severity from ratings
-                ratings = vuln.get("ratings", [])
+                # Extract severity (support both standard and enriched formats)
                 severity = "UNKNOWN"
-                if ratings:
-                    rating = ratings[0]
+
+                # Try direct severity field first (enriched format)
+                if "severity" in vuln and vuln["severity"]:
+                    severity = self._map_severity(vuln["severity"])
+                # Fall back to ratings array (standard CycloneDX format)
+                elif "ratings" in vuln and vuln["ratings"]:
+                    rating = vuln["ratings"][0]
                     severity = self._map_severity(rating.get("severity", ""))
 
                 # Extract description
@@ -138,14 +142,18 @@ class CycloneDXParser(BaseScanParser):
 
         # Extract root-level vulnerabilities (CycloneDX 1.5 style)
         for vuln in payload.get("vulnerabilities", []):
-            # Extract CVE ID
-            cve_id = vuln.get("id", "")
+            # Extract CVE ID (try both 'id' and 'cve_id' fields)
+            cve_id = vuln.get("cve_id") or vuln.get("id", "")
 
-            # Extract severity from ratings
-            ratings = vuln.get("ratings", [])
+            # Extract severity (support both standard and enriched formats)
             severity = "UNKNOWN"
-            if ratings:
-                rating = ratings[0]
+
+            # Try direct severity field first (enriched format)
+            if "severity" in vuln and vuln["severity"]:
+                severity = self._map_severity(vuln["severity"])
+            # Fall back to ratings array (standard CycloneDX format)
+            elif "ratings" in vuln and vuln["ratings"]:
+                rating = vuln["ratings"][0]
                 severity = self._map_severity(rating.get("severity", ""))
 
             # Extract description
@@ -181,20 +189,41 @@ class CycloneDXParser(BaseScanParser):
         """
         Extract SBOM components.
 
+        Includes both:
+        - metadata.component (root/main component - the application itself)
+        - components[] (dependency components)
+
         Args:
             payload: CycloneDX payload
 
         Returns:
             list: Component dictionaries
         """
-        components = payload.get("components", [])
+        all_components = []
+
+        # Extract root component from metadata (represents the application/project)
+        metadata = payload.get("metadata", {})
+        root_component = metadata.get("component")
+        if root_component:
+            all_components.append(root_component)
+            self.logger.debug(
+                "Found root component in metadata",
+                component_name=root_component.get("name", "Unknown"),
+                component_purl=root_component.get("purl", "NO_PURL"),
+            )
+
+        # Extract dependency components
+        dependency_components = payload.get("components", [])
+        all_components.extend(dependency_components)
 
         self.logger.debug(
             "Extracted CycloneDX components",
-            components_count=len(components),
+            root_component_count=1 if root_component else 0,
+            dependency_count=len(dependency_components),
+            total_count=len(all_components),
         )
 
-        return components
+        return all_components
 
     def _extract_metadata(self, payload: Dict[str, Any]) -> Dict[str, Any]:
         """

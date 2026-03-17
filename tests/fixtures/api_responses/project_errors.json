@@ -1,0 +1,53 @@
+{
+  "project_not_found": {
+    "detail": "Project not found: proj_nonexistent123"
+  },
+  "project_already_deleted": {
+    "detail": "Project already deleted: proj_abc123def456ghi789"
+  },
+  "project_validation_error": {
+    "detail": [
+      {
+        "loc": ["body", "name"],
+        "msg": "ensure this value has at least 3 characters",
+        "type": "value_error.any_str.min_length",
+        "ctx": {
+          "limit_value": 3
+        }
+      }
+    ]
+  },
+  "project_name_too_long": {
+    "detail": [
+      {
+        "loc": ["body", "name"],
+        "msg": "ensure this value has at most 100 characters",
+        "type": "value_error.any_str.max_length",
+        "ctx": {
+          "limit_value": 100
+        }
+      }
+    ]
+  },
+  "project_description_too_long": {
+    "detail": [
+      {
+        "loc": ["body", "description"],
+        "msg": "ensure this value has at most 500 characters",
+        "type": "value_error.any_str.max_length",
+        "ctx": {
+          "limit_value": 500
+        }
+      }
+    ]
+  },
+  "unauthorized": {
+    "detail": "Not authenticated"
+  },
+  "forbidden": {
+    "detail": "Insufficient permissions to access this project"
+  },
+  "internal_server_error": {
+    "detail": "Internal server error during project creation"
+  }
+}

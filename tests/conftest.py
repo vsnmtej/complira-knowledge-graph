@@ -13,8 +13,17 @@ project_root = Path(__file__).parent.parent
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
+# Add src to path
+src_path = project_root / "src"
+if str(src_path) not in sys.path:
+    sys.path.insert(0, str(src_path))
+
 # Set test environment
 os.environ['ENVIRONMENT'] = 'test'
+
+# Enable integration tests with real database
+# Set to 'true' to use local database, 'false' to use mocks
+USE_REAL_DB = os.environ.get('USE_REAL_DB', 'true').lower() == 'true'
 
 
 @pytest.fixture(scope='session')
@@ -38,6 +47,108 @@ def mock_db():
     db.aql.execute = Mock(return_value=[])
 
     return db
+
+
+@pytest.fixture
+def real_db():
+    """Real ArangoDB connection for integration tests."""
+    if not USE_REAL_DB:
+        pytest.skip("Real database tests disabled. Set USE_REAL_DB=true to enable.")
+
+    try:
+        from complira_graph.db import get_db
+        db = get_db()
+        yield db
+    except Exception as e:
+        pytest.skip(f"Could not connect to real database: {e}")
+
+
+@pytest.fixture
+def test_client():
+    """FastAPI TestClient for API integration tests."""
+    if not USE_REAL_DB:
+        pytest.skip("Real database tests disabled. Set USE_REAL_DB=true to enable.")
+
+    try:
+        from fastapi.testclient import TestClient
+        from api.main import app
+
+        client = TestClient(app)
+        yield client
+    except Exception as e:
+        pytest.skip(f"Could not create test client: {e}")
+
+
+@pytest.fixture(scope='session')
+def test_customer_profile(real_db):
+    """
+    Create test customer profile with API key in database.
+
+    This fixture creates a real test customer in the database that can be used
+    for integration tests. The customer is cleaned up after all tests complete.
+    """
+    if not USE_REAL_DB:
+        pytest.skip("Real database tests disabled. Set USE_REAL_DB=true to enable.")
+
+    import secrets
+    from api.core.security import hash_api_key
+
+    # Generate test API key
+    test_api_key = f"test_api_key_{secrets.token_hex(16)}"
+    api_key_hash = hash_api_key(test_api_key)
+
+    # Create test customer profile
+    test_customer = {
+        "_key": "test_customer_001",
+        "name": "Test Customer Organization",
+        "tier": "professional",
+        "frameworks": ["FDA_524B", "IEC_62304"],
+        "database_name": "complira_tenant_test_customer_001",
+        "api_key_hash": api_key_hash,
+        "created_at": "2024-01-01T00:00:00Z",
+    }
+
+    try:
+        # Create customer_profiles collection if it doesn't exist
+        if not real_db.has_collection("customer_profiles"):
+            real_db.create_collection("customer_profiles")
+
+        # Insert or update test customer
+        collection = real_db.collection("customer_profiles")
+        try:
+            collection.insert(test_customer, overwrite=True)
+        except Exception:
+            # If document exists, update it
+            collection.update(test_customer)
+
+        yield {
+            "customer_key": test_customer["_key"],
+            "api_key": test_api_key,
+            "customer_data": test_customer,
+        }
+
+        # Cleanup after all tests
+        try:
+            collection.delete(test_customer["_key"])
+        except Exception:
+            pass  # Ignore cleanup errors
+
+    except Exception as e:
+        pytest.skip(f"Could not create test customer: {e}")
+
+
+@pytest.fixture
+def valid_api_key(test_customer_profile):
+    """Valid API key for testing authenticated endpoints."""
+    return test_customer_profile["api_key"]
+
+
+@pytest.fixture
+def customer_token():
+    """Valid customer JWT token for testing."""
+    # TODO: Implement real JWT token generation
+    # For now, tests will use API key authentication
+    return "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.test"
 
 
 @pytest.fixture

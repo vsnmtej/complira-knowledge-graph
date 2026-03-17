@@ -134,60 +134,75 @@ class ScanIngestionService(BaseGraphService):
             customer_id=customer_id,
         )
 
-        # Step 4: Store findings
-        findings_created = []
-        if parsed_data.findings:
-            findings_created = await self._store_findings(
-                customer_id=customer_id,
-                scan_session_id=scan_session_id,
-                findings=parsed_data.findings,
-                finding_repo=finding_repo,
-            )
+        try:
+            # Step 4: Store findings
+            findings_created = []
+            if parsed_data.findings:
+                findings_created = await self._store_findings(
+                    customer_id=customer_id,
+                    scan_session_id=scan_session_id,
+                    findings=parsed_data.findings,
+                    finding_repo=finding_repo,
+                )
 
-        # Step 5: Store components (SBOM)
-        components_created = []
-        if parsed_data.components:
-            components_created = await self._store_components(
-                customer_id=customer_id,
-                scan_session_id=scan_session_id,
-                components=parsed_data.components,
-                component_repo=component_repo,
-            )
+            # Step 5: Store components (SBOM)
+            components_created = []
+            if parsed_data.components:
+                components_created = await self._store_components(
+                    customer_id=customer_id,
+                    scan_session_id=scan_session_id,
+                    components=parsed_data.components,
+                    component_repo=component_repo,
+                )
 
-        # Step 6: Create edges (finding → CVE, component → finding)
-        await self._create_edges(
-            customer_db=customer_db,
-            scan_session_id=scan_session_id,
-            findings=findings_created,
-            components=components_created,
-        )
-
-        # Step 7: Update scan session status (returns ScanSession model)
-        updated_session = session_repo.update_session_status(
-            session_key=scan_session_id,
-            status="completed",
-            findings_count=len(findings_created),
-            components_count=len(components_created),
-        )
-
-        self.logger.info(
-            "Scan ingestion completed",
-            scan_session_id=scan_session_id,
-            findings_count=len(findings_created),
-            components_count=len(components_created),
-        )
-
-        # Step 8: Update repository stats if repository_id is provided
-        if scan_request.repository_id:
-            await self._update_repository_stats(
+            # Step 6: Create edges (finding → CVE, component → finding)
+            await self._create_edges(
                 customer_db=customer_db,
-                customer_id=customer_id,
-                repository_id=scan_request.repository_id,
-                scan_timestamp=parsed_data.scan_timestamp,
+                scan_session_id=scan_session_id,
+                findings=findings_created,
+                components=components_created,
             )
 
-        # Return ScanSession model (FastAPI will auto-serialize to JSON)
-        return updated_session
+            # Step 7: Update scan session status (returns ScanSession model)
+            # Use original parsed data counts (not created counts) to reflect SBOM content
+            updated_session = session_repo.update_session_status(
+                session_key=scan_session_id,
+                status="completed",
+                findings_count=len(findings_created),
+                components_count=len(parsed_data.components),  # Use original count, not created count
+            )
+
+            self.logger.info(
+                "Scan ingestion completed",
+                scan_session_id=scan_session_id,
+                findings_count=len(findings_created),
+                components_count=len(parsed_data.components),
+            )
+
+            # Step 8: Update repository stats if repository_id is provided
+            if scan_request.repository_id:
+                await self._update_repository_stats(
+                    customer_db=customer_db,
+                    customer_id=customer_id,
+                    repository_id=scan_request.repository_id,
+                    scan_timestamp=parsed_data.scan_timestamp,
+                )
+
+            # Return ScanSession model (FastAPI will auto-serialize to JSON)
+            return updated_session
+
+        except Exception as e:
+            # Mark session as failed if error occurs during processing
+            self.logger.error(
+                "Scan processing failed, marking session as failed",
+                scan_session_id=scan_session_id,
+                error=str(e),
+            )
+            session_repo.update_session_status(
+                session_key=scan_session_id,
+                status="failed",
+            )
+            raise
 
     async def _store_findings(
         self,
@@ -226,7 +241,8 @@ class ScanIngestionService(BaseGraphService):
                 tool_name=parsed_finding.tool_name,
                 raw_data=parsed_finding.raw_data,
             )
-            findings_created.append(finding)
+            # Convert Pydantic model to dict for downstream processing
+            findings_created.append(finding.model_dump(by_alias=True))
 
         self.logger.debug(
             "Findings stored",
@@ -257,14 +273,48 @@ class ScanIngestionService(BaseGraphService):
         if not components:
             return []
 
+        # Log raw components for debugging
+        self.logger.info(
+            "Processing components for storage",
+            components_count=len(components),
+            component_purls=[c.get("purl", f"NO_PURL:{c.get('name', 'UNKNOWN')}") for c in components],
+        )
+
         # Normalize components
         component_dicts = []
         for component in components:
+            purl = component.get("purl", "")
+            name = component.get("name", "")
+            version = component.get("version", "")
+
+            # Generate a PURL if missing (for root components without PURL)
+            if not purl:
+                if name and name != ".":
+                    # Create a generic PURL for components with meaningful names
+                    comp_type = component.get("type", "library")
+                    if version:
+                        purl = f"pkg:generic/{name}@{version}"
+                    else:
+                        purl = f"pkg:generic/{name}"
+                    self.logger.info(
+                        "Component missing PURL, generated generic PURL",
+                        component_name=name,
+                        generated_purl=purl,
+                    )
+                else:
+                    # Skip components with no meaningful identifier
+                    self.logger.warning(
+                        "Component has no PURL and no meaningful name, skipping",
+                        component_name=name,
+                        component_type=component.get("type", "unknown"),
+                    )
+                    continue
+
             component_dict = {
                 "customer_id": customer_id,
-                "purl": component.get("purl", ""),
-                "name": component.get("name", ""),
-                "version": component.get("version", ""),
+                "purl": purl,
+                "name": name or "unknown",
+                "version": version or "unknown",
                 "type": component.get("type", "library"),
                 "metadata": {
                     "scan_session_id": scan_session_id,
@@ -843,6 +893,8 @@ class ScanIngestionService(BaseGraphService):
         customer_id: str,
         limit: int = 100,
         offset: int = 0,
+        project_id: Optional[str] = None,
+        repository_id: Optional[str] = None,
     ) -> list[Dict[str, Any]]:
         """
         List all scan sessions for a customer.
@@ -851,6 +903,8 @@ class ScanIngestionService(BaseGraphService):
             customer_id: Customer ID
             limit: Maximum sessions to return
             offset: Number of sessions to skip
+            project_id: Optional project ID filter
+            repository_id: Optional repository ID filter
 
         Returns:
             list: Scan sessions sorted by created_at DESC
@@ -860,6 +914,8 @@ class ScanIngestionService(BaseGraphService):
             customer_id=customer_id,
             limit=limit,
             offset=offset,
+            project_id=project_id,
+            repository_id=repository_id,
         )
 
     async def _validate_hierarchy(

@@ -64,9 +64,9 @@ async def create_token(
     {
         "success": true,
         "message": "Token created successfully. Save this token - you won't see it again!",
-        "token": "sk_live_abc123xyz789...",
+        "token": "complira_tk_abc123xyz789...",
         "token_id": "token_abc123",
-        "token_prefix": "sk_live_abc123",
+        "token_prefix": "complira_tk_abc123",
         "expires_at": "2025-01-15T10:00:00Z"
     }
     ```
@@ -163,7 +163,7 @@ async def list_tokens(
             {
                 "id": "token_abc123",
                 "name": "CI/CD Pipeline Token",
-                "token_prefix": "sk_live_abc123",
+                "token_prefix": "complira_tk_abc123",
                 "scopes": ["scan:write", "reference:read"],
                 "last_used": "2024-01-15T14:28:00Z",
                 "expires_at": "2025-01-15T10:00:00Z",
@@ -234,7 +234,7 @@ async def get_token(
         "id": "token_abc123",
         "organization_id": "org_xyz789",
         "name": "CI/CD Pipeline Token",
-        "token_prefix": "sk_live_abc123",
+        "token_prefix": "complira_tk_abc123",
         "scopes": ["scan:write"],
         "created_at": "2024-01-15T10:00:00Z",
         "expires_at": "2025-01-15T10:00:00Z",
@@ -369,9 +369,9 @@ async def rotate_token(
     {
         "success": true,
         "message": "Token rotated successfully. Old token expires in 24 hours.",
-        "new_token": "sk_live_xyz789abc456...",
+        "new_token": "complira_tk_xyz789abc456...",
         "token_id": "token_abc123",
-        "token_prefix": "sk_live_xyz789",
+        "token_prefix": "complira_tk_xyz789",
         "old_token_expires_at": "2024-01-16T10:00:00Z",
         "new_token_expires_at": "2025-01-15T10:00:00Z"
     }

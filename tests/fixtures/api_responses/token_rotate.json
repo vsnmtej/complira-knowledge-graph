@@ -1,0 +1,9 @@
+{
+  "success": true,
+  "message": "Token rotated successfully. Old token expires in 24 hours.",
+  "new_token": "complira_tk_xyz789newtoken456abcdefghijklmnopqrstuvwxyz0123456789ABC",
+  "token_id": "token_abc123",
+  "token_prefix": "complira_tk_xyz789",
+  "old_token_expires_at": "2024-01-16T10:00:00Z",
+  "new_token_expires_at": "2025-01-15T10:00:00Z"
+}

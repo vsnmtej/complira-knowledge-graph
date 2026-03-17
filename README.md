@@ -1,6 +1,6 @@
-# Complira Knowledge Graph Engine
+# Complira Cybersecurity Compliance Platform
 
-A production-grade cybersecurity compliance knowledge graph platform that ingests 40+ open data sources and maps vulnerabilities to regulatory requirements.
+A production-grade cybersecurity compliance platform combining a knowledge graph engine with a web-based UI for SBOM analysis and vulnerability enrichment.
 
 ## Overview
 
@@ -21,6 +21,23 @@ This platform builds a comprehensive ArangoDB knowledge graph (~10M nodes, ~28M 
 - **Real-time Monitoring** with Prometheus + Grafana
 - **Reference API** for local-first security scanning (no auth, no data upload)
 - **Multi-Tenant SaaS API** for cloud-based scan storage and tracking
+
+## Project Structure
+
+```
+cybersecurity-compliance-app/
+├── src/                          # Backend (FastAPI + Knowledge Graph)
+│   ├── api/                      # REST API
+│   └── complira_graph/           # Graph data model + agents
+├── frontend/                     # Web UI (Next.js 14) [Phase 5]
+│   ├── app/                      # Next.js App Router pages
+│   ├── components/               # React components (shadcn/ui)
+│   └── lib/                      # API client, utilities
+├── scripts/                      # Data ingestion scripts
+├── docs/                         # Documentation
+├── tickets/                      # Development tickets (Phase planning)
+└── monitoring/                   # Grafana dashboards
+```
 
 ## API Access
 

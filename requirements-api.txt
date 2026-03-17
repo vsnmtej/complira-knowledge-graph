@@ -1,0 +1,45 @@
+# Complira Cloud API Dependencies
+# Phase 0 (Foundation)
+
+# ========== Web Framework ==========
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+python-multipart==0.0.9
+
+# ========== Database ==========
+python-arango==7.8.0
+
+# ========== Caching ==========
+redis==5.0.1
+
+# ========== Authentication ==========
+bcrypt==4.1.2
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+email-validator==2.1.0
+
+# ========== Configuration ==========
+pydantic==2.6.0
+pydantic-settings==2.1.0
+python-dotenv==1.0.1
+
+# ========== Logging ==========
+structlog==24.1.0
+
+# ========== LLM (reused from local app) ==========
+anthropic==0.17.0
+
+# ========== HTTP Client (reused from local app) ==========
+httpx==0.26.0
+
+# ========== Utilities ==========
+python-dateutil==2.8.2
+
+# ========== AWS Services (Phase 5) ==========
+boto3==1.34.34  # S3, SES
+
+# ========== Document Generation (Phase 5) ==========
+reportlab==4.0.9  # PDF generation
+
+# ========== Development Dependencies ==========
+# (Install separately with: pip install -r requirements-dev.txt)

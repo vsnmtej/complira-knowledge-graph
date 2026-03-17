@@ -41,6 +41,15 @@ class CloudSettings(Settings):
     API_KEY_MIN_LENGTH: int = 32
     API_KEY_HASH_ROUNDS: int = 12  # bcrypt rounds
 
+    # JWT Authentication (Phase 5 - Web UI)
+    JWT_SECRET_KEY: str = Field(
+        default="INSECURE_DEFAULT_SECRET_CHANGE_IN_PRODUCTION",
+        description="JWT secret key for signing tokens. MUST be set via environment variable in production."
+    )
+    JWT_ALGORITHM: str = "HS256"
+    JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
+    JWT_REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+
     # ========== LLM Integration ==========
     ANTHROPIC_API_KEY: Optional[str] = None  # Required for Phase 1+ features
 

@@ -36,8 +36,38 @@ arango_data/
 # Testing
 .pytest_cache/
 .coverage
+coverage.xml
 htmlcov/
 .tox/
+
+# Terraform state (contains secrets)
+*.tfstate
+*.tfstate.backup
+.terraform/
+tfplan
+
+# Backup files
+*.bak
+
+# Debug/temp scripts in project root
+debug_*.py
+diagnostic_queries.py
+check_agent_schemas.py
+check_collections.py
+check_control_format.py
+check_ghsa_duplicates.py
+verify_edges.py
+verify_api_mocks.py
+create_cpe_affects_edges.py
+create_d3fend_counter_edges.py
+run_capec_fix.py
+run_cisa_adp.py
+EXAMPLE_REFACTORED_AGENT.py
+FIX_PLAN.md
+
+# Ad-hoc test scripts in project root (real tests are in tests/)
+/test_*.py
+/test_*.json
 
 # OS
 .DS_Store
@@ -46,3 +76,6 @@ Thumbs.db
 # Tickets work-in-progress
 tickets/in-progress/**/scratch/
 tickets/in-progress/**/*.tmp
+tickets/in-progress/complira-knowledge-graph/
+tickets/in-progress/multi-tenant-hierarchy/worktree/
+tickets/in-progress/vex-justification-enforcement/
