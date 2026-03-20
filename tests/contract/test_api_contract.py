@@ -46,12 +46,12 @@ class TestAPIContract:
 
         # Validate ScanIngestResponse data
         data = mock_data["data"]
-        required_fields = ["scan_session_id", "findings_count", "components_count", "status"]
+        required_fields = ["scan_run_id", "findings_count", "components_count", "status"]
         for field in required_fields:
             assert field in data, f"Missing required field: {field}"
 
         # Validate field types
-        assert isinstance(data["scan_session_id"], str)
+        assert isinstance(data["scan_run_id"], str)
         assert isinstance(data["findings_count"], int)
         assert isinstance(data["components_count"], int)
         assert isinstance(data["status"], str)
@@ -60,7 +60,7 @@ class TestAPIContract:
         # Validate using Pydantic model
         try:
             response = ScanIngestResponse(**data)
-            assert response.scan_session_id == data["scan_session_id"]
+            assert response.scan_run_id == data["scan_run_id"]
             assert response.findings_count == data["findings_count"]
         except ValidationError as e:
             pytest.fail(f"Mock data doesn't match ScanIngestResponse schema: {e}")

@@ -1,5 +1,12 @@
 # Graph Architecture: Reference vs Customer Data
 
+> **v2.2 Scanner Evidence Layer (2026-03-19):** The scan evidence collections
+> (`scan_runs`, `scan_findings`, `detected_controls`, `evidence_packages`, enriched
+> `components`) now live in the **reference DB** (not customer DBs), scoped by
+> `tenant_id`. The old `scan_sessions`/`scan_findings`/`customer_components` customer-DB
+> collections are superseded. See the [v2.2 Scanner Evidence Layer](#v22-scanner-evidence-layer)
+> section below for the current architecture.
+
 ## Overview
 
 Complira uses a **two-database architecture** that separates shared reference knowledge from customer-specific scan data.
@@ -394,3 +401,54 @@ FOR session IN scan_sessions
 ```
 
 **Key Principle**: Reference data (CVEs, CWE, ATT&CK) lives in shared graph database. Customer data (scan findings, VEX assessments) references CVEs by ID string, not graph edges.
+
+---
+
+## v2.2 Scanner Evidence Layer
+
+As of 2026-03-19, scanner evidence collections moved from per-customer databases into the
+shared **reference DB** (`complira_graph`), scoped by `tenant_id`.
+
+### New collection layout (reference DB)
+
+| Collection | Key scheme | tenant_id | Description |
+| --- | --- | --- | --- |
+| `scan_runs` | UUID | Yes | One doc per pipeline invocation (replaces `scan_sessions`) |
+| `scan_findings` | fingerprint (sha256[:32]) | Yes | Normalised findings (replaces customer-DB `scan_findings`) |
+| `detected_controls` | fingerprint | Yes | Positive Checkov PASSED evidence |
+| `evidence_packages` | UUID | Yes | Regulatory submission snapshots |
+| `components` | normalize_purl(purl) | No (global) | Enriched SBOM components — purl-keyed, shared across tenants |
+
+### New edge collections (reference DB)
+
+| Edge | From → To | Description |
+| --- | --- | --- |
+| `component_has_vuln` | components → vulnerabilities | SCA CVE hits |
+| `finding_maps_to_weakness` | scan_findings → weaknesses | CWE links |
+| `finding_triggers_req` | scan_findings → regulatory_requirements | Rule engine / checkov_native / llm_reg_mapper |
+| `finding_in_component` | scan_findings → components | SCA component context |
+| `project_uses_component` | projects → components (tenant_id on edge) | SBOM project-component link |
+| `evidence_links_finding` | evidence_packages → scan_findings | Evidence traceability |
+| `evidence_for_project` | evidence_packages → projects | Evidence traceability |
+| `detected_control_maps_to` | detected_controls → oscal_controls | (stub, pending data source) |
+| `control_in_component` | detected_controls → components | (stub, pending data source) |
+
+### Ingestion entry points
+
+```
+POST /v1/scan/ingest (format=cyclonedx/sbom) → EvidenceIngestionService.ingest_sbom()
+POST /v1/scan/ingest (format=semgrep/checkov/grype/…) → EvidenceIngestionService.ingest_scan()
+
+EvidenceIngestionService (src/complira_graph/ingestion/service.py)
+  └─ IngestionEngine            (9 normalisation steps, tool-agnostic)
+  └─ EvidenceRunRepository      (scan_runs lifecycle)
+  └─ EvidenceFindingRepository  (scan_findings upsert)
+  └─ EvidenceComponentRepository (components upsert)
+  └─ EvidenceDetectedControlRepository (detected_controls upsert)
+  └─ EvidenceEdgeService        (all 9 edge collections)
+```
+
+### Idempotency
+
+All ingestion writes use `import_bulk(on_duplicate="update")`. Re-ingesting the same
+scanner output updates existing documents rather than creating duplicates.

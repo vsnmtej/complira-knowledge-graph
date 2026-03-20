@@ -20,6 +20,7 @@ from arango.database import StandardDatabase
 import structlog
 
 from ..config import get_settings
+from ..utils.keys import generate_edge_key
 from ..utils.transforms import batch_iterator
 
 logger = structlog.get_logger()
@@ -234,12 +235,14 @@ class BaseIngestionAgent(ABC):
             raise ValueError(f"Collection {collection_name} does not exist")
 
         collection = self.db.collection(collection_name)
+        is_edge = collection.properties().get("edge", False)
+
         total_created = 0
         total_updated = 0
         total_errors = 0
 
         # Process in batches for performance
-        for batch in batch_iterator(records, batch_size=self.settings.BULK_IMPORT_BATCH_SIZE):
+        for batch in batch_iterator(self._ensure_keys(records, is_edge), batch_size=self.settings.BULK_IMPORT_BATCH_SIZE):
             try:
                 result = collection.import_bulk(
                     batch,
@@ -282,6 +285,33 @@ class BaseIngestionAgent(ABC):
         )
 
         return stats
+
+    @staticmethod
+    def _ensure_keys(
+        records: Generator[dict, None, None],
+        is_edge: bool,
+    ) -> Generator[dict, None, None]:
+        """
+        Ensure every record has a deterministic ``_key``.
+
+        For **edge** records that lack a ``_key``, one is derived from
+        ``_from`` and ``_to`` via :func:`generate_edge_key`.  This makes
+        ``import_bulk(on_duplicate="update")`` idempotent — re-running an
+        agent will update existing edges instead of creating duplicates.
+
+        Document records are passed through unchanged (agents already set
+        ``_key`` via the ``normalize_*`` helpers in ``utils.keys``).
+        """
+        for record in records:
+            if "_key" not in record and is_edge:
+                _from = record.get("_from", "")
+                _to = record.get("_to", "")
+                if _from and _to:
+                    # Strip collection prefix for shorter keys
+                    from_key = _from.split("/", 1)[-1]
+                    to_key = _to.split("/", 1)[-1]
+                    record["_key"] = generate_edge_key(from_key, to_key)
+            yield record
 
     def run(self) -> dict:
         """

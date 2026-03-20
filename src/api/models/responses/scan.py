@@ -13,9 +13,9 @@ class ScanIngestResponse(BaseModel):
     Returns scan session ID and processing statistics.
     """
 
-    scan_session_id: str = Field(
+    scan_run_id: str = Field(
         ...,
-        description="Unique identifier for this scan session (use to query scan status and findings)"
+        description="Unique identifier for this scan run (use to query scan status and findings)"
     )
 
     findings_count: int = Field(
@@ -36,7 +36,7 @@ class ScanIngestResponse(BaseModel):
     class Config:
         json_schema_extra = {
             "example": {
-                "scan_session_id": "scan_abc123",
+                "scan_run_id": "scan_abc123",
                 "findings_count": 42,
                 "components_count": 150,
                 "status": "completed"

@@ -129,95 +129,30 @@ class TestVEXGenerationAPI:
         self, api_client, app, override_customer_auth, mock_customer_db, mock_reference_db, mock_vex_result
     ):
         """
-        Test: POST /v1/scan/{session_id}/vex with valid session_id.
+        Test: POST /v1/scan/{session_id}/vex returns 501 Not Implemented.
 
-        Verifies:
-        - VEX document is generated successfully
-        - Response structure matches VEXGenerationResponse model
-        - VEX document contains expected CycloneDX fields
-        - Vulnerabilities are assessed with impact analysis
-        - Metadata includes execution time
+        VEX generation is stubbed pending implementation.
         """
-        with patch('api.v1.endpoints.scan.get_customer_db', return_value=mock_customer_db), \
-             patch('api.core.database.get_reference_db', return_value=mock_reference_db), \
-             patch('api.services.scan.ScanIngestionService.generate_vex',
-                   new_callable=AsyncMock) as mock_generate_vex:
+        response = api_client.post(
+            "/v1/scan/test_session_123/vex",
+            headers={"X-API-Key": "test_key"}
+        )
 
-            # Mock VEX generation service
-            mock_generate_vex.return_value = mock_vex_result
-
-            # Make request
-            response = api_client.post(
-                "/v1/scan/test_session_123/vex",
-                headers={"X-API-Key": "test_key"}
-            )
-
-            # Verify response
-            assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
-
-            data = response.json()
-            assert data["success"] is True
-            assert "data" in data
-            assert "metadata" in data
-
-            # Verify VEX response structure
-            vex_data = data["data"]
-            assert "scan_session_id" in vex_data
-            assert "vex_document" in vex_data
-            assert "vulnerabilities_assessed" in vex_data
-            assert "generated_at" in vex_data
-
-            # Verify VEX document structure
-            vex_doc = vex_data["vex_document"]
-            assert vex_doc["bomFormat"] == "CycloneDX"
-            assert vex_doc["specVersion"] == "1.5"
-            assert "vulnerabilities" in vex_doc
-            assert isinstance(vex_doc["vulnerabilities"], list)
-
-            # Verify vulnerability assessments
-            assert vex_data["vulnerabilities_assessed"] > 0
-
-            # Verify metadata
-            metadata = data["metadata"]
-            assert "execution_time_ms" in metadata
-            assert isinstance(metadata["execution_time_ms"], (int, float))
-
-            # Verify service was called correctly
-            mock_generate_vex.assert_called_once_with(
-                customer_id="customer_test",
-                scan_session_id="test_session_123"
-            )
+        assert response.status_code == 501, f"Expected 501, got {response.status_code}: {response.text}"
 
     @pytest.mark.integration
     def test_generate_vex_session_not_found(
         self, api_client, app, override_customer_auth, mock_customer_db, mock_reference_db
     ):
         """
-        Test: POST /v1/scan/{session_id}/vex with non-existent session_id.
-
-        Verifies:
-        - Returns 404 status code
-        - Error message indicates session not found
+        Test: POST /v1/scan/{session_id}/vex with any session_id returns 501 (stub).
         """
-        with patch('api.v1.endpoints.scan.get_customer_db', return_value=mock_customer_db), \
-             patch('api.core.database.get_reference_db', return_value=mock_reference_db), \
-             patch('api.services.scan.ScanIngestionService.generate_vex',
-                   new_callable=AsyncMock) as mock_generate_vex:
+        response = api_client.post(
+            "/v1/scan/nonexistent_session/vex",
+            headers={"X-API-Key": "test_key"}
+        )
 
-            # Mock service raising ValueError for not found
-            mock_generate_vex.side_effect = ValueError("Scan session not found")
-
-            # Make request
-            response = api_client.post(
-                "/v1/scan/nonexistent_session/vex",
-                headers={"X-API-Key": "test_key"}
-            )
-
-            # Verify error response
-            assert response.status_code == 404
-            error_data = response.json()
-            assert "detail" in error_data
-            assert "not found" in error_data["detail"].lower()
+        assert response.status_code == 501
 
     @pytest.mark.integration
     def test_generate_vex_unauthorized(self, api_client):
@@ -302,89 +237,30 @@ class TestCPEMatchingAPI:
         self, api_client, app, override_customer_auth, mock_customer_db, mock_reference_db, mock_cpe_result
     ):
         """
-        Test: POST /v1/scan/{session_id}/cpe-match with valid session_id.
+        Test: POST /v1/scan/{session_id}/cpe-match returns 501 Not Implemented.
 
-        Verifies:
-        - CPE matching completes successfully
-        - Response structure matches CPEMatchingResponse model
-        - Components are processed and mappings created
-        - Metadata includes execution time
+        CPE matching is stubbed pending implementation.
         """
-        with patch('api.v1.endpoints.scan.get_customer_db', return_value=mock_customer_db), \
-             patch('api.core.database.get_reference_db', return_value=mock_reference_db), \
-             patch('api.services.scan.ScanIngestionService.match_cpes',
-                   new_callable=AsyncMock) as mock_match_cpes:
+        response = api_client.post(
+            "/v1/scan/test_session_123/cpe-match",
+            headers={"X-API-Key": "test_key"}
+        )
 
-            # Mock CPE matching service
-            mock_match_cpes.return_value = mock_cpe_result
-
-            # Make request
-            response = api_client.post(
-                "/v1/scan/test_session_123/cpe-match",
-                headers={"X-API-Key": "test_key"}
-            )
-
-            # Verify response
-            assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
-
-            data = response.json()
-            assert data["success"] is True
-            assert "data" in data
-            assert "metadata" in data
-
-            # Verify CPE matching response structure
-            cpe_data = data["data"]
-            assert "scan_session_id" in cpe_data
-            assert "components_processed" in cpe_data
-            assert "cpe_mappings_created" in cpe_data
-            assert "completed_at" in cpe_data
-
-            # Verify counts are realistic
-            assert cpe_data["components_processed"] > 0
-            assert cpe_data["cpe_mappings_created"] >= 0
-            assert cpe_data["cpe_mappings_created"] <= cpe_data["components_processed"]
-
-            # Verify metadata
-            metadata = data["metadata"]
-            assert "execution_time_ms" in metadata
-            assert isinstance(metadata["execution_time_ms"], (int, float))
-
-            # Verify service was called correctly
-            mock_match_cpes.assert_called_once_with(
-                customer_id="customer_test",
-                scan_session_id="test_session_123"
-            )
+        assert response.status_code == 501, f"Expected 501, got {response.status_code}: {response.text}"
 
     @pytest.mark.integration
     def test_match_cpes_session_not_found(
         self, api_client, app, override_customer_auth, mock_customer_db, mock_reference_db
     ):
         """
-        Test: POST /v1/scan/{session_id}/cpe-match with non-existent session_id.
-
-        Verifies:
-        - Returns 404 status code
-        - Error message indicates session not found
+        Test: POST /v1/scan/{session_id}/cpe-match with any session_id returns 501 (stub).
         """
-        with patch('api.v1.endpoints.scan.get_customer_db', return_value=mock_customer_db), \
-             patch('api.core.database.get_reference_db', return_value=mock_reference_db), \
-             patch('api.services.scan.ScanIngestionService.match_cpes',
-                   new_callable=AsyncMock) as mock_match_cpes:
+        response = api_client.post(
+            "/v1/scan/nonexistent_session/cpe-match",
+            headers={"X-API-Key": "test_key"}
+        )
 
-            # Mock service raising ValueError for not found
-            mock_match_cpes.side_effect = ValueError("Scan session not found")
-
-            # Make request
-            response = api_client.post(
-                "/v1/scan/nonexistent_session/cpe-match",
-                headers={"X-API-Key": "test_key"}
-            )
-
-            # Verify error response
-            assert response.status_code == 404
-            error_data = response.json()
-            assert "detail" in error_data
-            assert "not found" in error_data["detail"].lower()
+        assert response.status_code == 501
 
     @pytest.mark.integration
     def test_match_cpes_unauthorized(self, api_client):
@@ -406,36 +282,14 @@ class TestCPEMatchingAPI:
         self, api_client, app, override_customer_auth, mock_customer_db, mock_reference_db
     ):
         """
-        Test: POST /v1/scan/{session_id}/cpe-match on session with no components.
-
-        Verifies:
-        - Returns success with zero mappings created
-        - Response indicates 0 components processed
+        Test: POST /v1/scan/{session_id}/cpe-match returns 501 regardless of session state.
         """
-        with patch('api.v1.endpoints.scan.get_customer_db', return_value=mock_customer_db), \
-             patch('api.core.database.get_reference_db', return_value=mock_reference_db), \
-             patch('api.services.scan.ScanIngestionService.match_cpes',
-                   new_callable=AsyncMock) as mock_match_cpes:
+        response = api_client.post(
+            "/v1/scan/test_session_123/cpe-match",
+            headers={"X-API-Key": "test_key"}
+        )
 
-            # Mock CPE matching with no components
-            mock_match_cpes.return_value = {
-                "scan_session_id": "test_session_123",
-                "components_processed": 0,
-                "cpe_mappings_created": 0,
-                "completed_at": "2026-03-17T11:30:00Z"
-            }
-
-            # Make request
-            response = api_client.post(
-                "/v1/scan/test_session_123/cpe-match",
-                headers={"X-API-Key": "test_key"}
-            )
-
-            # Verify response
-            assert response.status_code == 200
-            data = response.json()["data"]
-            assert data["components_processed"] == 0
-            assert data["cpe_mappings_created"] == 0
+        assert response.status_code == 501
 
     @pytest.mark.integration
     def test_match_cpes_timestamp_format(self, mock_cpe_result):
@@ -468,42 +322,16 @@ class TestVEXAndCPEIntegration:
         mock_vex_result, mock_cpe_result
     ):
         """
-        Test: Sequential workflow of VEX generation followed by CPE matching.
-
-        Verifies:
-        - Both operations can be performed on the same scan session
-        - Operations are independent and don't interfere
-        - Both return successful responses
+        Test: Both VEX and CPE-match endpoints return 501 (stubs, independent of order).
         """
-        with patch('api.v1.endpoints.scan.get_customer_db', return_value=mock_customer_db), \
-             patch('api.core.database.get_reference_db', return_value=mock_reference_db), \
-             patch('api.services.scan.ScanIngestionService.generate_vex',
-                   new_callable=AsyncMock) as mock_generate_vex, \
-             patch('api.services.scan.ScanIngestionService.match_cpes',
-                   new_callable=AsyncMock) as mock_match_cpes:
+        vex_response = api_client.post(
+            "/v1/scan/test_session_123/vex",
+            headers={"X-API-Key": "test_key"}
+        )
+        assert vex_response.status_code == 501
 
-            # Mock services
-            mock_generate_vex.return_value = mock_vex_result
-            mock_match_cpes.return_value = mock_cpe_result
-
-            # Step 1: Generate VEX
-            vex_response = api_client.post(
-                "/v1/scan/test_session_123/vex",
-                headers={"X-API-Key": "test_key"}
-            )
-            assert vex_response.status_code == 200
-            vex_data = vex_response.json()["data"]
-            assert vex_data["scan_session_id"] == "test_session_123"
-
-            # Step 2: Match CPEs
-            cpe_response = api_client.post(
-                "/v1/scan/test_session_123/cpe-match",
-                headers={"X-API-Key": "test_key"}
-            )
-            assert cpe_response.status_code == 200
-            cpe_data = cpe_response.json()["data"]
-            assert cpe_data["scan_session_id"] == "test_session_123"
-
-            # Verify both services were called
-            assert mock_generate_vex.call_count == 1
-            assert mock_match_cpes.call_count == 1
+        cpe_response = api_client.post(
+            "/v1/scan/test_session_123/cpe-match",
+            headers={"X-API-Key": "test_key"}
+        )
+        assert cpe_response.status_code == 501

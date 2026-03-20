@@ -480,19 +480,20 @@ class TestUC004_ScanIngestion:
 
         app.dependency_overrides[get_current_customer] = _override_auth
         try:
-            with patch('api.v1.endpoints.scan.get_customer_db', return_value=mock_customer_db), \
-                 patch('api.core.database.get_reference_db', return_value=MagicMock()):
+            with patch('api.core.database.get_reference_db', return_value=MagicMock()):
 
-                # Mock scan service to return a valid response
-                with patch('api.v1.endpoints.scan.ScanIngestionService') as MockService:
+                # Mock EvidenceIngestionService (v2.2 replacement)
+                # The endpoint imports EvidenceIngestionService inside the function body from
+                # complira_graph.ingestion.service, so we patch at that import path.
+                with patch('complira_graph.ingestion.service.EvidenceIngestionService') as MockSvc:
                     mock_ingest = AsyncMock()
-                    MockService.return_value.ingest_scan = mock_ingest
                     mock_result = MagicMock()
-                    mock_result.session_id = "session_test_123"
+                    mock_result.scan_run_id = "run_test_123"
                     mock_result.findings_count = 5
                     mock_result.components_count = 3
                     mock_result.status = "completed"
                     mock_ingest.return_value = mock_result
+                    MockSvc.return_value.ingest_sbom = mock_ingest
 
                     response = test_client.post(
                         "/v1/scan/ingest",
@@ -510,14 +511,14 @@ class TestUC004_ScanIngestion:
                         headers={"X-API-Key": "test_key"}
                     )
 
-                    # AC-016: Return scan_session_id
+                    # AC-016 (v2.2): Return scan_run_id
                     assert response.status_code == 200
                     data = response.json()
                     assert "data" in data
-                    assert "scan_session_id" in data["data"]
-                    assert data["data"]["scan_session_id"] == "session_test_123"
+                    assert "scan_run_id" in data["data"]
+                    assert data["data"]["scan_run_id"] == "run_test_123"
 
-                    print("AC-012 to AC-016 PASS: Scan ingestion returns session_id")
+                    print("AC-012 to AC-016 PASS: Scan ingestion returns scan_run_id")
         finally:
             app.dependency_overrides.pop(get_current_customer, None)
 

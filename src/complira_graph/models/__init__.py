@@ -20,11 +20,6 @@ from .customer import (
     CustomerProfile,
 )
 
-from .scan import (
-    ScanSession,
-    ScanFinding,
-)
-
 __all__ = [
     "RegulatoryFramework",
     "RegulatoryRequirement",
@@ -36,6 +31,4 @@ __all__ = [
     "RequirementContent",
     "RequirementClassification",
     "CustomerProfile",
-    "ScanSession",
-    "ScanFinding",
 ]

@@ -1021,16 +1021,18 @@ def get_all_tier1_evidence(
                 }
         )
 
-        // KEV status
+        // KEV status (kev_entries is a document collection, lookup by cve_id)
         LET kev = FIRST(
-            FOR k IN 1..1 OUTBOUND vuln in_kev_catalog
+            FOR k IN kev_entries
+                FILTER k.cve_id == @cve_id
+                LIMIT 1
                 RETURN k
         )
 
-        // EPSS score (latest)
+        // EPSS score (latest) — edge collection is has_epss, fields are epss_score/score_date
         LET epss = FIRST(
-            FOR e IN 1..1 OUTBOUND vuln has_epss_score
-                SORT e.date DESC
+            FOR e IN 1..1 OUTBOUND vuln has_epss
+                SORT e.score_date DESC
                 LIMIT 1
                 RETURN e
         )
@@ -1058,14 +1060,15 @@ def get_all_tier1_evidence(
                 kev_id: kev ? kev._id : null,
                 kev_date_added: kev ? kev.date_added : null,
                 kev_due_date: kev ? kev.due_date : null,
-                kev_required_action: kev ? kev.required_action : null
+                kev_required_action: kev ? kev.required_action : null,
+                kev_known_ransomware: kev ? kev.known_ransomware_campaign_use : null
             },
 
             // Exploitability
             exploitability: {
-                epss_score: epss ? epss.epss : null,
+                epss_score: epss ? epss.epss_score : null,
                 epss_percentile: epss ? epss.percentile : null,
-                epss_date: epss ? epss.date : null,
+                epss_date: epss ? epss.score_date : null,
                 epss_id: epss ? epss._id : null,
                 exploit_available: vuln.exploit_available,
                 exploit_maturity: vuln.exploit_maturity
@@ -1171,7 +1174,8 @@ def get_all_tier2_evidence(
                             _id: attack._id,
                             technique_id: attack.technique_id,
                             technique_name: attack.name,
-                            tactic: attack.tactic,
+                            tactic: LENGTH(attack.tactic_names) > 0 ? attack.tactic_names[0] : attack.tactic,
+                            description: attack.description,
                             capec_id: capec.capec_id,
                             cwe_id: cwe.cwe_id,
                             graph_path: [vuln._id, cwe._id, capec._id, attack._id]

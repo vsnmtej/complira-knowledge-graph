@@ -302,12 +302,12 @@ class CWEEvidence(BaseModel):
 
     # Graph provenance
     graph_id: str = Field(
-        description="ArangoDB document _id (e.g., cwes/CWE_502)",
-        pattern="^cwes/.+$"
+        description="ArangoDB document _id (e.g., weaknesses/CWE_502)",
+        min_length=1
     )
     edge_id: str = Field(
         description="Edge _id linking CVE to CWE (has_weakness edge)",
-        pattern="^has_weakness/.+$"
+        min_length=1
     )
 
     @field_validator('cwe_id')
@@ -625,13 +625,13 @@ class AttackTechniqueEvidence(BaseModel):
         description="Technique name (e.g., 'Exploit Public-Facing Application')",
         min_length=1
     )
-    tactic: str = Field(
-        description="ATT&CK tactic (e.g., 'Initial Access', 'Execution')",
-        min_length=1
+    tactic: Optional[str] = Field(
+        None,
+        description="ATT&CK tactic (e.g., 'Initial Access', 'Execution')"
     )
-    description: str = Field(
-        description="Technique description from ATT&CK",
-        min_length=1
+    description: Optional[str] = Field(
+        None,
+        description="Technique description from ATT&CK"
     )
 
     # Graph provenance (full chain)

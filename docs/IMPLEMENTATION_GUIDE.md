@@ -187,20 +187,30 @@ Reviewers will check:
 ```python
 # 1. Create service file
 # src/api/services/reporting_service.py
+#
+# v2.2 update: scan evidence now lives in the reference DB (scan_runs, scan_findings).
+# Use EvidenceRunRepository / EvidenceFindingRepository from complira_graph.ingestion.
+# The old ScanSessionRepository (api/repositories/scan.py) is deprecated.
 
 from api.services.base import BaseGraphService
-from api.repositories.scan import ScanSessionRepository
+from complira_graph.ingestion.repositories import EvidenceRunRepository, EvidenceFindingRepository
 
 class ReportingService(BaseGraphService):
     """Generate reports from scan data."""
 
-    async def generate_report(self, customer_id: str, scan_session_id: str):
-        # Get customer database
-        customer_db = get_customer_db(customer_id)
+    async def generate_report(self, tenant_id: str, scan_run_id: str):
+        # Reference DB holds scan_runs and scan_findings in v2.2
+        ref_db = get_reference_db()
 
-        # Use repository
-        session_repo = ScanSessionRepository(customer_db)
-        session = session_repo.get(scan_session_id)
+        # Query scan run
+        run = ref_db.collection("scan_runs").get(scan_run_id)
+
+        # Query findings for this run
+        cursor = ref_db.aql.execute(
+            "FOR f IN scan_findings FILTER f.scan_run_id == @run_id AND f.tenant_id == @tid RETURN f",
+            bind_vars={"run_id": scan_run_id, "tid": tenant_id},
+        )
+        findings = list(cursor)
 
         # Business logic...
         return report

@@ -26,6 +26,7 @@ from arango.database import StandardDatabase
 from openpyxl import load_workbook
 
 from complira_graph.agents.base import BaseIngestionAgent
+from complira_graph.utils.keys import generate_edge_key
 
 
 class DerivedEdgesAgent(BaseIngestionAgent):
@@ -259,8 +260,11 @@ class DerivedEdgesAgent(BaseIngestionAgent):
         timestamp = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
         for edge in raw_edges:
+            from_key = edge["technique_key"]
+            to_key = edge["cwe_key"]
             edges.append(
                 {
+                    "_key": generate_edge_key(from_key, to_key),
                     "_from": edge["technique_id"],
                     "_to": edge["cwe_id"],
                     "source": "derived",
@@ -332,8 +336,11 @@ class DerivedEdgesAgent(BaseIngestionAgent):
                 skipped += 1
                 continue
 
+            from_key = technique_doc_id.split("/", 1)[-1]
+            to_key = control_doc_id.split("/", 1)[-1]
             edges.append(
                 {
+                    "_key": generate_edge_key(from_key, to_key),
                     "_from": technique_doc_id,
                     "_to": control_doc_id,
                     "source": "mitre_mapping",
@@ -396,7 +403,7 @@ class DerivedEdgesAgent(BaseIngestionAgent):
                 f"Inserting {len(weakness_edges)} technique_exploits_weakness edges"
             )
             collection = self.db.collection("technique_exploits_weakness")
-            result = collection.import_bulk(weakness_edges, on_duplicate="ignore")
+            result = collection.import_bulk(weakness_edges, on_duplicate="update")
             results["technique_exploits_weakness"] = {
                 "created": result["created"],
                 "errors": result["errors"],
@@ -413,7 +420,7 @@ class DerivedEdgesAgent(BaseIngestionAgent):
                 f"Inserting {len(control_edges)} technique_mitigated_by_control edges"
             )
             collection = self.db.collection("technique_mitigated_by_control")
-            result = collection.import_bulk(control_edges, on_duplicate="ignore")
+            result = collection.import_bulk(control_edges, on_duplicate="update")
             results["technique_mitigated_by_control"] = {
                 "created": result["created"],
                 "errors": result["errors"],

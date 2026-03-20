@@ -13,6 +13,7 @@ from typing import Dict
 from api.parsers.base import IScanParser
 from api.parsers.sarif import SARIFParser
 from api.parsers.cyclonedx import CycloneDXParser
+from api.parsers.grype_analyzer import GryperAnalyzer
 import structlog
 
 logger = structlog.get_logger()
@@ -25,6 +26,7 @@ class ParserFactory:
     Supports:
     - sarif: SARIF 2.1.0 (SAST/DAST tools)
     - cyclonedx: CycloneDX 1.4/1.5 (SBOM/SCA tools)
+    - grype: Grype native JSON (fix.state → scanner_vex_status)
 
     Future:
     - osv: OSV (Open Source Vulnerabilities)
@@ -35,6 +37,7 @@ class ParserFactory:
     _parsers: Dict[str, type] = {
         "sarif": SARIFParser,
         "cyclonedx": CycloneDXParser,
+        "grype": GryperAnalyzer,      # Grype native JSON (fix.state → scanner_vex_status)
         # Future parsers:
         # "osv": OSVParser,
         # "vex": VEXParser,

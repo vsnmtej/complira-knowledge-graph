@@ -160,58 +160,14 @@ def get_customer(
 
 def get_scan_service():
     """
-    Get scan ingestion service.
+    Get evidence ingestion service (v2.2).
 
     Returns:
-        ScanIngestionService: Service instance with injected dependencies
-
-    Usage:
-        @app.post("/v1/scan/ingest")
-        def ingest_scan(
-            service: ScanIngestionService = Depends(get_scan_service)
-        ):
-            result = await service.ingest_scan(...)
-            return result
+        EvidenceIngestionService: Service instance with reference DB injected.
     """
-    # Import here to avoid circular dependency
-    from api.services.scan import ScanIngestionService
+    from complira_graph.ingestion.service import EvidenceIngestionService
 
-    return ScanIngestionService(
-        db=get_reference_db(),
-        cache=RedisCacheService(),
-    )
-
-
-def get_enrichment_service():
-    """
-    Get enrichment service.
-
-    Returns:
-        EnrichmentService: Service instance with injected dependencies
-    """
-    # Import here to avoid circular dependency
-    from api.services.enrichment import EnrichmentService
-
-    return EnrichmentService(
-        db=get_reference_db(),
-        cache=RedisCacheService(),
-    )
-
-
-def get_compaction_service():
-    """
-    Get compaction service.
-
-    Returns:
-        CompactionService: Service instance with injected dependencies
-    """
-    # Import here to avoid circular dependency
-    from api.services.compaction import CompactionService
-
-    return CompactionService(
-        db=get_reference_db(),
-        cache=RedisCacheService(),
-    )
+    return EvidenceIngestionService(db=get_reference_db())
 
 
 def get_blast_radius_service():

@@ -1,19 +1,20 @@
 """
-Scan ingestion endpoints.
+Scan ingestion endpoints (v2.2).
 
-POST /v1/scan/ingest - Ingest scan results
-GET /v1/scan/{session_id} - Get scan session details
-GET /v1/scan/{session_id}/findings - List scan findings
-GET /v1/scans - List all scans for customer
+POST /v1/scan/ingest - Ingest scan results via EvidenceIngestionService
+GET  /v1/scan/{run_id} - Get scan run details from scan_runs collection
+GET  /v1/scans - List scan runs for current tenant
+GET  /v1/scan/{run_id}/findings - List findings for a scan run
 """
 
-from fastapi import APIRouter, Depends, HTTPException, Query
-from typing import List
+import json
+import time
+from typing import List, Optional
+
 import structlog
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from api.core.security import Customer, get_current_customer
-from api.core.database import get_customer_db
-from api.services.scan import ScanIngestionService
 from api.models.requests.scan import ScanIngestRequest
 from api.models.responses.scan import (
     ScanIngestResponse,
@@ -29,6 +30,43 @@ logger = structlog.get_logger()
 router = APIRouter()
 
 
+# ---------------------------------------------------------------------------
+# Tool name derivation
+# ---------------------------------------------------------------------------
+
+_FORMAT_SCAN_TYPE_TO_TOOL = {
+    ("json", "sast"): "semgrep",
+    ("json", "iac"): "checkov",
+    ("json", "sca"): "grype",
+    ("json", "dast"): "zap",
+    ("json", "container"): "grype",
+    ("sarif", "sast"): "sarif",
+    ("sarif", "dast"): "sarif",
+    ("sarif", "sca"): "sarif",
+    ("sarif", "iac"): "sarif",
+    ("sarif", "container"): "sarif",
+}
+
+
+def _derive_tool_name(request: ScanIngestRequest) -> str:
+    """
+    Derive ADAPTER_REGISTRY tool key from the ingest request.
+
+    Priority:
+      1. request.metadata["tool_name"] — explicit caller override
+      2. (format, scan_type) lookup table
+      3. request.format — fallback (e.g. "sarif")
+    """
+    if request.metadata.get("tool_name"):
+        return request.metadata["tool_name"]
+    key = (request.format, request.scan_type)
+    return _FORMAT_SCAN_TYPE_TO_TOOL.get(key, request.format)
+
+
+# ---------------------------------------------------------------------------
+# POST /v1/scan/ingest
+# ---------------------------------------------------------------------------
+
 @router.post("/ingest", response_model=APIResponse[ScanIngestResponse])
 async def ingest_scan_endpoint(
     request: ScanIngestRequest,
@@ -37,80 +75,68 @@ async def ingest_scan_endpoint(
     """
     POST /v1/scan/ingest
 
-    Ingest scan results from SAST, DAST, SCA, or SBOM tools.
+    Ingest scan results from SAST, DAST, SCA, IaC, or SBOM tools into the
+    v2.2 scanner evidence layer.
 
     Supported formats:
-    - **SARIF** 2.1.0 (GitHub Code Scanning, Semgrep, Snyk, CodeQL, etc.)
-    - **CycloneDX** 1.4/1.5 (Dependency-Check, Syft, Grype, Trivy, etc.)
-
-    Flow:
-    1. Parse scan payload using appropriate parser
-    2. Create scan session
-    3. Store findings and components
-    4. Create graph edges (finding → CVE, component → finding)
+    - **SARIF** 2.1.0 (Semgrep, CodeQL, Snyk, etc.)
+    - **JSON** native tool format (Checkov, Grype, Gitleaks, etc.)
+    - **CycloneDX** 1.4/1.5 (SBOM path via ingest_sbom)
 
     Returns:
-    - **scan_session_id**: Unique identifier for this scan (use to query status/findings)
-    - **findings_count**: Number of vulnerabilities detected
-    - **components_count**: Number of SBOM components (SCA/SBOM scans only)
-    - **status**: Processing status (completed, processing, failed)
-
-    Example:
-    ```bash
-    curl -X POST https://api.complira.dev/v1/scan/ingest \\
-      -H "X-API-Key: your_api_key" \\
-      -H "Content-Type: application/json" \\
-      -d '{
-        "format": "sarif",
-        "scan_type": "sast",
-        "payload": { ... sarif json ... },
-        "metadata": {
-          "repository": "https://github.com/org/repo",
-          "branch": "main"
-        }
-      }'
-    ```
+    - **scan_run_id**: Unique identifier for this scan run
+    - **findings_count**: Number of findings ingested
+    - **components_count**: Number of SBOM components (SBOM scans only)
+    - **status**: completed | failed
     """
-    import time
     start_time = time.time()
 
     try:
-        # Get service dependencies
-        from api.core.cache import RedisCacheService
         from api.core.database import get_reference_db
+        from complira_graph.ingestion.service import EvidenceIngestionService
 
-        service = ScanIngestionService(
-            db=get_reference_db(),
-            cache=RedisCacheService(),
-        )
+        ref_db = get_reference_db()
+        svc = EvidenceIngestionService(ref_db)
 
-        # Ingest scan
-        result = await service.ingest_scan(
-            customer_id=customer.id,
-            scan_request=request,
-        )
+        tool_name = _derive_tool_name(request)
+        raw_payload = json.dumps(request.payload).encode()
 
-        # Build response (result is ScanSession Pydantic model)
+        if request.format == "cyclonedx" or request.scan_type == "sbom":
+            # SBOM component path
+            components_raw = request.payload.get("components", [])
+            result = await svc.ingest_sbom(
+                tenant_id=customer.id,
+                components_raw=components_raw,
+                sbom_format="cyclonedx",
+                project_id=request.project_id,
+                repository_id=request.repository_id,
+            )
+        else:
+            result = await svc.ingest_scan(
+                tenant_id=customer.id,
+                tool_name=tool_name,
+                raw_payload=raw_payload,
+                project_id=request.project_id,
+                repository_id=request.repository_id,
+            )
+
         scan_response = ScanIngestResponse(
-            scan_session_id=result.session_id,  # Use model attribute
+            scan_run_id=result.scan_run_id,
             findings_count=result.findings_count,
             components_count=result.components_count,
             status=result.status,
         )
-
-        execution_time_ms = (time.time() - start_time) * 1000
 
         return APIResponse(
             success=True,
             data=scan_response,
             metadata=ResponseMetadata(
                 cache_hit=False,
-                execution_time_ms=execution_time_ms,
+                execution_time_ms=(time.time() - start_time) * 1000,
             ),
         )
 
     except ValueError as e:
-        # Validation or parsing error (400 Bad Request)
         logger.warning(
             "Scan ingestion validation error",
             customer_id=customer.id,
@@ -119,74 +145,53 @@ async def ingest_scan_endpoint(
         raise HTTPException(status_code=400, detail=str(e))
 
     except Exception as e:
-        # Internal error (500)
         logger.error(
             "Scan ingestion failed",
             customer_id=customer.id,
             error=str(e),
             error_type=type(e).__name__,
         )
-        raise HTTPException(
-            status_code=500,
-            detail="Internal server error during scan ingestion"
-        )
+        raise HTTPException(status_code=500, detail="Internal server error during scan ingestion")
 
 
-@router.get("/{session_id}", response_model=APIResponse[ScanSessionResponse])
-async def get_scan_session(
-    session_id: str,
+# ---------------------------------------------------------------------------
+# GET /v1/scan/{run_id}
+# ---------------------------------------------------------------------------
+
+@router.get("/{run_id}", response_model=APIResponse[ScanSessionResponse])
+async def get_scan_run(
+    run_id: str,
     customer: Customer = Depends(get_current_customer),
 ):
     """
-    GET /v1/scan/{session_id}
+    GET /v1/scan/{run_id}
 
-    Get scan session details.
-
-    Args:
-    - **session_id**: Scan session identifier (from /v1/scan/ingest response)
-
-    Returns:
-    - Full scan session details including status, findings count, metadata
-
-    Example:
-    ```bash
-    curl https://api.complira.dev/v1/scan/scan_abc123 \\
-      -H "X-API-Key: your_api_key"
-    ```
+    Get scan run details from the scan_runs collection.
     """
     try:
-        from api.core.cache import RedisCacheService
+        from api.core.database import get_reference_db
 
-        customer_db = get_customer_db(customer.id)
-        service = ScanIngestionService(
-            db=customer_db,
-            cache=RedisCacheService(),
-        )
+        ref_db = get_reference_db()
+        doc = ref_db.collection("scan_runs").get(run_id)
 
-        # Get session
-        session = await service.get_session(session_id, customer.id)
+        if not doc or doc.get("tenant_id") != customer.id:
+            raise HTTPException(status_code=404, detail=f"Scan run not found: {run_id}")
 
-        if not session:
-            raise HTTPException(
-                status_code=404,
-                detail=f"Scan session not found: {session_id}"
-            )
-
-        # Build response
+        tools = doc.get("tools_invoked") or []
         response = ScanSessionResponse(
-            session_id=session["_key"],
-            tool_name=session["tool_name"],
-            tool_version=session["tool_version"],
-            scan_type=session.get("scan_type", "unknown"),
-            scan_timestamp=session["scan_timestamp"],
-            status=session["status"],
-            findings_count=session["findings_count"],
-            components_count=session.get("components_count", 0),
-            created_at=session["created_at"],
-            updated_at=session["updated_at"],
-            metadata=session.get("metadata", {}),
-            project_id=session.get("project_id"),
-            repository_id=session.get("repository_id"),
+            session_id=doc["_key"],
+            tool_name=tools[0] if tools else "unknown",
+            tool_version=doc.get("tool_version", "unknown"),
+            scan_type=doc.get("scan_type", "unknown"),
+            scan_timestamp=doc.get("created_at", ""),
+            status=doc.get("status", "unknown"),
+            findings_count=doc.get("finding_counts", {}).get("total", 0),
+            components_count=doc.get("components_count", 0),
+            created_at=doc.get("created_at", ""),
+            updated_at=doc.get("completed_at") or doc.get("created_at", ""),
+            metadata=doc.get("metadata", {}),
+            project_id=doc.get("project_id"),
+            repository_id=doc.get("repository_id"),
         )
 
         return APIResponse(
@@ -199,74 +204,62 @@ async def get_scan_session(
         raise
 
     except Exception as e:
-        logger.error(
-            "Failed to get scan session",
-            session_id=session_id,
-            customer_id=customer.id,
-            error=str(e),
-        )
+        logger.error("Failed to get scan run", run_id=run_id, customer_id=customer.id, error=str(e))
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@router.get("/{session_id}/findings", response_model=APIResponse[List[ScanFindingResponse]])
+# ---------------------------------------------------------------------------
+# GET /v1/scan/{run_id}/findings
+# ---------------------------------------------------------------------------
+
+@router.get("/{run_id}/findings", response_model=APIResponse[List[ScanFindingResponse]])
 async def list_scan_findings(
-    session_id: str,
+    run_id: str,
     customer: Customer = Depends(get_current_customer),
-    limit: int = Query(100, ge=1, le=1000, description="Maximum findings to return"),
-    offset: int = Query(0, ge=0, description="Number of findings to skip"),
+    limit: int = Query(100, ge=1, le=1000),
+    offset: int = Query(0, ge=0),
 ):
     """
-    GET /v1/scan/{session_id}/findings
+    GET /v1/scan/{run_id}/findings
 
-    List findings for a scan session.
-
-    Args:
-    - **session_id**: Scan session identifier
-    - **limit**: Maximum findings to return (1-1000, default 100)
-    - **offset**: Number of findings to skip (for pagination)
-
-    Returns:
-    - List of findings sorted by severity (CRITICAL → HIGH → MEDIUM → LOW)
-
-    Example:
-    ```bash
-    curl 'https://api.complira.dev/v1/scan/scan_abc123/findings?limit=50' \\
-      -H "X-API-Key: your_api_key"
-    ```
+    List findings for a scan run from the scan_findings collection.
     """
     try:
-        from api.core.cache import RedisCacheService
+        from api.core.database import get_reference_db
 
-        customer_db = get_customer_db(customer.id)
-        service = ScanIngestionService(
-            db=customer_db,
-            cache=RedisCacheService(),
+        ref_db = get_reference_db()
+
+        # Verify ownership
+        run_doc = ref_db.collection("scan_runs").get(run_id)
+        if not run_doc or run_doc.get("tenant_id") != customer.id:
+            raise HTTPException(status_code=404, detail=f"Scan run not found: {run_id}")
+
+        cursor = ref_db.aql.execute(
+            """
+            FOR f IN scan_findings
+                FILTER f.scan_run_id == @run_id AND f.tenant_id == @tenant_id
+                SORT f.severity ASC
+                LIMIT @offset, @limit
+                RETURN f
+            """,
+            bind_vars={
+                "run_id": run_id,
+                "tenant_id": customer.id,
+                "offset": offset,
+                "limit": limit,
+            },
         )
+        findings = list(cursor)
 
-        # Get findings (service verifies session exists and customer owns it)
-        findings = await service.list_session_findings(
-            session_id=session_id,
-            customer_id=customer.id,
-            limit=limit,
-            offset=offset,
-        )
-
-        if not findings and limit > 0:
-            # Check if session exists
-            session = await service.get_session(session_id, customer.id)
-            if not session:
-                raise HTTPException(status_code=404, detail="Scan session not found")
-
-        # Build response
         findings_response = [
             ScanFindingResponse(
                 finding_id=f["_key"],
-                cve_id=f["cve_id"],
-                severity=f["severity"],
-                description=f["description"],
-                location=f["location"],
-                tool_name=f["tool_name"],
-                created_at=f["created_at"],
+                cve_id=f.get("cve_id") or f.get("rule_id") or "N/A",
+                severity=f.get("severity") or "unknown",
+                description=f.get("message") or f.get("description") or "",
+                location=f.get("file_path") or f.get("location") or "",
+                tool_name=f.get("tool", "unknown"),
+                created_at=f.get("ingested_at") or "",
             )
             for f in findings
         ]
@@ -281,281 +274,109 @@ async def list_scan_findings(
         raise
 
     except Exception as e:
-        logger.error(
-            "Failed to list scan findings",
-            session_id=session_id,
-            customer_id=customer.id,
-            error=str(e),
-        )
+        logger.error("Failed to list findings", run_id=run_id, customer_id=customer.id, error=str(e))
         raise HTTPException(status_code=500, detail="Internal server error")
 
+
+# ---------------------------------------------------------------------------
+# GET /v1/scans
+# ---------------------------------------------------------------------------
 
 @router.get("s", response_model=APIResponse[List[ScanSessionResponse]])
 async def list_scans(
     customer: Customer = Depends(get_current_customer),
-    limit: int = Query(100, ge=1, le=1000, description="Maximum scans to return"),
-    offset: int = Query(0, ge=0, description="Number of scans to skip"),
-    project_id: str = Query(None, description="Filter by project ID"),
-    repository_id: str = Query(None, description="Filter by repository ID"),
+    limit: int = Query(100, ge=1, le=1000),
+    offset: int = Query(0, ge=0),
+    project_id: Optional[str] = Query(None),
+    repository_id: Optional[str] = Query(None),
 ):
     """
     GET /v1/scans
 
-    List all scan sessions for current customer.
-
-    Args:
-    - **limit**: Maximum scans to return (1-1000, default 100)
-    - **offset**: Number of scans to skip (for pagination)
-    - **project_id**: Filter scans by project ID (optional)
-    - **repository_id**: Filter scans by repository ID (optional)
-
-    Returns:
-    - List of scan sessions sorted by created_at DESC (newest first)
-
-    Example:
-    ```bash
-    curl 'https://api.complira.dev/v1/scans?limit=20&repository_id=repo_abc123' \\
-      -H "X-API-Key: your_api_key"
-    ```
+    List scan runs for the current tenant, newest first.
     """
     try:
-        from api.core.cache import RedisCacheService
+        from api.core.database import get_reference_db
 
-        customer_db = get_customer_db(customer.id)
-        service = ScanIngestionService(
-            db=customer_db,
-            cache=RedisCacheService(),
+        ref_db = get_reference_db()
+
+        filters = "FILTER r.tenant_id == @tenant_id"
+        bind_vars: dict = {"tenant_id": customer.id, "offset": offset, "limit": limit}
+        if project_id:
+            filters += " AND r.project_id == @project_id"
+            bind_vars["project_id"] = project_id
+        if repository_id:
+            filters += " AND r.repository_id == @repository_id"
+            bind_vars["repository_id"] = repository_id
+
+        cursor = ref_db.aql.execute(
+            f"""
+            FOR r IN scan_runs
+                {filters}
+                SORT r.created_at DESC
+                LIMIT @offset, @limit
+                RETURN r
+            """,
+            bind_vars=bind_vars,
         )
+        runs = list(cursor)
 
-        # Get sessions (filtering will be implemented in service layer)
-        sessions = await service.list_customer_sessions(
-            customer_id=customer.id,
-            limit=limit,
-            offset=offset,
-            project_id=project_id,
-            repository_id=repository_id,
-        )
-
-        # Build response (sessions are ScanSession Pydantic models)
-        sessions_response = [
+        response = [
             ScanSessionResponse(
-                session_id=s.session_id,
-                tool_name=s.tool_name,
-                tool_version=s.tool_version,
-                scan_type=s.scan_type,
-                scan_timestamp=s.scan_timestamp,
-                status=s.status,
-                findings_count=s.findings_count,
-                components_count=s.components_count,
-                created_at=s.created_at,
-                updated_at=s.updated_at,
-                metadata=s.metadata,
-                project_id=s.project_id,
-                repository_id=s.repository_id,
+                session_id=r["_key"],
+                tool_name=(r.get("tools_invoked") or ["unknown"])[0],
+                tool_version=r.get("tool_version", "unknown"),
+                scan_type=r.get("scan_type", "unknown"),
+                scan_timestamp=r.get("created_at", ""),
+                status=r.get("status", "unknown"),
+                findings_count=r.get("finding_counts", {}).get("total", 0),
+                components_count=r.get("components_count", 0),
+                created_at=r.get("created_at", ""),
+                updated_at=r.get("completed_at") or r.get("created_at", ""),
+                metadata=r.get("metadata", {}),
+                project_id=r.get("project_id"),
+                repository_id=r.get("repository_id"),
             )
-            for s in sessions
+            for r in runs
         ]
 
         return APIResponse(
             success=True,
-            data=sessions_response,
+            data=response,
             metadata=ResponseMetadata(cache_hit=False),
         )
 
     except Exception as e:
-        logger.error(
-            "Failed to list scans",
-            customer_id=customer.id,
-            error=str(e),
-        )
+        logger.error("Failed to list scans", customer_id=customer.id, error=str(e))
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@router.post("/{session_id}/vex", response_model=APIResponse[VEXGenerationResponse])
+# ---------------------------------------------------------------------------
+# POST /v1/scan/{run_id}/vex  (not yet implemented in v2.2)
+# POST /v1/scan/{run_id}/cpe-match  (not yet implemented in v2.2)
+# ---------------------------------------------------------------------------
+
+@router.post("/{run_id}/vex", response_model=APIResponse[VEXGenerationResponse])
 async def generate_vex_endpoint(
-    session_id: str,
+    run_id: str,
     customer: Customer = Depends(get_current_customer),
 ):
     """
-    POST /v1/scan/{session_id}/vex
+    POST /v1/scan/{run_id}/vex
 
-    Generate VEX (Vulnerability Exploitability eXchange) document for a scan session.
-
-    VEX documents provide machine-readable assessments of vulnerability impact
-    in the context of specific products/components.
-
-    Args:
-    - **session_id**: Scan session identifier (from /v1/scan/ingest response)
-
-    Returns:
-    - **vex_document**: CycloneDX VEX document (JSON format)
-    - **vulnerabilities_assessed**: Number of vulnerabilities analyzed
-    - **generated_at**: Timestamp of VEX generation
-
-    Example:
-    ```bash
-    curl -X POST https://api.complira.dev/v1/scan/{session_id}/vex \\
-      -H "X-API-Key: your_api_key"
-    ```
-
-    Caching:
-    - VEX documents are cached for 24 hours (identical SBOM = cached VEX)
+    VEX generation is not yet available in the v2.2 evidence pipeline.
     """
-    import time
-    start_time = time.time()
-
-    try:
-        # Get service dependencies
-        from api.core.cache import RedisCacheService
-        from api.core.database import get_reference_db
-
-        service = ScanIngestionService(
-            db=get_reference_db(),
-            cache=RedisCacheService(),
-        )
-
-        # Generate VEX
-        result = await service.generate_vex(
-            customer_id=customer.id,
-            scan_session_id=session_id,
-        )
-
-        # Build response
-        vex_response = VEXGenerationResponse(
-            scan_session_id=result["scan_session_id"],
-            vex_document=result["vex_document"],
-            vulnerabilities_assessed=result["vulnerabilities_assessed"],
-            generated_at=result["generated_at"],
-        )
-
-        execution_time_ms = (time.time() - start_time) * 1000
-
-        return APIResponse(
-            success=True,
-            data=vex_response,
-            metadata=ResponseMetadata(
-                cache_hit=False,
-                execution_time_ms=execution_time_ms,
-            ),
-        )
-
-    except ValueError as e:
-        # Validation error (404 Not Found or 400 Bad Request)
-        logger.warning(
-            "VEX generation validation error",
-            customer_id=customer.id,
-            session_id=session_id,
-            error=str(e),
-        )
-        status_code = 404 if "not found" in str(e).lower() else 400
-        raise HTTPException(status_code=status_code, detail=str(e))
-
-    except Exception as e:
-        # Internal error (500)
-        logger.error(
-            "VEX generation failed",
-            customer_id=customer.id,
-            session_id=session_id,
-            error=str(e),
-            error_type=type(e).__name__,
-        )
-        raise HTTPException(
-            status_code=500,
-            detail="Internal server error during VEX generation"
-        )
+    raise HTTPException(status_code=501, detail="VEX generation not yet implemented in v2.2")
 
 
-@router.post("/{session_id}/cpe-match", response_model=APIResponse[CPEMatchingResponse])
+@router.post("/{run_id}/cpe-match", response_model=APIResponse[CPEMatchingResponse])
 async def match_cpes_endpoint(
-    session_id: str,
+    run_id: str,
     customer: Customer = Depends(get_current_customer),
 ):
     """
-    POST /v1/scan/{session_id}/cpe-match
+    POST /v1/scan/{run_id}/cpe-match
 
-    Generate CPE (Common Platform Enumeration) mappings for SBOM components.
-
-    CPE mappings enable vulnerability matching by linking Package URLs (PURLs)
-    to CPE identifiers used in CVE records.
-
-    Args:
-    - **session_id**: Scan session identifier (from /v1/scan/ingest response)
-
-    Returns:
-    - **components_processed**: Number of components analyzed
-    - **cpe_mappings_created**: Number of matched_by_cpe edges created
-    - **completed_at**: Timestamp of completion
-
-    Example:
-    ```bash
-    curl -X POST https://api.complira.dev/v1/scan/{session_id}/cpe-match \\
-      -H "X-API-Key: your_api_key"
-    ```
-
-    Note:
-    - Uses Claude Sonnet 4.5 for intelligent PURL→CPE mapping
-    - Only processes components without existing CPE mappings
-    - May take several minutes for large SBOMs (150+ components)
+    CPE matching is not yet available in the v2.2 evidence pipeline.
     """
-    import time
-    start_time = time.time()
-
-    try:
-        # Get service dependencies
-        from api.core.cache import RedisCacheService
-        from api.core.database import get_reference_db
-
-        service = ScanIngestionService(
-            db=get_reference_db(),
-            cache=RedisCacheService(),
-        )
-
-        # Match CPEs
-        result = await service.match_cpes(
-            customer_id=customer.id,
-            scan_session_id=session_id,
-        )
-
-        # Build response
-        cpe_response = CPEMatchingResponse(
-            scan_session_id=result["scan_session_id"],
-            components_processed=result["components_processed"],
-            cpe_mappings_created=result["cpe_mappings_created"],
-            completed_at=result["completed_at"],
-        )
-
-        execution_time_ms = (time.time() - start_time) * 1000
-
-        return APIResponse(
-            success=True,
-            data=cpe_response,
-            metadata=ResponseMetadata(
-                cache_hit=False,
-                execution_time_ms=execution_time_ms,
-            ),
-        )
-
-    except ValueError as e:
-        # Validation error (404 Not Found or 400 Bad Request)
-        logger.warning(
-            "CPE matching validation error",
-            customer_id=customer.id,
-            session_id=session_id,
-            error=str(e),
-        )
-        status_code = 404 if "not found" in str(e).lower() else 400
-        raise HTTPException(status_code=status_code, detail=str(e))
-
-    except Exception as e:
-        # Internal error (500)
-        logger.error(
-            "CPE matching failed",
-            customer_id=customer.id,
-            session_id=session_id,
-            error=str(e),
-            error_type=type(e).__name__,
-        )
-        raise HTTPException(
-            status_code=500,
-            detail="Internal server error during CPE matching"
-        )
+    raise HTTPException(status_code=501, detail="CPE matching not yet implemented in v2.2")

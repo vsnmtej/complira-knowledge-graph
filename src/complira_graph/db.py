@@ -3,17 +3,26 @@ ArangoDB connection management and schema initialization.
 
 This module handles:
 - Database connection pooling
-- Schema creation (27 document collections, 35 edge collections for v1.0 + Phase 3A)
+- Schema creation (42 document collections, 49 edge collections)
 - Index management
 - Health checks
 
 v1.0 + Phase 3A Scope:
-- Core Vulnerability Intelligence (6 doc, 6 edge)
-- Phase 3A: VulnCheck Intelligence (5 doc, 9 edge) ← NEW
+- Core Vulnerability Intelligence (8 doc, 6 edge)
+- Phase 3A: VulnCheck Intelligence (5 doc, 9 edge)
 - Threat & Attack Frameworks (5 doc, 7 edge)
-- Compliance & Regulatory (5 doc, 4 edge)
+- Compliance & Regulatory (5 doc, 5 edge)
 - Software Identity & Supply Chain (5 doc, 5 edge)
-- System Collections (2 doc, 4 edge)
+- System Collections (1 doc, 0 edge)
+
+Phase 5: Web UI & Multi-Tenant:
+- Organizations, Users, API Tokens, Audit Log (4 doc, 3 edge)
+- Multi-Tenant Hierarchy: Projects, Repositories (2 doc, 0 edge)
+
+Other:
+- LLM Enrichments (1 doc, 0 edge)
+- Customer API Keys (1 doc, 0 edge)
+- EPSS History linkage (0 doc, 1 edge)
 
 Phase 3A VulnCheck Integration:
 - exploit_intelligence, ransomware_families, botnets, exploit_chains, eol_products
@@ -22,8 +31,15 @@ Phase 3A VulnCheck Integration:
 - botnet_uses_technique, vuln_triggers_requirement
 - Note: canary_observations removed (402 Payment Required - requires Exploit & Vulnerability Intelligence subscription)
 
-Deferred to v2.0:
-- Scanner Evidence Layers 0-4 (8 doc, 10 edge)
+v2.2 Scanner Evidence Layer:
+- scan_runs, scan_findings, detected_controls, evidence_packages (4 doc)
+- component_has_vuln, finding_maps_to_weakness, finding_triggers_req,
+  detected_control_maps_to, control_in_component, finding_in_component,
+  evidence_links_finding, evidence_for_project, project_uses_component (9 edge)
+- Architecture: components are global (purl-keyed), projects link via
+  project_uses_component edge. tenant_id required on all evidence collections.
+
+Deferred to v3.0:
 - Process Evidence Layer 5 (4 doc, 6 edge)
 - Document Provenance Layer 6 (3 doc, 3 edge)
 """
@@ -38,7 +54,7 @@ from .config import get_settings
 
 logger = structlog.get_logger()
 
-# ========== Document Collections (29 total - v1.0 scope + Phase 3A + system) ==========
+# ========== Document Collections (42 total) ==========
 DOCUMENT_COLLECTIONS = [
     # Core Vulnerability Intelligence (8 collections)
     "vulnerabilities",           # CVE records (NVD, OSV, GHSA)
@@ -80,12 +96,30 @@ DOCUMENT_COLLECTIONS = [
 
     # System Collections
     "agent_checkpoints",         # Agent execution checkpoints for resume support
+    "llm_enrichments",           # LLM-generated enrichment data (CWE↔CVE mappings, etc.)
 
-    # Multi-Tenant SaaS (1 collection - Phase 0)
+    # Multi-Tenant SaaS (Phase 0)
     "customer_profiles",         # Customer metadata and authentication
+    "customer_api_keys",         # Per-customer API keys for programmatic access
+
+    # Phase 5: Web UI & Multi-Tenant (4 collections)
+    "organizations",             # Organization profiles (slug-keyed)
+    "users",                     # User accounts with org membership
+    "api_tokens",                # API tokens for programmatic access (org-scoped)
+    "audit_log",                 # Audit trail for compliance and security
+
+    # Multi-Tenant Hierarchy (2 collections)
+    "projects",                  # Customer projects grouping repositories
+    "repositories",              # Source code repositories linked to projects
+
+    # v2.2 Scanner Evidence Layer (4 collections — tenant_id required)
+    "scan_runs",                 # Pipeline execution metadata (replaces scan_sessions in reference DB)
+    "scan_findings",             # Universal scanner findings (SAST/secrets/DAST/SCA/firmware)
+    "detected_controls",         # Positive security control detections from scanner output
+    "evidence_packages",         # Regulatory evidence bundles (SBOM + MCP + scan run)
 ]
 
-# ========== Edge Collections (35 total - v1.0 scope + Phase 3A) ==========
+# ========== Edge Collections (49 total) ==========
 EDGE_COLLECTIONS = [
     # Core Vulnerability Intelligence (6 edges)
     "has_weakness",              # Vulnerability → CWE
@@ -94,6 +128,7 @@ EDGE_COLLECTIONS = [
     "aliases",                   # Vulnerability ↔ Vulnerability (CVE/GHSA/OSV equivalence)
     "affects",                   # Vulnerability → component/CPE (with version ranges)
     "has_epss",                  # Vulnerability → EPSS history entry (time-series in epss_history collection)
+    "has_epss_history",          # Vulnerability → EPSS history (alternate linkage)
 
     # Phase 3A: VulnCheck Intelligence (9 edges)
     "has_exploit_intelligence",      # Vulnerability → exploit_intelligence
@@ -121,11 +156,12 @@ EDGE_COLLECTIONS = [
     "can_precede",               # CWE → CWE (temporal relationship)
     "requires",                  # CWE → CWE (dependency)
 
-    # Compliance & Regulatory (4 edges)
+    # Compliance & Regulatory (5 edges)
     "maps_to_requirement",       # CWE → regulatory requirement
     "requirement_hierarchy",     # Requirement → parent requirement (Annex → Section → Paragraph)
     "cross_framework_mapping",   # Framework ↔ framework equivalence
     "opencre_links",             # OpenCRE → standards/requirements
+    "violates_requirement",      # Vulnerability → regulatory requirement (CVE-to-regulation mapping)
 
     # Software Identity & Supply Chain (5 edges)
     "depends_on",                # Component → component (dependency DAG)
@@ -133,13 +169,29 @@ EDGE_COLLECTIONS = [
     "same_as",                   # Component ↔ component (identity equivalence)
     "scored_by",                 # Component → Scorecard result
     "licensed_under",            # Component → license
+
+    # Phase 5: Web UI & Multi-Tenant (3 edges)
+    "user_belongs_to_org",       # User → Organization (membership)
+    "org_owns_token",            # Organization → API Token (ownership)
+    "user_created_token",        # User → API Token (creator tracking)
+
+    # v2.2 Scanner Evidence Layer (9 edges)
+    "component_has_vuln",            # Component → Vulnerability (CPE match / scanner direct)
+    "finding_maps_to_weakness",      # ScanFinding → CWE (enables ATT&CK traversal)
+    "finding_triggers_req",          # ScanFinding → Regulatory Requirement
+    "detected_control_maps_to",      # DetectedControl → OSCAL/SCF control
+    "control_in_component",          # DetectedControl → Component (scoping)
+    "finding_in_component",          # ScanFinding → Component (scoping)
+    "evidence_links_finding",        # EvidencePackage → ScanFinding (traceability)
+    "evidence_for_project",          # EvidencePackage → Project (ownership)
+    "project_uses_component",        # Project → Component (global component usage, Fix 1)
 ]
 
 # ========== Index Definitions ==========
 # Indexes optimized for query performance with cacheEnabled
 INDEXES = {
     "vulnerabilities": [
-        {"type": "persistent", "fields": ["cve_id"], "unique": True},
+        {"type": "persistent", "fields": ["cve_id"], "unique": True, "sparse": True},
         {"type": "persistent", "fields": ["published"]},
         {"type": "persistent", "fields": ["cvss_v31.baseScore"]},
         {"type": "persistent", "fields": ["source"]},
@@ -153,7 +205,7 @@ INDEXES = {
         {"type": "persistent", "fields": ["date_added"]},
     ],
     "exploit_modules": [
-        {"type": "persistent", "fields": ["module_id"], "unique": True},
+        {"type": "persistent", "fields": ["edb_id"], "unique": True},
         {"type": "persistent", "fields": ["source"]},
         {"type": "persistent", "fields": ["cve_ids[*]"]},
     ],
@@ -176,9 +228,12 @@ INDEXES = {
     "components": [
         {"type": "persistent", "fields": ["purl"], "unique": True},
         {"type": "persistent", "fields": ["name", "version"]},
+        {"type": "persistent", "fields": ["cpe"]},
+        {"type": "persistent", "fields": ["package_manager"]},
+        {"type": "persistent", "fields": ["firmware_layer"]},
     ],
     "cpe_entries": [
-        {"type": "persistent", "fields": ["cpe23"], "unique": True},
+        {"type": "persistent", "fields": ["cpe_name"], "unique": True},
     ],
 
     # Phase 3A: VulnCheck Intelligence indexes
@@ -205,12 +260,137 @@ INDEXES = {
         {"type": "persistent", "fields": ["support_status"]},
     ],
     "vulncheck_kev_entries": [
-        {"type": "persistent", "fields": ["cve_id"], "unique": True},
+        {"type": "persistent", "fields": ["primary_cve_id"], "unique": True},
         {"type": "persistent", "fields": ["date_added"]},
-        {"type": "persistent", "fields": ["vulncheck_first"]},
+        {"type": "persistent", "fields": ["vulncheck_reported_exploitation"]},
     ],
 
-    # Additional indexes for other collections can be added as needed
+    # Compliance & Regulatory
+    "regulatory_frameworks": [
+        {"type": "persistent", "fields": ["short_name"], "unique": True},
+    ],
+    "regulatory_requirements": [
+        {"type": "persistent", "fields": ["requirement_id"], "unique": True},
+        {"type": "persistent", "fields": ["framework_id"]},
+    ],
+    "scf_controls": [
+        {"type": "persistent", "fields": ["scf_id"], "unique": True},
+    ],
+    "oscal_controls": [
+        {"type": "persistent", "fields": ["control_id"], "unique": True},
+    ],
+
+    # LLM Enrichments
+    "llm_enrichments": [
+        {"type": "persistent", "fields": ["entity_type"]},
+        {"type": "persistent", "fields": ["cve_id"]},
+        {"type": "persistent", "fields": ["cwe_id"]},
+    ],
+
+    # Customer API Keys
+    "customer_api_keys": [
+        {"type": "persistent", "fields": ["customer_id"]},
+        {"type": "persistent", "fields": ["api_key_hash"], "unique": True},
+    ],
+
+    # Phase 5: Web UI & Multi-Tenant
+    "organizations": [
+        {"type": "persistent", "fields": ["slug"], "unique": True},
+        {"type": "persistent", "fields": ["domain"]},
+    ],
+    "users": [
+        {"type": "persistent", "fields": ["email"], "unique": True},
+    ],
+    "api_tokens": [
+        {"type": "persistent", "fields": ["token_hash"], "unique": True},
+        {"type": "persistent", "fields": ["organization_id"]},
+        {"type": "persistent", "fields": ["expires_at"]},
+    ],
+    "audit_log": [
+        {"type": "persistent", "fields": ["organization_id", "timestamp"]},
+        {"type": "persistent", "fields": ["actor_id", "timestamp"]},
+        {"type": "persistent", "fields": ["event_type"]},
+    ],
+
+    # Multi-Tenant Hierarchy
+    "projects": [
+        {"type": "persistent", "fields": ["customer_id"]},
+        {"type": "persistent", "fields": ["project_id"], "unique": True},
+        {"type": "persistent", "fields": ["customer_id", "active"]},
+    ],
+    "repositories": [
+        {"type": "persistent", "fields": ["customer_id"]},
+        {"type": "persistent", "fields": ["repository_id"], "unique": True},
+        {"type": "persistent", "fields": ["customer_id", "project_id"]},
+        {"type": "persistent", "fields": ["customer_id", "active"]},
+    ],
+
+    # Violates Requirement edge indexes
+    "violates_requirement": [
+        {"type": "persistent", "fields": ["framework"]},
+        {"type": "persistent", "fields": ["severity"]},
+    ],
+
+    # ── v2.2 Scanner Evidence Layer ──────────────────────────────────────
+
+    # Document collection indexes
+    "scan_runs": [
+        {"type": "persistent", "fields": ["scan_run_id"], "unique": True},
+        {"type": "persistent", "fields": ["tenant_id", "project_id"]},
+        {"type": "persistent", "fields": ["tenant_id", "started_at"]},
+        {"type": "persistent", "fields": ["commit_sha"]},
+        {"type": "persistent", "fields": ["status"]},
+    ],
+    "scan_findings": [
+        {"type": "persistent", "fields": ["fingerprint"], "unique": True},
+        {"type": "persistent", "fields": ["tenant_id", "project_id"]},
+        {"type": "persistent", "fields": ["tenant_id", "scan_run_id"]},
+        {"type": "persistent", "fields": ["tool"]},
+        {"type": "persistent", "fields": ["finding_type"]},
+        {"type": "persistent", "fields": ["severity_normalised"]},
+        {"type": "persistent", "fields": ["triage_status"]},
+        {"type": "persistent", "fields": ["cwe_ids[*]"]},
+        {"type": "persistent", "fields": ["secret_type"]},
+        {"type": "persistent", "fields": ["tenant_id", "project_id", "triage_status", "severity_normalised"]},
+    ],
+    "detected_controls": [
+        {"type": "persistent", "fields": ["fingerprint"], "unique": True},
+        {"type": "persistent", "fields": ["tenant_id", "project_id"]},
+        {"type": "persistent", "fields": ["tenant_id", "scan_run_id"]},
+        {"type": "persistent", "fields": ["control_type"]},
+        {"type": "persistent", "fields": ["control_category"]},
+        {"type": "persistent", "fields": ["oscal_control_id"]},
+        {"type": "persistent", "fields": ["scf_control_id"]},
+    ],
+    "evidence_packages": [
+        {"type": "persistent", "fields": ["package_id"], "unique": True},
+        {"type": "persistent", "fields": ["tenant_id", "project_id"]},
+        {"type": "persistent", "fields": ["tenant_id", "scan_run_id"]},
+        {"type": "persistent", "fields": ["submission_ready"]},
+        {"type": "persistent", "fields": ["retention_until"]},
+        {"type": "persistent", "fields": ["target_regulation[*]"]},
+    ],
+
+    # Edge collection indexes
+    "component_has_vuln": [
+        {"type": "persistent", "fields": ["source"]},
+        {"type": "persistent", "fields": ["vex_status"]},
+        {"type": "persistent", "fields": ["is_kev_at_detection"]},
+    ],
+    "finding_maps_to_weakness": [
+        {"type": "persistent", "fields": ["source"]},
+    ],
+    "finding_triggers_req": [
+        {"type": "persistent", "fields": ["source"]},
+    ],
+    "detected_control_maps_to": [
+        {"type": "persistent", "fields": ["confidence"]},
+        {"type": "persistent", "fields": ["target_collection"]},
+    ],
+    "project_uses_component": [
+        {"type": "persistent", "fields": ["tenant_id"]},
+        {"type": "persistent", "fields": ["tenant_id", "project_id"]},
+    ],
 }
 
 
@@ -287,7 +467,7 @@ def init_schema(db: Optional[StandardDatabase] = None) -> None:
     """
     Initialize database schema.
 
-    Creates all 28 document collections and 36 edge collections for v1.0 + Phase 3A.
+    Creates all 42 document collections and 49 edge collections.
     Creates indexes for performance optimization.
 
     Args:
@@ -366,7 +546,7 @@ def create_indexes(db: Optional[StandardDatabase] = None) -> None:
                 collection.add_persistent_index(
                     fields=index_def["fields"],
                     unique=index_def.get("unique", False),
-                    sparse=False,
+                    sparse=index_def.get("sparse", False),
                     name=None,  # Auto-generate index name
                 )
                 logger.info(
@@ -457,7 +637,7 @@ def rebuild_indexes(collection_name: str, db: Optional[StandardDatabase] = None)
             collection.add_persistent_index(
                 fields=index_def["fields"],
                 unique=index_def.get("unique", False),
-                sparse=False,
+                sparse=index_def.get("sparse", False),
             )
             logger.debug(
                 "Rebuilt index",
