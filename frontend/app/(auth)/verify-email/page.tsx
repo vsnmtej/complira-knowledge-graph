@@ -99,7 +99,12 @@ function VerifyEmailContent() {
 
 export default function VerifyEmailPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900"><Loader2 className="h-8 w-8 text-blue-400 animate-spin" /></div>}>
+    <Suspense fallback={
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+        <Loader2 className="h-8 w-8 text-blue-400 animate-spin" />
+        <p className="text-slate-400 mt-2">Verifying...</p>
+      </div>
+    }>
       <VerifyEmailContent />
     </Suspense>
   );

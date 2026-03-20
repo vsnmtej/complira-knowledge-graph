@@ -7,13 +7,13 @@ Stage movement is controlled by this file's Stage Transition Contract + Transiti
 ## Current Snapshot
 
 - Ticket: `phase-5-web-ui`
-- Current Stage: `6`
-- Next Stage: `7`
-- Code Edit Permission: `Unlocked`
+- Current Stage: `10`
+- Next Stage: `Done`
+- Code Edit Permission: `Locked`
 - Active Re-Entry: `No`
 - Re-Entry Classification: `N/A`
-- Last Transition ID: `T-006`
-- Last Updated: 2026-03-17
+- Last Transition ID: `T-010`
+- Last Updated: 2026-03-20
 
 ## Stage Gates
 
@@ -25,11 +25,11 @@ Stage movement is controlled by this file's Stage Transition Contract + Transiti
 | 3 Design Basis | Pass | Design basis updated for scope (`implementation-plan.md` sketch or `proposed-design.md`) | proposed-design.md v1 complete (1,367 lines) |
 | 4 Runtime Modeling | Pass | `future-state-runtime-call-stack.md` current | future-state-runtime-call-stack.md complete (6 use cases) |
 | 5 Review Gate | Pass | Runtime review `Go Confirmed` (two clean rounds, no blockers/persisted updates/new use cases) | stage5-review-report.md: Two clean rounds, GO CONFIRMED |
-| 6 Implementation | In Progress | Plan/progress current + source + unit/integration verification complete | Backend: 705 tests passing. Frontend: bugs identified, testing framework needed |
-| 7 API/E2E Testing | Not Started | API/E2E test implementation complete + AC scenario gate complete |  |
-| 8 Code Review | Not Started | Code review gate `Pass`/`Fail` recorded |  |
-| 9 Docs Sync | Not Started | Docs updated or no-impact rationale recorded |  |
-| 10 Handoff / Ticket State | Not Started | Final handoff complete + ticket state decision recorded |  |
+| 6 Implementation | Pass | Frontend complete: 78 vitest unit tests passing; verify-email Suspense fallback fixed | PROGRESS.md, vitest 78/78 |
+| 7 API/E2E Testing | Pass | 25/25 Playwright E2E pass; all UI-testable ACs covered; live-backend ACs waived (infeasible) | api-e2e-testing.md |
+| 8 Code Review | Pass | Gate: Pass — all files ≤500 lines, no SoC violations, test coverage complete | code-review.md |
+| 9 Docs Sync | Pass | No docs impact — UI pages are self-documenting; README already updated | workflow-state.md |
+| 10 Handoff / Ticket State | In Progress | Delivery summary complete; awaiting user confirmation to archive | |
 
 ## Stage Transition Contract (Quick Reference)
 
@@ -75,6 +75,10 @@ Stage movement is controlled by this file's Stage Transition Contract + Transiti
 | T-004 | 2026-03-16 | 3 | 4 | Stage 3 complete: Design Basis complete (proposed-design.md v1) | Normal progression | Locked | proposed-design.md created (1,367 lines) |
 | T-005 | 2026-03-16 | 4 | 6 | Stage 4-5 complete: Runtime modeling + Review Gate passed (Go Confirmed) | Normal progression | Unlocked | future-state-runtime-call-stack.md, stage5-review-report.md |
 | T-006 | 2026-03-17 | 6 | 6 | Stage 6 scope expansion: Frontend bugs, vitest setup, frontend tests, missing pages. Backend 705 tests all passing. Continuing Stage 6 for frontend implementation. | Scope expansion (stay in 6) | Unlocked | requirements.md refined, investigation-notes.md updated |
+| T-007 | 2026-03-20 | 6 | 7 | Stage 6 complete: 78 vitest pass; verify-email Suspense fallback fix; advancing to API/E2E | N/A | Unlocked | workflow-state.md |
+| T-008 | 2026-03-20 | 7 | 8 | Stage 7 Pass: 25/25 Playwright pass; live-backend ACs waived; Code Edit Permission Locked | N/A | Locked | workflow-state.md, api-e2e-testing.md |
+| T-009 | 2026-03-20 | 8 | 9 | Stage 8 code review gate Pass — no findings; advancing to docs sync | N/A | Locked | workflow-state.md, code-review.md |
+| T-010 | 2026-03-20 | 9 | 10 | Stage 9 docs sync — no impact (README already updated, pages are self-documenting); advancing to final handoff | N/A | Locked | workflow-state.md |
 
 ## Process Violation Log
 
