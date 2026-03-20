@@ -1,0 +1,1011 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2865
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\froman\fcharset0 Times-Bold;\f1\froman\fcharset0 Times-Roman;\f2\fmodern\fcharset0 Courier;
+\f3\froman\fcharset0 TimesNewRomanPSMT;\f4\fnil\fcharset0 Menlo-Regular;\f5\fmodern\fcharset0 Courier-Bold;
+\f6\froman\fcharset0 TimesNewRomanPS-BoldMT;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;\red109\green109\blue109;}
+{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;\cssrgb\c50196\c50196\c50196;}
+{\*\listtable{\list\listtemplateid1\listhybrid{\listlevel\levelnfc0\levelnfcn0\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{decimal\}}{\leveltext\leveltemplateid1\'01\'00;}{\levelnumbers\'01;}\fi-360\li720\lin720 }{\listname ;}\listid1}
+{\list\listtemplateid2\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid101\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid2}}
+{\*\listoverridetable{\listoverride\listid1\listoverridecount0\ls1}{\listoverride\listid2\listoverridecount0\ls2}}
+\paperw11900\paperh16840\margl1440\margr1440\vieww34360\viewh20960\viewkind0
+\deftab720
+\pard\pardeftab720\sa321\partightenfactor0
+
+\f0\b\fs48 \cf0 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Building a production-grade ArangoDB knowledge graph from 40+ cybersecurity sources\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\fs24 \cf0 A Python-based agentic ingestion engine can reliably seed ~10M nodes and ~28M edges from open cybersecurity and compliance data, then keep them current through scheduled refresh cycles ranging from hourly to quarterly.
+\f1\b0  The architecture centers on deterministic 
+\f2\fs26 _key
+\f1\fs24 -based upserts via 
+\f2\fs26 python-arango
+\f1\fs24 's 
+\f2\fs26 import_bulk()
+\f1\fs24  method (100\'962,100\'d7 faster than AQL UPSERT), a plugin-based agent pattern for each data source, and 
+\f2\fs26 graphlib.TopologicalSorter
+\f1\fs24  for dependency-aware DAG execution. Every data source researched here is freely accessible with minimal or no authentication, and all support some form of incremental update detection \'97 from NVD's 
+\f2\fs26 lastModStartDate
+\f1\fs24  parameter to OSV's 
+\f2\fs26 modified_id.csv
+\f1\fs24  changelog to git-based diff detection for ATT&CK, Nuclei, and ExploitDB.\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 1. Vulnerability intelligence APIs: current specifications\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\fs28 \cf0 NVD API 2.0\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0\fs24 \cf0 The NVD REST API at 
+\f2\fs26 https://services.nvd.nist.gov/rest/json/cves/2.0
+\f1\fs24  serves 
+\f0\b 318,000+ CVE records
+\f1\b0  with offset pagination (
+\f2\fs26 startIndex
+\f1\fs24  + 
+\f2\fs26 resultsPerPage
+\f1\fs24 , max 
+\f0\b 2,000 per page
+\f1\b0 ). Without an API key, the rate limit is 
+\f0\b 5 requests per 30-second rolling window
+\f1\b0 ; with a free API key (requested at 
+\f2\fs26 nvd.nist.gov/developers/request-an-api-key
+\f1\fs24 ), this increases to 
+\f0\b 50 requests per 30 seconds
+\f1\b0 . The key is passed as an 
+\f2\fs26 apiKey
+\f1\fs24  HTTP header. NVD recommends sleeping 6 seconds between requests without a key, 2 seconds with one.\
+For incremental updates, the 
+\f2\fs26 lastModStartDate
+\f1\fs24  and 
+\f2\fs26 lastModEndDate
+\f1\fs24  parameters (ISO-8601 UTC) return only CVEs modified within that window. The 
+\f0\b maximum date range is 120 days
+\f1\b0  \'97 longer gaps must be chunked. NVD recommends polling no more than once every 2 hours. The Change History API at 
+\f2\fs26 /cvehistory/2.0
+\f1\fs24  provides audit-level detail on what changed. Note that NVD experienced enrichment pauses in 2024 and continues to have intermittent reliability issues (503 errors), making robust retry logic essential.\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 OSV.dev, CISA KEV, and EPSS\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\fs24 \cf0 OSV.dev
+\f1\b0  (
+\f2\fs26 api.osv.dev
+\f1\fs24 ) requires no authentication and currently imposes 
+\f0\b no rate limits
+\f1\b0 . The batch endpoint accepts up to 
+\f0\b 1,000 queries per request
+\f1\b0  and supports ~30 ecosystems (PyPI, npm, Go, Maven, crates.io, Debian, Alpine, Ubuntu, and more). For bulk access, a GCS bucket at 
+\f2\fs26 gs://osv-vulnerabilities
+\f1\fs24  provides per-ecosystem ZIP downloads and \'97 critically for incremental updates \'97 a 
+\f2\fs26 modified_id.csv
+\f1\fs24  file sorted in reverse chronological order. Stream this file and stop when reaching your last-processed timestamp.\
+
+\f0\b CISA KEV
+\f1\b0  is a static JSON file at 
+\f2\fs26 https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json
+\f1\fs24  containing 
+\f0\b ~1,507 entries
+\f1\b0  as of early 2026. It requires no authentication and updates on weekdays during US Eastern business hours. The GitHub mirror at 
+\f2\fs26 cisagov/kev-data
+\f1\fs24  tracks changes via commit history, enabling git-based delta detection. Each entry includes 
+\f2\fs26 cveID
+\f1\fs24 , 
+\f2\fs26 vendorProject
+\f1\fs24 , 
+\f2\fs26 product
+\f1\fs24 , 
+\f2\fs26 dateAdded
+\f1\fs24 , 
+\f2\fs26 dueDate
+\f1\fs24 , and 
+\f2\fs26 knownRansomwareCampaignUse
+\f1\fs24 .\
+
+\f0\b EPSS
+\f1\b0  from FIRST.org provides daily bulk CSVs at 
+\f2\fs26 https://epss.empiricalsecurity.com/epss_scores-YYYY-MM-DD.csv.gz
+\f1\fs24  containing all scored CVEs with three fields: 
+\f2\fs26 cve
+\f1\fs24 , 
+\f2\fs26 epss
+\f1\fs24  (probability 0\'961), 
+\f2\fs26 percentile
+\f1\fs24 . The REST API at 
+\f2\fs26 https://api.first.org/data/v1/epss
+\f1\fs24  supports batch lookups (comma-separated CVEs, max 2,000 chars), historical queries back to April 2021, and time-series scopes. Rate limit is 
+\f0\b 1,000 requests per minute
+\f1\b0 , no authentication required.\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 VulnCheck and GitHub Advisory Database\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\fs24 \cf0 VulnCheck v3
+\f1\b0  at 
+\f2\fs26 https://api.vulncheck.com/v3
+\f1\fs24  uses Bearer token authentication with a 
+\f0\b free Community tier
+\f1\b0  providing access to VulnCheck KEV, NVD++ enriched data, and an exploit database (XDB). Rate limit is 
+\f0\b 1,000 requests per minute
+\f1\b0 . The 
+\f2\fs26 /v3/backup/\{index\}
+\f1\fs24  endpoint enables complete bulk downloads of any index. Cursor-based pagination supports up to 2,000 results per page.\
+
+\f0\b GitHub Advisory Database
+\f1\b0  can be accessed via REST (
+\f2\fs26 GET /advisories
+\f1\fs24 , max 100 per page) or GraphQL (
+\f2\fs26 securityAdvisories
+\f1\fs24  query). With a PAT, rate limits are 
+\f0\b 5,000 requests per hour
+\f1\b0  (REST) or 
+\f0\b 5,000 points per hour
+\f1\b0  (GraphQL). For bulk mirroring, cloning the 
+\f2\fs26 github/advisory-database
+\f1\fs24  repo (OSV format) is most efficient, with git pull for incremental updates.\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 2. Exploit intelligence and MITRE framework data structures\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\fs28 \cf0 Metasploit, ExploitDB, Nuclei, and PoC-in-GitHub\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\fs24 \cf0 Metasploit
+\f1\b0 's 
+\f2\fs26 modules_metadata_base.json
+\f1\fs24  (~40\'9660 MB) lives at 
+\f2\fs26 https://raw.githubusercontent.com/rapid7/metasploit-framework/master/db/modules_metadata_base.json
+\f1\fs24 . Each module has a 
+\f2\fs26 references
+\f1\fs24  array where CVEs appear as 
+\f2\fs26 "CVE-2024-XXXXX"
+\f1\fs24  strings alongside EDB, ZDI, and URL references. Extract via 
+\f2\fs26 [ref for ref in module['references'] if ref.startswith('CVE-')]
+\f1\fs24 .\
+
+\f0\b ExploitDB
+\f1\b0 's 
+\f2\fs26 files_exploits.csv
+\f1\fs24  at 
+\f2\fs26 https://gitlab.com/exploit-database/exploitdb/-/raw/main/files_exploits.csv
+\f1\fs24  has 17 columns including a 
+\f2\fs26 codes
+\f1\fs24  column with semicolon-separated references (e.g., 
+\f2\fs26 CVE-2021-44228;OSVDB-12345
+\f1\fs24 ). The database contains 
+\f0\b 45,000\'9650,000+ exploits
+\f1\b0  with daily git updates at 05:05 UTC.\
+
+\f0\b Nuclei Templates
+\f1\b0  (
+\f2\fs26 projectdiscovery/nuclei-templates
+\f1\fs24 ) organize CVE templates under 
+\f2\fs26 http/cves/YYYY/CVE-YYYY-NNNNN.yaml
+\f1\fs24 . The YAML 
+\f2\fs26 classification
+\f1\fs24  block provides 
+\f2\fs26 cve-id
+\f1\fs24 , 
+\f2\fs26 cwe-id
+\f1\fs24 , 
+\f2\fs26 cvss-score
+\f1\fs24 , 
+\f2\fs26 cvss-metrics
+\f1\fs24 , 
+\f2\fs26 epss-score
+\f1\fs24 , 
+\f2\fs26 epss-percentile
+\f1\fs24 , and 
+\f2\fs26 cpe
+\f1\fs24  \'97 making each template a rich metadata source. Over 
+\f0\b 9,000 total templates
+\f1\b0  exist, with 1,496 covering KEV entries. Use 
+\f2\fs26 yaml.CSafeLoader
+\f1\fs24  for high-performance bulk parsing.\
+
+\f0\b PoC-in-GitHub
+\f1\b0  (
+\f2\fs26 nomi-sec/PoC-in-GitHub
+\f1\fs24 ) stores one JSON file per CVE organized by year (
+\f2\fs26 2025/CVE-2025-31324.json
+\f1\fs24 ), each containing an array of GitHub repository metadata with 
+\f2\fs26 stargazers_count
+\f1\fs24 , 
+\f2\fs26 forks_count
+\f1\fs24 , and 
+\f2\fs26 pushed_at
+\f1\fs24  timestamps.\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 ATT&CK, CAPEC, D3FEND, ATLAS, and CTID\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\fs24 \cf0 ATT&CK STIX 2.1
+\f1\b0  data (current version 
+\f0\b v18.1
+\f1\b0 ) lives at 
+\f2\fs26 mitre-attack/attack-stix-data
+\f1\fs24  with JSON bundles per domain (
+\f2\fs26 enterprise-attack.json
+\f1\fs24 , 
+\f2\fs26 mobile-attack.json
+\f1\fs24 , 
+\f2\fs26 ics-attack.json
+\f1\fs24 ). Enterprise ATT&CK v18 includes 
+\f0\b 216 techniques, 475 sub-techniques, 176 groups, 784 software entries
+\f1\b0 , and newly added detection strategies and analytics. STIX object types include 
+\f2\fs26 attack-pattern
+\f1\fs24 , 
+\f2\fs26 malware
+\f1\fs24 , 
+\f2\fs26 tool
+\f1\fs24 , 
+\f2\fs26 intrusion-set
+\f1\fs24 , 
+\f2\fs26 campaign
+\f1\fs24 , 
+\f2\fs26 course-of-action
+\f1\fs24 , and 
+\f2\fs26 relationship
+\f1\fs24 . Version detection uses the 
+\f2\fs26 x_mitre_version
+\f1\fs24  field in the 
+\f2\fs26 x-mitre-collection
+\f1\fs24  object.\
+
+\f0\b CAPEC XML
+\f1\b0  (version 
+\f0\b 3.9
+\f1\b0 , 
+\f0\b 559 attack patterns
+\f1\b0 ) at 
+\f2\fs26 https://capec.mitre.org/data/xml/capec_latest.xml
+\f1\fs24  maps to ATT&CK via 
+\f2\fs26 <Taxonomy_Mapping Taxonomy_Name="ATTACK">
+\f1\fs24  elements and to CWE via 
+\f2\fs26 <Related_Weakness CWE_ID="89"/>
+\f1\fs24  elements.\
+
+\f0\b D3FEND
+\f1\b0  (version 
+\f0\b 1.3.0
+\f1\b0 , 
+\f0\b 267 defensive techniques
+\f1\b0 ) offers a REST API at 
+\f2\fs26 https://d3fend.mitre.org/api/
+\f1\fs24  with endpoints like 
+\f2\fs26 /api/offensive-technique/attack/\{T_ID\}.json
+\f1\fs24  for ATT&CK-to-D3FEND mappings and 
+\f2\fs26 /api/weakness/cwe/\{CWE-ID\}.json
+\f1\fs24  for CWE associations. No authentication required.\
+
+\f0\b ATLAS
+\f1\b0  (version 
+\f0\b 4.4.0
+\f1\b0 ) at 
+\f2\fs26 mitre-atlas/atlas-data
+\f1\fs24  provides 
+\f2\fs26 dist/ATLAS.yaml
+\f1\fs24  with 12 tactics, 40 techniques, and 27 sub-techniques for AI systems. ATT&CK cross-references appear as 
+\f2\fs26 ATT&CK-reference
+\f1\fs24  keys with technique IDs and URLs.\
+
+\f0\b CTID Mappings
+\f1\b0  (now at 
+\f2\fs26 center-for-threat-informed-defense/mappings-explorer
+\f1\fs24 ) provide ATT&CK 
+\f3 \uc0\u8594 
+\f1  NIST 800-53 Rev 5 relationships as STIX bundles. Controls are 
+\f2\fs26 course-of-action
+\f1\fs24  objects; mappings are 
+\f2\fs26 relationship
+\f1\fs24  objects with 
+\f2\fs26 relationship_type: "mitigates"
+\f1\fs24  linking controls to 
+\f2\fs26 attack-pattern
+\f1\fs24  targets. Current mappings cover ATT&CK v16.1, with v18 updates forthcoming.\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 3. Compliance frameworks and package ecosystem endpoints\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\fs28 \cf0 NIST OSCAL, SCF, OLIR, OpenCRE, and CWE\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\fs24 \cf0 NIST OSCAL SP 800-53 Rev 5
+\f1\b0  (version 
+\f0\b 5.2.0
+\f1\b0 , OSCAL 
+\f0\b 1.1.3
+\f1\b0 ) is available at 
+\f2\fs26 https://raw.githubusercontent.com/usnistgov/oscal-content/main/nist.gov/SP800-53/rev5/json/NIST_SP-800-53_rev5_catalog.json
+\f1\fs24 . The JSON hierarchy follows 
+\f2\fs26 catalog 
+\f4 \uc0\u8594 
+\f2  groups (20 families) 
+\f4 \uc0\u8594 
+\f2  controls 
+\f4 \uc0\u8594 
+\f2  controls (enhancements) 
+\f4 \uc0\u8594 
+\f2  parts (statement, guidance, objective)
+\f1\fs24 . Approximately 
+\f0\b 1,007 controls and enhancements
+\f1\b0  span families AC through SR. Parameters use 
+\f2\fs26 \{\{ insert: param, param-id \}\}
+\f1\fs24  notation in prose text.\
+
+\f0\b SCF
+\f1\b0  (version 
+\f0\b 2025.4
+\f1\b0 ) is downloadable without registration from GitHub Releases at 
+\f2\fs26 github.com/securecontrolsframework/securecontrolsframework/releases
+\f1\fs24 . The Excel file maps controls to 
+\f0\b 100+ frameworks
+\f1\b0  including ISO 27001:2022, NIST CSF, PCI-DSS, HIPAA, SOC 2, CMMC, GDPR, and FedRAMP. The primary sheet contains SCF ID, Domain, Control Description, and one column per mapped framework.\
+
+\f0\b NIST OLIR
+\f1\b0  CSF 2.0 
+\f3 \uc0\u8596 
+\f1  SP 800-53 mappings are available as Excel at 
+\f2\fs26 https://csrc.nist.gov/files/pubs/sp/800/53/r5/upd1/final/docs/csf-pf-to-sp800-53r5-mappings.xlsx
+\f1\fs24 . Additional mappings (ISO/IEC 27001:2022, CSF 1.1, Privacy Framework) are available from the same NIST page.\
+
+\f0\b OpenCRE
+\f1\b0  at 
+\f2\fs26 https://www.opencre.org/rest/v1/
+\f1\fs24  provides endpoints for 
+\f2\fs26 root_cres
+\f1\fs24 , 
+\f2\fs26 cre/\{id\}
+\f1\fs24 , 
+\f2\fs26 standard/\{name\}
+\f1\fs24 , and 
+\f2\fs26 text_search
+\f1\fs24 . CREs act as intermediary nodes linking OWASP ASVS, NIST 800-53, CWE, ISO 27001, and other standards through a hierarchical concept graph. No authentication required.\
+
+\f0\b CWE
+\f1\b0  (version 
+\f0\b 4.19.1
+\f1\b0 ) downloads as 
+\f2\fs26 https://cwe.mitre.org/data/xml/cwec_latest.xml.zip
+\f1\fs24  with 
+\f0\b ~930+ individual weakness entries
+\f1\b0 . View 1424 provides IEC 62443 mappings. Updates are quarterly. The XML root element's 
+\f2\fs26 Version
+\f1\fs24  attribute enables version comparison for change detection.\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 Package and distribution security data\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\fs24 \cf0 deps.dev
+\f1\b0  (Google) at 
+\f2\fs26 https://api.deps.dev/v3/
+\f1\fs24  covers 
+\f0\b 7 ecosystems
+\f1\b0  (Go, npm, Cargo, Maven, PyPI, NuGet, RubyGems) with no authentication. The v3alpha API adds PURL support via 
+\f2\fs26 PurlLookup
+\f1\fs24 /
+\f2\fs26 PurlLookupBatch
+\f1\fs24 . Data includes licenses (SPDX), advisories (OSV IDs), SLSA provenance, and OpenSSF Scorecards.\
+
+\f0\b Ecosyste.ms
+\f1\b0  operates 
+\f0\b 16+ microservices
+\f1\b0  with the most relevant being Packages (75 registries), Advisories (24K+ advisories), Repositories, and License Parser. Rate limit is 
+\f0\b 5,000 requests per hour
+\f1\b0  with a priority "polite pool" for requests with a 
+\f2\fs26 From
+\f1\fs24  header. PURL lookups are natively supported.\
+
+\f0\b endoflife.date
+\f1\b0  tracks 
+\f0\b 432+ products
+\f1\b0  at 
+\f2\fs26 https://endoflife.date/api/v1/products/
+\f1\fs24  with no authentication. Each cycle returns 
+\f2\fs26 releaseDate
+\f1\fs24 , 
+\f2\fs26 eol
+\f1\fs24 , 
+\f2\fs26 latest
+\f1\fs24 , 
+\f2\fs26 lts
+\f1\fs24 , and 
+\f2\fs26 support
+\f1\fs24  dates.\
+
+\f0\b Red Hat Security Data API
+\f1\b0  at 
+\f2\fs26 https://access.redhat.com/hydra/rest/securitydata/cve.json
+\f1\fs24  supports filtering by severity, package, product, date range, and CWE. 
+\f0\b Debian Security Tracker
+\f1\b0  provides a ~30 MB JSON dump at 
+\f2\fs26 https://security-tracker.debian.org/tracker/data/json
+\f1\fs24  with per-release fix status. 
+\f0\b Ubuntu
+\f1\b0 's CVE API is still marked work-in-progress; OVAL data files are the more reliable automated option.\
+
+\f0\b SPDX License List
+\f1\b0  JSON at 
+\f2\fs26 https://raw.githubusercontent.com/spdx/license-list-data/main/json/licenses.json
+\f1\fs24  includes 
+\f2\fs26 licenseId
+\f1\fs24 , 
+\f2\fs26 name
+\f1\fs24 , 
+\f2\fs26 isOsiApproved
+\f1\fs24 , and 
+\f2\fs26 isFsfLibre
+\f1\fs24  for all SPDX licenses. 
+\f0\b OSADL
+\f1\b0  provides its compatibility matrix as CSV at 
+\f2\fs26 https://www.osadl.org/fileadmin/checklists/unreflicenses/compatibility.csv
+\f1\fs24  or via 
+\f2\fs26 pip install osadl-matrix
+\f1\fs24  for Python-native access.\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 4. Python ingestion architecture and ArangoDB optimization\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\fs28 \cf0 The driver stack and bulk loading strategy\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f5\fs26 \cf0 \strokec2 python-arango
+\f0\fs24 \strokec2  8.3.0
+\f1\b0  (February 2026) is the recommended synchronous driver, maintained by ArangoDB officially. For async operations, 
+\f5\b\fs26 \strokec2 python-arango-async
+\f0\fs24 \strokec2  0.5.4
+\f1\b0  (the official async driver, import name 
+\f2\fs26 arangoasync
+\f1\fs24 ) replaces the deprecated community 
+\f2\fs26 aioarango
+\f1\fs24 . Use synchronous 
+\f2\fs26 python-arango
+\f1\fs24  for bulk loading and async for concurrent API fetching during incremental updates.\
+The 
+\f0\b fastest programmatic bulk loading method
+\f1\b0  is 
+\f2\fs26 collection.import_bulk()
+\f1\fs24 , which wraps ArangoDB's 
+\f2\fs26 /_api/import
+\f1\fs24  endpoint. It accepts a list of dicts and supports 
+\f2\fs26 on_duplicate
+\f1\fs24  parameter with values 
+\f2\fs26 "update"
+\f1\fs24 , 
+\f2\fs26 "replace"
+\f1\fs24 , or 
+\f2\fs26 "ignore"
+\f1\fs24  \'97 providing native upsert behavior when documents use deterministic 
+\f2\fs26 _key
+\f1\fs24  values. 
+\f0\b Critical benchmark finding
+\f1\b0 : 
+\f2\fs26 import_bulk()
+\f1\fs24  completes 1,000 documents in ~0.03 seconds, while AQL 
+\f2\fs26 UPSERT
+\f1\fs24  takes ~6 seconds for the same \'97 a 
+\f0\b 200\'d7 performance gap
+\f1\b0  that widens further with sharding.\
+Recommended batch sizes are 
+\f0\b 50,000\'96100,000 documents
+\f1\b0  per call. For the initial 10M-node seed, the optimal strategy is:\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\partightenfactor0
+\ls1\ilvl0\cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	1	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Drop all non-primary, non-edge indexes\
+\ls1\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	2	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Bulk load via 
+\f2\fs26 import_bulk()
+\f1\fs24  in 50K batches (or 
+\f2\fs26 arangoimport
+\f1\fs24  CLI for JSONL files)\
+\ls1\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	3	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Rebuild indexes after load completes\
+\ls1\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	4	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Enable 
+\f2\fs26 on_duplicate="update"
+\f1\fs24  for incremental updates without index dropping\
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 \strokec2 Derive deterministic 
+\f2\fs26 _key
+\f1\fs24  values from natural identifiers: 
+\f2\fs26 "CVE-2024-1234"
+\f1\fs24  for CVEs, 
+\f2\fs26 "CWE-79"
+\f1\fs24  for weaknesses, 
+\f2\fs26 "T1190"
+\f1\fs24  for ATT&CK techniques. For edges, use composite keys like 
+\f2\fs26 "CVE-2024-1234_affects_pkg:npm/express@4.18.2"
+\f1\fs24 .\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 Rate limiting, scheduling, retries, and XML parsing\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f5\fs26 \cf0 \strokec2 pyrate-limiter
+\f0\fs24 \strokec2  4.0.2
+\f1\b0  is the best choice for multi-source rate limiting, supporting multiple rate definitions per resource with sync and async modes. Define per-source limiters matching each API's constraints (e.g., 
+\f2\fs26 Rate(50, Duration.SECOND * 30)
+\f1\fs24  for NVD with key, 
+\f2\fs26 Rate(5000, Duration.HOUR)
+\f1\fs24  for GitHub).\
+For 
+\f0\b scheduling
+\f1\b0 , 
+\f0\b Prefect 3.x
+\f1\b0  provides the best balance of Python-native development, built-in scheduling with cron syntax, automatic retries, and a rich monitoring UI \'97 without requiring external infrastructure like Redis or RabbitMQ. Flows are defined via simple decorators (
+\f2\fs26 @flow
+\f1\fs24 , 
+\f2\fs26 @task
+\f1\fs24 ) and deployed with cron expressions. For simpler deployments, 
+\f0\b APScheduler
+\f1\b0  with a 
+\f2\fs26 BackgroundScheduler
+\f1\fs24  and SQLAlchemy job store provides crash recovery without any external dependencies.\
+
+\f5\b\fs26 \strokec2 tenacity
+\f0\fs24 \strokec2  9.1.4
+\f1\b0  handles retries with 
+\f2\fs26 wait_exponential_jitter(initial=1, max=60)
+\f1\fs24  for API calls and ArangoDB operations. The 
+\f2\fs26 retry_if_exception_type
+\f1\fs24  predicate should target 
+\f2\fs26 ArangoServerError
+\f1\fs24 , 
+\f2\fs26 ArangoConnectionError
+\f1\fs24 , 
+\f2\fs26 ConnectionError
+\f1\fs24 , and 
+\f2\fs26 TimeoutError
+\f1\fs24 . Use 
+\f2\fs26 before_log
+\f1\fs24  and 
+\f2\fs26 after_log
+\f1\fs24  callbacks for observability.\
+For 
+\f0\b 50 MB+ CWE/CAPEC XML files
+\f1\b0 , 
+\f2\fs26 lxml.etree.iterparse()
+\f1\fs24  is 2\'9610\'d7 faster than stdlib 
+\f2\fs26 ElementTree
+\f1\fs24  for full parsing and provides superior namespace handling. The critical pattern is filtering by tag (
+\f2\fs26 tag='\{namespace\}Weakness'
+\f1\fs24 ), calling 
+\f2\fs26 elem.clear()
+\f1\fs24  after processing each element, and deleting preceding siblings (
+\f2\fs26 del elem.getparent()[0]
+\f1\fs24 ) to maintain constant memory usage.\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 ArangoDB indexing and capacity planning\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0\fs24 \cf0 In ArangoDB 3.10+, 
+\f2\fs26 hash
+\f1\fs24  and 
+\f2\fs26 skiplist
+\f1\fs24  indexes are 
+\f0\b aliases for 
+\f5\fs26 \strokec2 persistent
+\f1\b0\fs24 \strokec2  \'97 there is only one user-creatable index type, backed by a B-tree with optional in-memory cache. Enable 
+\f2\fs26 cacheEnabled: true
+\f1\fs24  on persistent indexes used for equality lookups (e.g., 
+\f2\fs26 cve_id
+\f1\fs24 , 
+\f2\fs26 purl
+\f1\fs24 ). Use 
+\f2\fs26 storedValues
+\f1\fs24  to cover projections and avoid document lookups. 
+\f0\b Vertex-centric indexes
+\f1\b0  (composite on edge 
+\f2\fs26 _from
+\f1\fs24  + timestamp) are critical for supernodes with 10K+ edges.\
+For 
+\f0\b 10M nodes + 28M edges
+\f1\b0 , expect 
+\f0\b 15\'9625 GB on disk
+\f1\b0  (with LZ4 compression) and recommend 
+\f0\b 32 GB RAM
+\f1\b0  (4\'968 GB for RocksDB block cache, 1.5 GB for write buffers, 2\'964 GB for index caches). A 
+\f0\b single server is sufficient
+\f1\b0  \'97 ArangoDB handles 100M+ documents on one node. Cluster only if high availability is required, and note that UPSERT is non-atomic across shards.\
+RocksDB tuning for bulk writes should increase 
+\f2\fs26 write-buffer-size
+\f1\fs24  to 256 MB, 
+\f2\fs26 max-write-buffer-number
+\f1\fs24  to 6, and 
+\f2\fs26 level0-compaction-trigger
+\f1\fs24  to 8. Set 
+\f2\fs26 max-background-jobs
+\f1\fs24  to match CPU core count and allocate at least 4 GB to 
+\f2\fs26 block-cache-size
+\f1\fs24 .\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 5. Orchestration, dependency ordering, and deployment\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\fs28 \cf0 Agent pattern with DAG execution\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0\fs24 \cf0 Each data source is implemented as a subclass of 
+\f2\fs26 BaseIngestionAgent
+\f1\fs24  with an abstract interface: 
+\f2\fs26 check_for_updates() 
+\f4 \uc0\u8594 
+\f2  bool
+\f1\fs24 , 
+\f2\fs26 fetch_data() 
+\f4 \uc0\u8594 
+\f2  list
+\f1\fs24 , 
+\f2\fs26 transform_data(raw) 
+\f4 \uc0\u8594 
+\f2  list
+\f1\fs24 , and 
+\f2\fs26 load_data(transformed) 
+\f4 \uc0\u8594 
+\f2  IngestionResult
+\f1\fs24 . Configuration is YAML-driven, specifying schedule (cron), dependencies, source type (
+\f2\fs26 REST_API
+\f1\fs24 , 
+\f2\fs26 CSV
+\f1\fs24 , 
+\f2\fs26 XML
+\f1\fs24 , 
+\f2\fs26 GIT_REPO
+\f1\fs24 , 
+\f2\fs26 JSON_FEED
+\f1\fs24 , 
+\f2\fs26 GCS_BUCKET
+\f1\fs24 ), and source-specific parameters.\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f0\b \cf0 Dependency ordering
+\f1\b0  uses Python's stdlib 
+\f2\fs26 graphlib.TopologicalSorter
+\f1\fs24  (3.9+) with these critical chains:\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\partightenfactor0
+\ls2\ilvl0
+\f0\b \cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 CWE 
+\f6 \uc0\u8594 
+\f0  NVD CVEs
+\f1\b0  (CVEs reference CWE IDs)\
+\ls2\ilvl0
+\f0\b \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 ATT&CK 
+\f6 \uc0\u8594 
+\f0  CAPEC
+\f1\b0  (CAPEC maps to ATT&CK techniques)\
+\ls2\ilvl0
+\f0\b \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 ATT&CK 
+\f6 \uc0\u8594 
+\f0  D3FEND
+\f1\b0  (D3FEND counters ATT&CK techniques)\
+\ls2\ilvl0
+\f0\b \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 NIST 800-53 
+\f6 \uc0\u8594 
+\f0  SCF/OLIR
+\f1\b0  (mappings reference controls)\
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 \strokec2 Independent sources \'97 EPSS, OSV, Nuclei, KEV, ExploitDB, Metasploit, endoflife.date, SPDX, GHSA \'97 can run fully in parallel. Limit concurrent ArangoDB writers to 
+\f0\b 3\'964 agents
+\f1\b0  to avoid write-buffer saturation and compaction storms.\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 Incremental update strategies by source type\
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrt\brdrnil \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2773\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth6845\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth3265\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+
+\fs24 \cf0 \strokec2 Source\cell 
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+\cf0 Strategy\cell 
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+\cf0 Frequency\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2773\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth6845\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth3265\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f1\b0 \cf0 NVD\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f2\fs26 \cf0 lastModStartDate
+\f1\fs24 /
+\f2\fs26 lastModEndDate
+\f1\fs24  with 2-hour polling\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Every 2 hours\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2773\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth6845\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth3265\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 CISA KEV\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Download JSON, compare against stored 
+\f2\fs26 catalogVersion
+\f1\fs24 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Hourly\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2773\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth6845\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth3265\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 EPSS\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Daily CSV full replacement (hash check for change detection)\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Daily\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2773\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth6845\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth3265\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 OSV\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Stream 
+\f2\fs26 modified_id.csv
+\f1\fs24  from GCS, fetch only changed records\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Daily\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2773\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth6845\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth3265\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ATT&CK/Nuclei/ExploitDB\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f2\fs26 \cf0 git pull
+\f1\fs24  + 
+\f2\fs26 git diff
+\f1\fs24  to identify changed files\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Weekly/Daily\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2773\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth6845\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth3265\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 CWE/CAPEC\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Compare XML root 
+\f2\fs26 Version
+\f1\fs24  attribute against stored version\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Weekly (detect quarterly releases)\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2773\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth6845\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth3265\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 SCF\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 GitHub Releases API 
+\f2\fs26 tag_name
+\f1\fs24  comparison\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Weekly\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrt\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2773\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth6845\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth3265\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 D3FEND\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f2\fs26 \cf0 /api/version.json
+\f1\fs24  endpoint comparison\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Weekly\cell \lastrow\row
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 \strokec2 For 
+\f0\b git-based sources
+\f1\b0 , use 
+\f2\fs26 GitPython
+\f1\fs24  with 
+\f2\fs26 repo.git.diff(old_head, new_head, name_only=True)
+\f1\fs24  after pulling to identify changed files. Shallow clones (
+\f2\fs26 depth=1
+\f1\fs24 ) save disk space for Nuclei and ExploitDB; full clones are warranted for ATT&CK where version history matters.\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 Monitoring, Docker deployment, and production hardening\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0\fs24 \cf0 Instrument every agent with 
+\f0\b Prometheus metrics
+\f1\b0 : 
+\f2\fs26 ingestion_records_total
+\f1\fs24  (Counter by source/operation), 
+\f2\fs26 ingestion_duration_seconds
+\f1\fs24  (Histogram), 
+\f2\fs26 ingestion_errors_total
+\f1\fs24  (Counter), and 
+\f2\fs26 ingestion_last_success_timestamp
+\f1\fs24  (Gauge). Alert on staleness (e.g., EPSS not updated in 48 hours) and duration anomalies. Use 
+\f0\b structlog
+\f1\b0  for structured JSON logging with source name, record counts, and durations in every log line.\
+The Docker Compose stack runs four services: 
+\f0\b ArangoDB 3.12
+\f1\b0  (with healthcheck on 
+\f2\fs26 /_api/version
+\f1\fs24 , 4 GB memory limit), 
+\f0\b ingestion-engine
+\f1\b0  (multi-stage build from Python 3.12-slim, non-root user, volume mounts for git repos and cached data), 
+\f0\b Prometheus
+\f1\b0 , and 
+\f0\b Grafana
+\f1\b0 . Secrets (
+\f2\fs26 NVD_API_KEY
+\f1\fs24 , 
+\f2\fs26 GITHUB_TOKEN
+\f1\fs24 , 
+\f2\fs26 ARANGO_ROOT_PASSWORD
+\f1\fs24 ) should use 
+\f2\fs26 .env
+\f1\fs24  files excluded from version control, escalating to HashiCorp Vault for production.\
+Data validation via 
+\f0\b Pydantic models
+\f1\b0  catches malformed records before insertion. Audit logging to an 
+\f2\fs26 _ingestion_audit
+\f1\fs24  ArangoDB collection tracks every run's record counts, duration, source version, and git commit SHA. ArangoDB backups via 
+\f2\fs26 arangodump
+\f1\fs24  should be scheduled daily with 7-day retention. Graceful shutdown uses 
+\f2\fs26 asyncio.Event
+\f1\fs24  with SIGTERM/SIGINT handlers, allowing in-progress agents to complete before exit.\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 Recommended refresh schedule and estimated scale\
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrt\brdrnil \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth1026\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth8338\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1565\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth4390\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+
+\fs24 \cf0 \strokec2 Tier\cell 
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+\cf0 Sources\cell 
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+\cf0 Schedule\cell 
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+\cf0 Est. Records\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth1026\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth8338\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1565\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth4390\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Hourly
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 CISA KEV, EPSS (scores), NVD delta\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f2\fs26 \cf0 0 * * * *
+\f1\fs24 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~1.5K (KEV), ~250K (EPSS), ~500 (NVD delta)\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth1026\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth8338\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1565\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth4390\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 Daily
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 OSV, VulnCheck, GHSA, Nuclei, ExploitDB, Metasploit, PoC-in-GitHub\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f2\fs26 \cf0 0 3 * * *
+\f1\fs24 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~200K (OSV), ~50K (Nuclei), ~50K (ExploitDB)\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth1026\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth8338\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1565\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth4390\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 Weekly
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ATT&CK, D3FEND, ATLAS, deps.dev, Ecosyste.ms, endoflife.date, Red Hat, Debian, Ubuntu\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f2\fs26 \cf0 0 4 * * 1
+\f1\fs24 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~5K (ATT&CK), ~50K (deps.dev)\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrt\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth1026\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth8338\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1565\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth4390\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 Quarterly
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 CWE, CAPEC, NIST 800-53, SCF, OLIR, SPDX, OSADL, CTID\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f2\fs26 \cf0 0 1 1 */3 *
+\f1\fs24 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~1K (CWE), ~1K (CAPEC), ~1K (800-53)\cell \lastrow\row
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f0\b \cf0 \strokec2 Total estimated scale
+\f1\b0 : ~10M vertex documents across ~20 collections and ~28M edge documents across ~15 edge collections, requiring 
+\f0\b 15\'9625 GB storage
+\f1\b0  and 
+\f0\b 32 GB RAM
+\f1\b0  on a single ArangoDB instance with NVMe SSD.\
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 Conclusion\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0\fs24 \cf0 The most impactful architectural decision is 
+\f0\b using 
+\f5\fs26 \strokec2 import_bulk(on_duplicate="update")
+\f0\fs24 \strokec2  with deterministic 
+\f5\fs26 \strokec2 _key
+\f0\fs24 \strokec2  values
+\f1\b0  rather than AQL UPSERT \'97 this single choice determines whether initial seeding takes hours or weeks. The second critical insight is that 
+\f0\b every source in this stack supports some form of incremental update detection
+\f1\b0 , eliminating the need for full re-ingestion after the initial seed. OSV's 
+\f2\fs26 modified_id.csv
+\f1\fs24 , NVD's 
+\f2\fs26 lastModStartDate
+\f1\fs24 , and git-based diff detection for ATT&CK/Nuclei/ExploitDB collectively enable a system that processes only deltas, keeping the knowledge graph current with minimal API calls and compute overhead. The plugin-based agent architecture with YAML configuration makes adding new sources a matter of implementing four methods against a well-defined interface, while 
+\f2\fs26 TopologicalSorter
+\f1\fs24  ensures CWE loads before NVD, ATT&CK before CAPEC, and 800-53 before SCF \'97 without manual coordination.\
+}

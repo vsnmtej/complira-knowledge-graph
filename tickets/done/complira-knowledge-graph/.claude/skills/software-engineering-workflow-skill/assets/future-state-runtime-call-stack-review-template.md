@@ -1,0 +1,142 @@
+# Future-State Runtime Call Stack Review
+
+Use this document as the pre-implementation gate for future-state runtime-call-stack quality and use-case completeness.
+This review validates alignment with target (`to-be`) design behavior, not parity with current (`as-is`) code.
+
+## Review Meta
+
+- Scope Classification: `Small` / `Medium` / `Large`
+- Current Round: `1` / `2` / `3` / ...
+- Current Review Type: `Deep Review`
+- Clean-Review Streak Before This Round: `0` / `1` / `2` / ...
+- Clean-Review Streak After This Round: `0` / `1` / `2` / ...
+- Round State: `Reset` / `Candidate Go` / `Go Confirmed`
+- Missing-Use-Case Discovery Sweep Completed This Round: `Yes` / `No`
+- New Use Cases Discovered This Round: `Yes` / `No`
+- This Round Classification (`Design Impact`/`Requirement Gap`/`Unclear`/`N/A`):
+- Required Re-Entry Path Before Next Round:
+
+## Review Basis
+
+- Requirements: `tickets/in-progress/<ticket-name>/requirements.md` (status `Design-ready`/`Refined`)
+- Runtime Call Stack Document: `tickets/in-progress/<ticket-name>/future-state-runtime-call-stack.md`
+- Source Design Basis:
+  - `Small`: `tickets/in-progress/<ticket-name>/implementation-plan.md` (solution sketch)
+  - `Medium/Large`: `tickets/in-progress/<ticket-name>/proposed-design.md`
+- Artifact Versions In This Round:
+  - Requirements Status:
+  - Design Version:
+  - Call Stack Version:
+- Required Persisted Artifact Updates Completed For This Round: `Yes` / `No` / `N/A`
+
+## Review Intent (Mandatory)
+
+- Primary check: Is the future-state runtime call stack a coherent and implementable future-state model?
+- Not a pass criterion: matching current-code call paths exactly.
+- Not a required action: adding/removing layers by default; `Keep` can pass when layering is coherent and boundary placement is clear.
+- Local-fix-is-not-enough rule: if a fix works functionally but degrades architecture/layering/responsibility boundaries, mark `Fail` and require architectural artifact updates via classified re-entry.
+- Any finding with a required design/call-stack update is blocking.
+
+## Round History
+
+| Round | Requirements Status | Design Version | Call Stack Version | Findings Requiring Persisted Updates | New Use Cases Discovered | Persisted Updates Completed | Classification (`Design Impact`/`Requirement Gap`/`Unclear`/`N/A`) | Required Re-Entry Path | Clean Streak After Round | Round State | Gate (`Go`/`No-Go`) |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 |  |  |  | Yes/No | Yes/No | Yes/No/N/A |  |  | 0/1/2+ | Reset/Candidate Go/Go Confirmed |  |
+| 2 |  |  |  | Yes/No | Yes/No | Yes/No/N/A |  |  | 0/1/2+ | Reset/Candidate Go/Go Confirmed |  |
+| 3 |  |  |  | Yes/No | Yes/No | Yes/No/N/A |  |  | 0/1/2+ | Reset/Candidate Go/Go Confirmed |  |
+| N |  |  |  | Yes/No | Yes/No | Yes/No/N/A |  |  | 0/1/2+ | Reset/Candidate Go/Go Confirmed |  |
+
+Notes:
+- No fixed round count is hard-coded.
+- `Candidate Go` means one clean deep-review round with no blockers, no required persisted artifact updates, and no newly discovered use cases.
+- `Go Confirmed` means two consecutive clean deep-review rounds.
+- Any round with blockers, required persisted artifact updates, or newly discovered use cases must be classified and routed through the required re-entry path before the next review round.
+
+## Round Artifact Update Log (Mandatory)
+
+| Round | Findings Requiring Updates (`Yes`/`No`) | Updated Files | Version Changes | Changed Sections | Resolved Finding IDs |
+| --- | --- | --- | --- | --- | --- |
+| 1 |  |  |  |  |  |
+| 2 |  |  |  |  |  |
+| 3 |  |  |  |  |  |
+| N |  |  |  |  |  |
+
+Rule:
+- A round is incomplete until required file updates are physically written and logged.
+- `Required persisted artifact updates` means file updates produced in the classified re-entry stage path, not in-memory edits inside Stage 5.
+
+## Missing-Use-Case Discovery Log (Mandatory Per Round)
+
+| Round | Discovery Lens | New Use Case IDs (`None` if no new case) | Source Type (`Requirement`/`Design-Risk`) | Why Previously Missing | Classification (`Design Impact`/`Requirement Gap`/`Unclear`/`N/A`) | Upstream Update Required |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | Requirement coverage / boundary crossing / fallback-error / design-risk |  |  |  |  |  |
+| 2 | Requirement coverage / boundary crossing / fallback-error / design-risk |  |  |  |  |  |
+| N | Requirement coverage / boundary crossing / fallback-error / design-risk |  |  |  |  |  |
+
+Rule:
+- Missing-use-case discovery must run in every round before gate verdict.
+- If any new use case is discovered, the round cannot be marked clean.
+
+## Per-Use-Case Review
+
+| Use Case | Architecture Fit (`Pass`/`Fail`) | Layering Fitness (`Pass`/`Fail`) | Boundary Placement (`Pass`/`Fail`) | Existing-Structure Bias Check (`Pass`/`Fail`) | Anti-Hack Check (`Pass`/`Fail`) | Local-Fix Degradation Check (`Pass`/`Fail`) | Terminology & Concept Naturalness (`Pass`/`Fail`) | File/API Naming Clarity (`Pass`/`Fail`) | Name-to-Responsibility Alignment Under Scope Drift (`Pass`/`Fail`) | Future-State Alignment With Design Basis (`Pass`/`Fail`) | Use-Case Coverage Completeness (`Pass`/`Fail`) | Use-Case Source Traceability (`Pass`/`Fail`) | Design-Risk Justification Quality (`Pass`/`Fail`/`N/A`) | Business Flow Completeness (`Pass`/`Fail`) | Layer-Appropriate SoC Check (`Pass`/`Fail`) | Dependency Flow Smells | Redundancy/Duplication Check (`Pass`/`Fail`) | Simplification Opportunity Check (`Pass`/`Fail`) | Remove/Decommission Completeness (`Pass`/`Fail`/`N/A`) | No Legacy/Backward-Compat Branches (`Pass`/`Fail`) | Verdict (`Pass`/`Fail`) |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| UC-001 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+
+## Findings
+
+- If no findings, write `None`.
+- Otherwise list only actionable findings:
+  - `[F-001] Use case: ... | Type: Architecture/Layering/Hack/LocalFixDegradation/Vocabulary/Naming/MissingUseCase/Gap/Structure/Dependency/Redundancy/Simplification/Legacy/Decommission | Severity: Blocker/Major/Minor | Confidence: High/Medium/Low | Evidence: ... | Required update: ... | Classification: Design Impact/Requirement Gap/Unclear`
+
+Rule:
+- Any finding with a `Required update` is blocking and must be resolved in a later review round before implementation can start.
+
+## Blocking Findings Summary
+
+- Unresolved Blocking Findings: `Yes` / `No`
+- Remove/Decommission Checks Complete For Scoped `Remove`/`Rename/Move`: `Yes` / `No` / `N/A`
+
+## Gate Decision
+
+- Implementation can start: `Yes` / `No`
+- Clean-review streak at end of this round:
+- Gate rule checks (all must be `Yes` for `Implementation can start = Yes`):
+  - Architecture fit is `Pass` for all in-scope use cases:
+  - Layering fitness is `Pass` for all in-scope use cases:
+  - Boundary placement is `Pass` for all in-scope use cases:
+  - Existing-structure bias check is `Pass` for all in-scope use cases:
+  - Anti-hack check is `Pass` for all in-scope use cases:
+  - Local-fix degradation check is `Pass` for all in-scope use cases:
+  - Terminology and concept vocabulary is natural/intuitive across in-scope use cases:
+  - File/API naming clarity is `Pass` across in-scope use cases:
+  - Name-to-responsibility alignment under scope drift is `Pass` across in-scope use cases:
+  - Future-state alignment with target design basis is `Pass` for all in-scope use cases:
+  - Layer-appropriate structure and separation of concerns is `Pass` for all in-scope use cases:
+  - Use-case coverage completeness is `Pass` for all in-scope use cases:
+  - Use-case source traceability is `Pass` for all in-scope use cases:
+  - Requirement coverage closure is `Pass` (all requirements map to at least one use case):
+  - Design-risk justification quality is `Pass` for all design-risk use cases:
+  - Redundancy/duplication check is `Pass` for all in-scope use cases:
+  - Simplification opportunity check is `Pass` for all in-scope use cases:
+  - All use-case verdicts are `Pass`:
+  - No unresolved blocking findings:
+  - Required persisted artifact updates completed for this round:
+  - Missing-use-case discovery sweep completed for this round:
+  - No newly discovered use cases in this round:
+  - Remove/decommission checks complete for scoped `Remove`/`Rename/Move` changes:
+  - Two consecutive deep-review rounds have no blockers, no required persisted artifact updates, and no newly discovered use cases:
+  - Findings trend quality is acceptable across rounds (issues declined in count/severity or became more localized), or explicit design decomposition update is recorded:
+- If `No`, required refinement actions:
+  - If classification is `Design Impact` (clear/high-confidence design issue): `Stage 3 -> Stage 4 -> Stage 5`:
+  - If classification is `Requirement Gap`: update `requirements.md` first in `Stage 2` (status `Refined`), then `Stage 3 -> Stage 4 -> Stage 5`:
+  - If classification is `Unclear` (cross-cutting or low confidence): update `investigation-notes.md` in `Stage 1`, then `Stage 2 -> Stage 3 -> Stage 4 -> Stage 5`:
+  - Regenerate `future-state-runtime-call-stack.md`:
+  - Re-run this review from updated files:
+
+## Speak Log (Optional Tracking)
+
+- Stage/gate transition spoken after `workflow-state.md` update: `Yes` / `No`
+- Review gate decision spoken after persisted gate evidence: `Yes` / `No`
+- Re-entry or lock-state change spoken (if applicable): `Yes` / `No` / `N/A`
+- If any required speech was not emitted, fallback text update recorded: `Yes` / `No` / `N/A`

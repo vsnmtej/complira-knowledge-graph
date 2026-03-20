@@ -76,6 +76,5 @@ Thumbs.db
 # Tickets work-in-progress
 tickets/in-progress/**/scratch/
 tickets/in-progress/**/*.tmp
-tickets/in-progress/complira-knowledge-graph/
 tickets/in-progress/multi-tenant-hierarchy/worktree/
 tickets/in-progress/vex-justification-enforcement/

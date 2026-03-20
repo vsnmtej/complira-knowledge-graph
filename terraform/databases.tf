@@ -188,7 +188,8 @@ resource "aws_elasticache_parameter_group" "redis" {
 
 # ========== S3 Bucket for Backups ==========
 resource "aws_s3_bucket" "backups" {
-  bucket = "${var.project_name}-backups-${var.environment}-${data.aws_caller_identity.current.account_id}"
+  bucket        = "${var.project_name}-backups-${var.environment}-${data.aws_caller_identity.current.account_id}"
+  force_destroy = true
 
   tags = {
     Name = "${var.project_name}-backups-${var.environment}"
