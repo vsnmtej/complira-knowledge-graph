@@ -152,6 +152,7 @@ filterwarnings = [
     "error",
     "ignore::UserWarning",
     "ignore::DeprecationWarning",
+    "ignore:urllib3 v2 only supports OpenSSL",
 ]
 
 # ========== Coverage Configuration ==========

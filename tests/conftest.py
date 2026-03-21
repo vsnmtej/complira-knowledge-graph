@@ -2,6 +2,13 @@
 Pytest configuration and fixtures for Complira Knowledge Graph tests.
 """
 
+# Suppress urllib3 SSL warning BEFORE any imports that trigger it.
+# On macOS system Python 3.9 with LibreSSL, urllib3 v2 fires a NotOpenSSLWarning
+# at import time. This must be suppressed here (before pytest filterwarnings="error"
+# processes it) so the existing test suite continues to function.
+import warnings
+warnings.filterwarnings("ignore", message="urllib3 v2 only supports OpenSSL")
+
 import pytest
 from unittest.mock import Mock, MagicMock
 from pathlib import Path

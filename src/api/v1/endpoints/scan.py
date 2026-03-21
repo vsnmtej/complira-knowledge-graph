@@ -12,7 +12,7 @@ import time
 from typing import List, Optional
 
 import structlog
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
 
 from api.core.security import Customer, get_current_customer
 from api.models.requests.scan import ScanIngestRequest
@@ -70,6 +70,7 @@ def _derive_tool_name(request: ScanIngestRequest) -> str:
 @router.post("/ingest", response_model=APIResponse[ScanIngestResponse])
 async def ingest_scan_endpoint(
     request: ScanIngestRequest,
+    background_tasks: BackgroundTasks,
     customer: Customer = Depends(get_current_customer),
 ):
     """
@@ -118,6 +119,31 @@ async def ingest_scan_endpoint(
                 raw_payload=raw_payload,
                 project_id=request.project_id,
                 repository_id=request.repository_id,
+            )
+
+        # Auto-trigger post-ingestion pipeline (enrichment → compaction → control mapping)
+        # Runs asynchronously after the HTTP response is returned.
+        try:
+            from complira_graph.ingestion.pipeline_coordinator import PipelineCoordinator
+
+            coordinator = PipelineCoordinator(ref_db)
+            background_tasks.add_task(
+                coordinator.run_post_ingest_pipeline,
+                scan_run_id=result.scan_run_id,
+                tenant_id=customer.id,
+            )
+            logger.debug(
+                "Scan ingest: pipeline background task queued",
+                scan_run_id=result.scan_run_id,
+                customer_id=customer.id,
+            )
+        except Exception as pipeline_exc:
+            # Never fail the ingest response because of pipeline wiring failure
+            logger.warning(
+                "Scan ingest: failed to queue pipeline background task",
+                scan_run_id=result.scan_run_id,
+                customer_id=customer.id,
+                error=str(pipeline_exc),
             )
 
         scan_response = ScanIngestResponse(
