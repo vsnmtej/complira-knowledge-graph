@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+.uv/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment files
+.env
+.env.local
+
+# Data and logs
+*.log
+data/
+logs/
+*.db
+*.sqlite
+
+# ArangoDB
+arango_data/
+
+# Prefect
+.prefect/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Tickets work-in-progress
+tickets/in-progress/**/scratch/
+tickets/in-progress/**/*.tmp

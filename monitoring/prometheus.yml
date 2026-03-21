@@ -1,0 +1,50 @@
+# Prometheus Configuration for Complira Knowledge Graph
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'complira-local'
+    environment: 'development'
+
+# Alertmanager configuration (optional)
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets: ['alertmanager:9093']
+
+# Scrape configurations
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Complira Knowledge Graph application metrics
+  # Assumes metrics server runs on host machine at port 9090
+  - job_name: 'complira-graph'
+    static_configs:
+      - targets: ['host.docker.internal:9090']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
+  # ArangoDB metrics (if exposed)
+  - job_name: 'arangodb'
+    static_configs:
+      - targets: ['arangodb:8529']
+    metrics_path: '/_admin/metrics/v2'
+    scrape_interval: 30s
+    basic_auth:
+      username: 'root'
+      password: 'CompliraSecurePassword123!'
+
+  # Prefect Server metrics (if available)
+  # - job_name: 'prefect'
+  #   static_configs:
+  #     - targets: ['prefect-server:4200']
+  #   metrics_path: '/metrics'
+
+# Recording rules for derived metrics
+# rule_files:
+#   - 'rules/*.yml'

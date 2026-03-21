@@ -1,0 +1,258 @@
+[project]
+name = "complira-graph"
+version = "1.0.0"
+description = "Unified cybersecurity knowledge graph for vulnerabilities, threats, compliance, and components"
+authors = [
+    {name = "Complira Team", email = "dev@complira.com"}
+]
+requires-python = ">=3.12"
+readme = "README.md"
+license = {text = "MIT"}
+keywords = ["security", "compliance", "vulnerability", "knowledge-graph", "cybersecurity"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Security",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+dependencies = [
+    # Core framework
+    "python-arango>=8.0.0",
+    "pydantic>=2.5.0",
+    "pydantic-settings>=2.1.0",
+    # Workflow orchestration
+    "prefect>=2.14.0",
+    "croniter>=2.0.0",
+    # HTTP client
+    "httpx>=0.25.0",
+    "tenacity>=8.2.0",
+    "ratelimit>=2.2.1",
+    # Data parsing
+    "lxml>=5.0.0",
+    "pyyaml>=6.0.1",
+    "pandas>=2.0.0",
+    "openpyxl>=3.1.0",  # For Excel file reading
+    "ijson>=3.2.0",  # Streaming JSON parser for large responses (VulnCheck NVD2)
+    # API framework
+    "fastapi>=0.109.0",
+    "uvicorn[standard]>=0.27.0",
+    "bcrypt>=4.1.0",  # Password/API key hashing
+    "redis>=5.0.0",  # Caching layer
+    # LLM integration
+    "anthropic>=0.39.0",
+    # Logging and monitoring
+    "structlog>=24.1.0",
+    "prometheus-client>=0.19.0",
+    # Authentication (Phase 5)
+    "python-jose[cryptography]>=3.3.0",  # JWT token handling
+    "passlib[bcrypt]>=1.7.4",  # Password hashing
+    "email-validator>=2.1.0",  # Email validation for Pydantic
+    # AWS Services (Phase 5)
+    "boto3>=1.34.34",  # AWS SDK for email/storage
+    # Document Generation (Phase 5)
+    "reportlab>=4.0.9",  # PDF report generation
+    # CLI
+    "click>=8.1.7",
+    "rich>=13.7.0",
+    # Utilities
+    "python-dateutil>=2.8.2",
+    "packaging>=23.2",
+    "instructor>=1.14.5",
+]
+
+[project.optional-dependencies]
+dev = [
+    # Testing
+    "pytest>=7.4.3",
+    "pytest-cov>=4.1.0",
+    "pytest-asyncio>=0.21.1",
+    "pytest-mock>=3.12.0",
+    "pytest-xdist>=3.5.0",
+    "responses>=0.24.1",
+
+    # Code quality
+    "ruff>=0.1.9",
+    "black>=23.12.1",
+    "mypy>=1.8.0",
+    "pre-commit>=3.6.0",
+
+    # Type stubs
+    "types-PyYAML>=6.0.12",
+    "types-python-dateutil>=2.8.19",
+
+    # Development tools
+    "ipython>=8.18.1",
+    "ipdb>=0.13.13",
+]
+
+docs = [
+    "mkdocs>=1.5.3",
+    "mkdocs-material>=9.5.3",
+    "mkdocstrings[python]>=0.24.0",
+]
+
+all = [
+    "complira-graph[dev,docs]",
+]
+
+[project.urls]
+Homepage = "https://github.com/complira/complira-graph"
+Documentation = "https://docs.complira.com"
+Repository = "https://github.com/complira/complira-graph"
+"Bug Tracker" = "https://github.com/complira/complira-graph/issues"
+
+[project.scripts]
+complira = "complira_graph.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/complira_graph"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/src",
+    "/tests",
+    "/README.md",
+    "/LICENSE",
+]
+
+# ========== pytest Configuration ==========
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+asyncio_mode = "auto"
+addopts = [
+    "-v",
+    "--strict-markers",
+    "--strict-config",
+    "--cov=complira_graph",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+    "--cov-report=xml",
+]
+markers = [
+    "unit: Unit tests",
+    "integration: Integration tests",
+    "performance: Performance tests",
+    "slow: Slow running tests",
+    "requires_db: Tests requiring database",
+    "requires_llm: Tests requiring LLM API",
+]
+filterwarnings = [
+    "error",
+    "ignore::UserWarning",
+    "ignore::DeprecationWarning",
+    "ignore:urllib3 v2 only supports OpenSSL",
+]
+
+# ========== Coverage Configuration ==========
+[tool.coverage.run]
+source = ["src/complira_graph"]
+omit = [
+    "*/tests/*",
+    "*/test_*.py",
+    "*/__pycache__/*",
+]
+branch = true
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "@abstractmethod",
+]
+
+[tool.coverage.html]
+directory = "htmlcov"
+
+# ========== Black Configuration ==========
+[tool.black]
+line-length = 100
+target-version = ["py312"]
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
+
+# ========== Ruff Configuration ==========
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+    "ARG", # flake8-unused-arguments
+    "SIM", # flake8-simplify
+]
+ignore = [
+    "E501",  # line too long (handled by black)
+    "B008",  # do not perform function calls in argument defaults
+    "B905",  # zip without strict parameter
+]
+exclude = [
+    ".git",
+    ".mypy_cache",
+    ".ruff_cache",
+    ".venv",
+    "__pycache__",
+    "build",
+    "dist",
+]
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401"]  # Allow unused imports in __init__.py
+"tests/*" = ["ARG"]       # Allow unused arguments in tests
+
+[tool.ruff.isort]
+known-first-party = ["complira_graph"]
+
+# ========== MyPy Configuration ==========
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false  # Set to true for stricter typing
+ignore_missing_imports = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+check_untyped_defs = true
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false

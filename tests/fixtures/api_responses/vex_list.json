@@ -1,0 +1,50 @@
+{
+  "success": true,
+  "data": [
+    {
+      "vex_id": "vex_abc123def456",
+      "vulnerabilities_count": 5,
+      "created_at": "2026-03-17T10:00:00Z",
+      "updated_at": "2026-03-17T10:00:00Z",
+      "metadata": {
+        "component": {
+          "type": "application",
+          "name": "medical-device-app",
+          "version": "2.1.0"
+        },
+        "environment": "production"
+      }
+    },
+    {
+      "vex_id": "vex_ghi789jkl012",
+      "vulnerabilities_count": 3,
+      "created_at": "2026-03-16T14:30:00Z",
+      "updated_at": "2026-03-16T15:45:00Z",
+      "metadata": {
+        "component": {
+          "type": "application",
+          "name": "medical-device-app",
+          "version": "2.0.5"
+        },
+        "environment": "production"
+      }
+    },
+    {
+      "vex_id": "vex_mno345pqr678",
+      "vulnerabilities_count": 7,
+      "created_at": "2026-03-15T09:15:00Z",
+      "updated_at": "2026-03-15T09:15:00Z",
+      "metadata": {
+        "component": {
+          "type": "library",
+          "name": "crypto-module",
+          "version": "1.5.2"
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "cache_hit": false,
+    "execution_time_ms": 234.56
+  }
+}

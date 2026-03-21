@@ -1,0 +1,300 @@
+{
+  "success": true,
+  "data": {
+    "vex_id": "vex_abc123def456",
+    "bomFormat": "CycloneDX",
+    "specVersion": "1.5",
+    "version": 1,
+    "vulnerabilities": [
+      {
+        "cve_id": "CVE-2021-44228",
+        "state": "not_affected",
+        "justification": "code_not_reachable",
+        "detail": "Log4j is included as a transitive dependency but logging functionality is disabled in production configuration. The vulnerable code path is never executed.",
+        "enrichment": {
+          "in_kev": true,
+          "kev_date_added": "2021-12-10T00:00:00Z",
+          "kev_due_date": "2021-12-24T00:00:00Z",
+          "epss_score": 0.97542,
+          "epss_percentile": 0.99876,
+          "cvss_score": 10.0,
+          "cvss_severity": "CRITICAL",
+          "weaknesses": [
+            {
+              "cwe_id": "CWE-502",
+              "name": "Deserialization of Untrusted Data"
+            },
+            {
+              "cwe_id": "CWE-917",
+              "name": "Improper Neutralization of Special Elements used in an Expression Language Statement"
+            }
+          ],
+          "attack_techniques": [
+            {
+              "technique_id": "T1190",
+              "name": "Exploit Public-Facing Application"
+            },
+            {
+              "technique_id": "T1059",
+              "name": "Command and Scripting Interpreter"
+            }
+          ],
+          "nist_controls": [
+            {
+              "control_id": "SI-10",
+              "title": "Information Input Validation"
+            },
+            {
+              "control_id": "SC-7",
+              "title": "Boundary Protection"
+            },
+            {
+              "control_id": "CM-7",
+              "title": "Least Functionality"
+            }
+          ],
+          "d3fend_defenses": [
+            {
+              "technique_id": "D3-IAA",
+              "name": "Input Validation Analysis"
+            }
+          ],
+          "regulatory_violations": [
+            {
+              "framework": "EU_CRA",
+              "requirement_id": "ANNEX_I_1_a",
+              "description": "Critical vulnerability with known exploitation"
+            },
+            {
+              "framework": "FDA_524B",
+              "requirement_id": "SECTION_524B_2_a",
+              "description": "Exploited vulnerability in medical device software"
+            }
+          ]
+        }
+      },
+      {
+        "cve_id": "CVE-2024-2508",
+        "state": "resolved",
+        "response": ["update"],
+        "detail": "Vulnerability was exploitable in previous version. Patched in current version 2.1.0 by upgrading dependency to 3.4.1.",
+        "enrichment": {
+          "in_kev": false,
+          "kev_date_added": null,
+          "kev_due_date": null,
+          "epss_score": 0.00234,
+          "epss_percentile": 0.45123,
+          "cvss_score": 7.5,
+          "cvss_severity": "HIGH",
+          "weaknesses": [
+            {
+              "cwe_id": "CWE-79",
+              "name": "Improper Neutralization of Input During Web Page Generation (Cross-site Scripting)"
+            }
+          ],
+          "attack_techniques": [
+            {
+              "technique_id": "T1566",
+              "name": "Phishing"
+            }
+          ],
+          "nist_controls": [
+            {
+              "control_id": "SI-10",
+              "title": "Information Input Validation"
+            },
+            {
+              "control_id": "SI-15",
+              "title": "Information Output Filtering"
+            }
+          ],
+          "d3fend_defenses": [
+            {
+              "technique_id": "D3-OTF",
+              "name": "Outbound Traffic Filtering"
+            }
+          ],
+          "regulatory_violations": []
+        }
+      },
+      {
+        "cve_id": "CVE-2023-12345",
+        "state": "not_affected",
+        "justification": "code_not_present",
+        "detail": "The affected component was removed in version 2.0.0 during security audit.",
+        "enrichment": {
+          "in_kev": false,
+          "kev_date_added": null,
+          "kev_due_date": null,
+          "epss_score": 0.00012,
+          "epss_percentile": 0.12456,
+          "cvss_score": 5.3,
+          "cvss_severity": "MEDIUM",
+          "weaknesses": [
+            {
+              "cwe_id": "CWE-287",
+              "name": "Improper Authentication"
+            }
+          ],
+          "attack_techniques": [
+            {
+              "technique_id": "T1078",
+              "name": "Valid Accounts"
+            }
+          ],
+          "nist_controls": [
+            {
+              "control_id": "IA-2",
+              "title": "Identification and Authentication (Organizational Users)"
+            },
+            {
+              "control_id": "AC-7",
+              "title": "Unsuccessful Logon Attempts"
+            }
+          ],
+          "d3fend_defenses": [],
+          "regulatory_violations": []
+        }
+      },
+      {
+        "cve_id": "CVE-2024-6789",
+        "state": "in_triage",
+        "detail": "Security team is currently investigating this vulnerability. Initial analysis suggests it may not be exploitable in our configuration, but further testing is required.",
+        "enrichment": {
+          "in_kev": false,
+          "kev_date_added": null,
+          "kev_due_date": null,
+          "epss_score": 0.00567,
+          "epss_percentile": 0.67890,
+          "cvss_score": 8.1,
+          "cvss_severity": "HIGH",
+          "weaknesses": [
+            {
+              "cwe_id": "CWE-78",
+              "name": "Improper Neutralization of Special Elements used in an OS Command"
+            }
+          ],
+          "attack_techniques": [
+            {
+              "technique_id": "T1059.004",
+              "name": "Command and Scripting Interpreter: Unix Shell"
+            }
+          ],
+          "nist_controls": [
+            {
+              "control_id": "SI-10",
+              "title": "Information Input Validation"
+            },
+            {
+              "control_id": "CM-7",
+              "title": "Least Functionality"
+            }
+          ],
+          "d3fend_defenses": [
+            {
+              "technique_id": "D3-PLA",
+              "name": "Process Lineage Analysis"
+            }
+          ],
+          "regulatory_violations": [
+            {
+              "framework": "EU_CRA",
+              "requirement_id": "ANNEX_I_1_b",
+              "description": "High severity vulnerability requiring timely assessment"
+            }
+          ]
+        }
+      },
+      {
+        "cve_id": "CVE-2022-54321",
+        "state": "not_affected",
+        "justification": "protected_by_mitigating_control",
+        "detail": "Vulnerability is present but mitigated by WAF rules that block all exploitation attempts. Additional runtime protection via AppArmor profile.",
+        "enrichment": {
+          "in_kev": true,
+          "kev_date_added": "2022-08-15T00:00:00Z",
+          "kev_due_date": "2022-09-15T00:00:00Z",
+          "epss_score": 0.85234,
+          "epss_percentile": 0.97654,
+          "cvss_score": 9.8,
+          "cvss_severity": "CRITICAL",
+          "weaknesses": [
+            {
+              "cwe_id": "CWE-89",
+              "name": "Improper Neutralization of Special Elements used in an SQL Command (SQL Injection)"
+            }
+          ],
+          "attack_techniques": [
+            {
+              "technique_id": "T1190",
+              "name": "Exploit Public-Facing Application"
+            },
+            {
+              "technique_id": "T1213",
+              "name": "Data from Information Repositories"
+            }
+          ],
+          "nist_controls": [
+            {
+              "control_id": "SI-10",
+              "title": "Information Input Validation"
+            },
+            {
+              "control_id": "SC-7",
+              "title": "Boundary Protection"
+            },
+            {
+              "control_id": "SI-4",
+              "title": "System Monitoring"
+            }
+          ],
+          "d3fend_defenses": [
+            {
+              "technique_id": "D3-IAA",
+              "name": "Input Validation Analysis"
+            },
+            {
+              "technique_id": "D3-NTA",
+              "name": "Network Traffic Analysis"
+            }
+          ],
+          "regulatory_violations": [
+            {
+              "framework": "EU_CRA",
+              "requirement_id": "ANNEX_I_1_a",
+              "description": "Critical vulnerability with active exploitation"
+            },
+            {
+              "framework": "FDA_524B",
+              "requirement_id": "SECTION_524B_2_a",
+              "description": "Known exploited vulnerability requiring mitigation"
+            },
+            {
+              "framework": "IEC_62304",
+              "requirement_id": "7.1.2",
+              "description": "Security vulnerability in medical device software"
+            }
+          ]
+        }
+      }
+    ],
+    "metadata": {
+      "component": {
+        "type": "application",
+        "name": "medical-device-app",
+        "version": "2.1.0",
+        "purl": "pkg:npm/medical-device-app@2.1.0"
+      },
+      "timestamp": "2026-03-17T10:00:00Z",
+      "generator": "complira-vex-analyzer",
+      "environment": "production"
+    },
+    "created_at": "2026-03-17T10:00:00Z",
+    "updated_at": "2026-03-17T10:00:00Z",
+    "customer_id": "customer_test_123"
+  },
+  "metadata": {
+    "cache_hit": false,
+    "execution_time_ms": 678.90
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "success": true,
+  "message": "Account created successfully. Please check your email to verify your account.",
+  "user_id": "users/abc123def456ghi789",
+  "email": "john.doe@example.com"
+}

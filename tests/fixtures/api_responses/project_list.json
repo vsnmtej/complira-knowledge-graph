@@ -1,0 +1,78 @@
+{
+  "success": true,
+  "data": {
+    "projects": [
+      {
+        "project_id": "proj_abc123def456ghi789",
+        "name": "Backend Services",
+        "description": "All backend microservices and APIs for production environment",
+        "tags": ["backend", "production", "FDA_524B", "critical"],
+        "repository_count": 5,
+        "created_at": "2024-01-15T10:00:00Z",
+        "updated_at": "2024-01-20T14:30:00Z",
+        "last_scan_at": "2024-01-22T09:15:00Z",
+        "active": true
+      },
+      {
+        "project_id": "proj_def456ghi789jkl012",
+        "name": "Mobile Applications",
+        "description": "iOS and Android mobile apps compliant with HIPAA and FDA regulations",
+        "tags": ["mobile", "production", "HIPAA", "FDA_524B"],
+        "repository_count": 3,
+        "created_at": "2024-01-10T10:00:00Z",
+        "updated_at": "2024-01-18T15:45:00Z",
+        "last_scan_at": "2024-01-21T16:20:00Z",
+        "active": true
+      },
+      {
+        "project_id": "proj_ghi789jkl012mno345",
+        "name": "Medical Device Firmware",
+        "description": "Embedded firmware for Class II and Class III medical devices",
+        "tags": ["firmware", "production", "IEC_62304", "ISO_13485", "critical"],
+        "repository_count": 7,
+        "created_at": "2024-01-05T10:00:00Z",
+        "updated_at": "2024-01-19T11:20:00Z",
+        "last_scan_at": "2024-01-22T08:00:00Z",
+        "active": true
+      },
+      {
+        "project_id": "proj_jkl012mno345pqr678",
+        "name": "Clinical Data Platform",
+        "description": "HIPAA-compliant clinical data management and analytics platform",
+        "tags": ["backend", "frontend", "production", "HIPAA", "SOC2", "GDPR"],
+        "repository_count": 8,
+        "created_at": "2024-01-08T10:00:00Z",
+        "updated_at": "2024-01-21T10:15:00Z",
+        "last_scan_at": "2024-01-22T07:30:00Z",
+        "active": true
+      },
+      {
+        "project_id": "proj_mno345pqr678stu901",
+        "name": "Development Tools",
+        "description": "Internal development tools and utilities",
+        "tags": ["tools", "development", "internal"],
+        "repository_count": 2,
+        "created_at": "2024-01-12T10:00:00Z",
+        "updated_at": "2024-01-12T10:00:00Z",
+        "last_scan_at": null,
+        "active": true
+      },
+      {
+        "project_id": "proj_pqr678stu901vwx234",
+        "name": "Legacy System Migration",
+        "description": "Migration of legacy systems to cloud-native architecture",
+        "tags": ["migration", "staging", "cloud"],
+        "repository_count": 4,
+        "created_at": "2024-01-01T10:00:00Z",
+        "updated_at": "2024-01-15T09:00:00Z",
+        "last_scan_at": "2024-01-20T14:45:00Z",
+        "active": true
+      }
+    ],
+    "total": 6
+  },
+  "metadata": {
+    "cache_hit": false,
+    "execution_time_ms": 28.76
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "success": true,
+  "data": {
+    "cwe_id": "CWE-79",
+    "name": "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+    "description": "The software does not neutralize or incorrectly neutralizes user-controllable input before it is placed in output that is used as a web page that is served to other users.",
+    "extended_description": "Cross-site scripting (XSS) vulnerabilities occur when:\n\n1. Data enters a web application through an untrusted source, most frequently a web request.\n2. The data is included in dynamic content that is sent to a web user without being validated for malicious content.\n\nThe malicious content sent to the web browser often takes the form of a segment of JavaScript, but may also include HTML, Flash, or any other type of code that the browser may execute. The variety of attacks based on XSS is almost limitless, but they commonly include transmitting private data, like cookies or other session information, to the attacker, redirecting the victim to web content controlled by the attacker, or performing other malicious operations on the user's machine under the guise of the vulnerable site.\n\nXSS attacks can generally be categorized into two categories: stored and reflected. Stored attacks are those where the injected script is permanently stored on the target servers, such as in a database, in a message forum, visitor log, comment field, etc. The victim then retrieves the malicious script from the server when it requests the stored information. Reflected attacks are those where the injected script is reflected off the web server, such as in an error message, search result, or any other response that includes some or all of the input sent to the server as part of the request.",
+    "parents": [
+      {
+        "cwe_id": "CWE-74",
+        "name": "Improper Neutralization of Special Elements in Output Used by a Downstream Component ('Injection')"
+      },
+      {
+        "cwe_id": "CWE-707",
+        "name": "Improper Neutralization"
+      }
+    ],
+    "children": [
+      {
+        "cwe_id": "CWE-80",
+        "name": "Improper Neutralization of Script-Related HTML Tags in a Web Page (Basic XSS)"
+      },
+      {
+        "cwe_id": "CWE-83",
+        "name": "Improper Neutralization of Script in Attributes in a Web Page"
+      },
+      {
+        "cwe_id": "CWE-84",
+        "name": "Improper Neutralization of Encoded URI Schemes in a Web Page"
+      },
+      {
+        "cwe_id": "CWE-85",
+        "name": "Doubled Character XSS Manipulations"
+      },
+      {
+        "cwe_id": "CWE-86",
+        "name": "Improper Neutralization of Invalid Characters in Identifiers in Web Pages"
+      },
+      {
+        "cwe_id": "CWE-87",
+        "name": "Improper Neutralization of Alternate XSS Syntax"
+      }
+    ],
+    "attack_patterns": [
+      {
+        "capec_id": "CAPEC-18",
+        "name": "XSS Targeting Non-Script Elements",
+        "description": "An adversary embeds malicious script code in non-script elements of web pages, such as headers, comments, and imported style sheets. This attack targets vulnerabilities that allow adversaries to run scripts in the browser which were not intended to be executed by the application developer."
+      },
+      {
+        "capec_id": "CAPEC-19",
+        "name": "Embedding Script in Non-Script Elements",
+        "description": "This attack is a form of Cross-Site Scripting (XSS) where malicious scripts are embedded in elements that are not expected to host scripts such as image tags (<img>), comments in XML documents (< !-CDATA->), etc."
+      },
+      {
+        "capec_id": "CAPEC-86",
+        "name": "XSS Through HTTP Query Strings",
+        "description": "An adversary injects malicious script code into HTTP query strings in order to launch a Cross-Site Scripting (XSS) attack. Query strings are often used to specify parameters that affect the processing of web pages."
+      },
+      {
+        "capec_id": "CAPEC-198",
+        "name": "XSS Targeting Error Pages",
+        "description": "An adversary distributes a link (or possibly some other query structure) with a request to a third party web server that is malformed and also contains a block of exploit code in order to have the exploit returned to the user."
+      },
+      {
+        "capec_id": "CAPEC-209",
+        "name": "XSS Using MIME Type Mismatch",
+        "description": "An adversary creates a file with scripting content but where the specified MIME type of the file is such that scripting is not expected."
+      },
+      {
+        "capec_id": "CAPEC-232",
+        "name": "Exploiting Incorrectly Configured Access Control Security Levels",
+        "description": "An adversary exploits a weakness in the configuration of access controls and is able to bypass the intended protection that these measures guard against."
+      }
+    ]
+  },
+  "metadata": {
+    "cache_hit": false,
+    "execution_time_ms": 123.45,
+    "api_version": "v1"
+  }
+}

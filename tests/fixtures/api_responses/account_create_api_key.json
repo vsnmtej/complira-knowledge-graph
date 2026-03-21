@@ -1,0 +1,15 @@
+{
+  "success": true,
+  "data": {
+    "key_id": "key_abc123def456ghi789jkl012mno345pq",
+    "name": "Production Server",
+    "api_key": "ak_live_abc123xyz789defghijklmnopqrstuvwxyz0123456789ABCDEFGHIJK",
+    "created_at": "2024-01-15T10:00:00Z",
+    "expires_at": "2024-04-15T10:00:00Z",
+    "warning": "⚠️ Save this API key securely. You will not be able to retrieve it again."
+  },
+  "metadata": {
+    "cache_hit": false,
+    "execution_time_ms": 45.3
+  }
+}

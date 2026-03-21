@@ -1,0 +1,58 @@
+{
+  "success": true,
+  "data": {
+    "vertices": {
+      "vulnerabilities": 245678,
+      "weaknesses": 934,
+      "attack_patterns": 559,
+      "attack_techniques": 718,
+      "oscal_controls": 1084,
+      "regulatory_requirements": 2456
+    },
+    "edges": {
+      "has_weakness": 238901,
+      "capec_relates_to_cwe": 1829,
+      "capec_maps_to_attack": 163,
+      "technique_mitigated_by_control": 8492,
+      "violates_requirement": 5274983
+    },
+    "total_edges": 5524368,
+    "enrichment_funnel": {
+      "sample_size": 100,
+      "sample_year": 2024,
+      "cve_to_cwe_percent": 97,
+      "cve_to_capec_percent": 72,
+      "cve_to_attack_percent": 45,
+      "estimated_coverage": {
+        "cwe_weaknesses": "~97% of CVEs",
+        "capec_patterns": "~72% of CVEs",
+        "attack_techniques": "~45% of CVEs",
+        "nist_controls": "~45% of CVEs (estimated)"
+      }
+    },
+    "data_limitations": {
+      "capec_attack_mappings": {
+        "total_capecs": 559,
+        "capecs_with_attack_mappings": 163,
+        "coverage_percent": 29.2,
+        "source": "MITRE CAPEC XML",
+        "limitation": "MITRE only provides ATT&CK mappings for ~29% of CAPEC patterns"
+      },
+      "control_to_regulatory": {
+        "status": "not_implemented",
+        "reason": "Manual mapping required - not in public data sources",
+        "workaround": "Use violates_requirement edges for direct CVE → Regulatory mapping (5.27M edges)"
+      }
+    },
+    "recommendations": [
+      "45% of CVEs reach ATT&CK techniques - use these for threat modeling",
+      "72% of CVEs have CAPEC attack patterns - useful for understanding attack methods",
+      "97% of CVEs have CWE weaknesses - excellent for root cause analysis",
+      "Use violates_requirement edges for direct CVE → Regulatory mapping (bypasses control layer)"
+    ]
+  },
+  "metadata": {
+    "cache_hit": false,
+    "api_version": "v1"
+  }
+}

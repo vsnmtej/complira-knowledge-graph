@@ -1,0 +1,36 @@
+{
+  "404_cve_not_found": {
+    "detail": "CVE not found: CVE-9999-99999"
+  },
+  "404_cwe_not_found": {
+    "detail": "CWE not found: CWE-99999"
+  },
+  "404_controls_cve_not_found": {
+    "detail": "CVE not found: CVE-8888-88888"
+  },
+  "400_batch_limit_exceeded": {
+    "detail": "Maximum 100 CVEs per request. You requested 101 CVEs."
+  },
+  "422_missing_cve_ids": {
+    "detail": [
+      {
+        "type": "missing",
+        "loc": ["query", "cve_ids"],
+        "msg": "Field required",
+        "input": null
+      }
+    ]
+  },
+  "422_invalid_cve_format": {
+    "detail": "Invalid CVE ID format: INVALID-2024-1234. Expected format: CVE-YYYY-NNNN+"
+  },
+  "422_invalid_cwe_format": {
+    "detail": "Invalid CWE ID format: INVALID-123. Expected format: CWE-N+"
+  },
+  "401_unauthorized": {
+    "detail": "Invalid or missing API key"
+  },
+  "403_forbidden": {
+    "detail": "Insufficient permissions to access reference data"
+  }
+}
