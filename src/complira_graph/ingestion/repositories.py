@@ -62,8 +62,10 @@ class EvidenceRunRepository:
 
         Returns the inserted document (includes _key).
         """
+        run_uuid = str(uuid.uuid4())
         run = ScanRun(
-            key=str(uuid.uuid4()),
+            key=run_uuid,
+            scan_run_id=run_uuid,
             tenant_id=tenant_id,
             project_id=project_id,
             repository_id=repository_id,

@@ -42,6 +42,10 @@ class ScanRun(BaseModel):
         serialization_alias="_key",
         description="UUID (auto-assigned at creation)",
     )
+    scan_run_id: Optional[str] = Field(
+        None,
+        description="UUID v4 — mirrors _key; satisfies unique index idx_scan_runs_id",
+    )
     tenant_id: str = Field(..., description="Tenant identifier (= customer_id)")
     project_id: Optional[str] = Field(None)
     repository_id: Optional[str] = Field(None)

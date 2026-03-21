@@ -463,8 +463,8 @@ class ScanEnrichmentRepository:
             chunk = updates[i : i + _CHUNK_SIZE]
             self._db.aql.execute(
                 """
-                FOR update IN @updates
-                    UPDATE update._key WITH update IN scan_findings
+                FOR u IN @updates
+                    UPDATE u._key WITH u IN scan_findings
                     OPTIONS {keepNull: false}
                 """,
                 bind_vars={"updates": chunk},
