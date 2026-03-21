@@ -1,0 +1,25 @@
+{
+  "success": true,
+  "data": {
+    "database": "complira_graph",
+    "collections": {
+      "vulnerabilities": 245678,
+      "weaknesses": 934,
+      "attack_patterns": 559,
+      "attack_techniques": 718,
+      "oscal_controls": 1084,
+      "regulatory_requirements": 2456,
+      "has_weakness": 238901,
+      "capec_relates_to_cwe": 1829,
+      "capec_maps_to_attack": 163,
+      "technique_mitigated_by_control": 8492,
+      "violates_requirement": 5274983
+    },
+    "total_documents": 251429,
+    "total_edges": 5524368
+  },
+  "metadata": {
+    "cache_hit": false,
+    "api_version": "v1"
+  }
+}

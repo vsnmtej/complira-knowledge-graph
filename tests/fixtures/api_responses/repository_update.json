@@ -1,0 +1,22 @@
+{
+  "success": true,
+  "data": {
+    "repository_id": "repo_abc123xyz789def",
+    "project_id": "proj_new456def789ghi",
+    "project_name": "Cloud Infrastructure",
+    "name": "backend-api-v2",
+    "description": "Updated backend API service with new microservices architecture",
+    "repository_url": "https://github.com/acmecorp/backend-api",
+    "default_branch": "develop",
+    "tags": ["backend", "api", "production", "critical", "microservices"],
+    "scan_count": 12,
+    "created_at": "2024-01-15T10:30:00Z",
+    "updated_at": "2024-03-17T10:45:00Z",
+    "last_scan_at": "2024-03-17T09:15:00Z",
+    "active": true
+  },
+  "metadata": {
+    "cache_hit": false,
+    "execution_time_ms": 38.9
+  }
+}

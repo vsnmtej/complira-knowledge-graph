@@ -1,0 +1,13 @@
+{
+  "success": true,
+  "data": {
+    "vex_id": "vex_abc123def456",
+    "vulnerabilities_count": 5,
+    "enriched_count": 5,
+    "created_at": "2026-03-17T10:00:00Z"
+  },
+  "metadata": {
+    "cache_hit": false,
+    "execution_time_ms": 456.78
+  }
+}

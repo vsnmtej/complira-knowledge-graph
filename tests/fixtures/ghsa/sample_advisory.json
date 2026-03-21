@@ -1,0 +1,39 @@
+{
+  "ghsa_id": "GHSA-xxxx-yyyy-zzzz",
+  "cve_id": "CVE-2024-1234",
+  "summary": "Test SQL Injection Vulnerability",
+  "description": "A SQL injection vulnerability exists in the authentication module allowing attackers to bypass authentication.",
+  "severity": "high",
+  "cvss": {
+    "score": 7.5,
+    "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N"
+  },
+  "cwes": [
+    {
+      "cwe_id": "CWE-89",
+      "name": "SQL Injection"
+    }
+  ],
+  "published_at": "2024-01-15T10:00:00Z",
+  "updated_at": "2024-01-16T12:00:00Z",
+  "withdrawn_at": null,
+  "vulnerabilities": [
+    {
+      "package": {
+        "ecosystem": "npm",
+        "name": "test-package"
+      },
+      "vulnerable_version_range": "< 1.2.3",
+      "patched_versions": "1.2.3",
+      "vulnerable_functions": []
+    }
+  ],
+  "references": [
+    {
+      "url": "https://example.com/advisory"
+    },
+    {
+      "url": "https://github.com/example/repo/issues/123"
+    }
+  ]
+}

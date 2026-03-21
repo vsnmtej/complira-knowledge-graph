@@ -1,0 +1,15 @@
+{
+  "success": true,
+  "data": {
+    "project_id": "proj_abc123def456ghi789",
+    "name": "Backend Services",
+    "description": "All backend microservices and APIs for production environment",
+    "tags": ["backend", "production", "FDA_524B", "critical"],
+    "created_at": "2024-01-15T10:00:00Z",
+    "repository_count": 0
+  },
+  "metadata": {
+    "cache_hit": false,
+    "execution_time_ms": 45.32
+  }
+}

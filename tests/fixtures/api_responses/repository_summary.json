@@ -1,0 +1,75 @@
+{
+  "success": true,
+  "data": {
+    "repository_id": "repo_abc123xyz789def",
+    "repository_name": "backend-api",
+    "project_id": "proj_xyz789abc123",
+    "project_name": "Medical Device Platform",
+    "scan_count": 12,
+    "first_scan": "2024-01-20T10:00:00Z",
+    "last_scan": "2024-03-17T09:15:00Z",
+    "current_findings": {
+      "critical": 3,
+      "high": 12,
+      "medium": 28,
+      "low": 15,
+      "total": 58
+    },
+    "trends": {
+      "new_last_7_days": 5,
+      "resolved_last_7_days": 8,
+      "net_change": -3
+    },
+    "top_vulnerabilities": [
+      {
+        "cve_id": "CVE-2024-1234",
+        "severity": "CRITICAL",
+        "description": "SQL injection vulnerability in authentication module",
+        "affected_component": "pkg:npm/express@4.17.1",
+        "occurrences": 1,
+        "first_detected": "2024-03-10T14:30:00Z",
+        "status": "open"
+      },
+      {
+        "cve_id": "CVE-2024-5678",
+        "severity": "CRITICAL",
+        "description": "Remote code execution in dependencies",
+        "affected_component": "pkg:pypi/django@3.2.0",
+        "occurrences": 1,
+        "first_detected": "2024-03-12T09:15:00Z",
+        "status": "open"
+      },
+      {
+        "cve_id": "GHSA-v8gr-m533-ghj9",
+        "severity": "CRITICAL",
+        "description": "Cross-site scripting (XSS) vulnerability",
+        "affected_component": "pkg:npm/react@17.0.2",
+        "occurrences": 1,
+        "first_detected": "2024-03-15T11:00:00Z",
+        "status": "open"
+      },
+      {
+        "cve_id": "CVE-2024-9012",
+        "severity": "HIGH",
+        "description": "Authentication bypass in API gateway",
+        "affected_component": "pkg:npm/express-jwt@6.0.0",
+        "occurrences": 2,
+        "first_detected": "2024-03-05T10:20:00Z",
+        "status": "open"
+      },
+      {
+        "cve_id": "CVE-2024-3456",
+        "severity": "HIGH",
+        "description": "Path traversal vulnerability",
+        "affected_component": "pkg:npm/serve-static@1.14.1",
+        "occurrences": 1,
+        "first_detected": "2024-02-28T14:45:00Z",
+        "status": "resolved"
+      }
+    ]
+  },
+  "metadata": {
+    "cache_hit": false,
+    "execution_time_ms": 142.6
+  }
+}

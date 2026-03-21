@@ -1,0 +1,68 @@
+{
+  "400_email_exists": {
+    "detail": "Email already registered"
+  },
+  "400_invalid_verification_token": {
+    "detail": "Invalid or expired verification token"
+  },
+  "400_invalid_reset_token": {
+    "detail": "Invalid or expired reset token"
+  },
+  "401_invalid_credentials": {
+    "detail": "Invalid email or password"
+  },
+  "401_invalid_refresh_token": {
+    "detail": "Invalid or expired refresh token"
+  },
+  "401_invalid_token_type": {
+    "detail": "Invalid token type. Use refresh token."
+  },
+  "401_missing_auth_header": {
+    "detail": "Not authenticated"
+  },
+  "404_user_not_found": {
+    "detail": "User not found"
+  },
+  "422_weak_password": {
+    "detail": [
+      {
+        "type": "value_error",
+        "loc": ["body", "password"],
+        "msg": "Password must contain at least one uppercase letter",
+        "input": "weakpassword",
+        "ctx": {
+          "error": "Password must contain at least one uppercase letter"
+        }
+      }
+    ]
+  },
+  "422_invalid_email": {
+    "detail": [
+      {
+        "type": "value_error",
+        "loc": ["body", "email"],
+        "msg": "value is not a valid email address",
+        "input": "not-an-email"
+      }
+    ]
+  },
+  "422_short_token": {
+    "detail": [
+      {
+        "type": "string_too_short",
+        "loc": ["body", "token"],
+        "msg": "String should have at least 32 characters",
+        "input": "short",
+        "ctx": {
+          "min_length": 32
+        }
+      }
+    ]
+  },
+  "500_account_config_error": {
+    "detail": "Account configuration error. Please contact support."
+  },
+  "500_signup_error": {
+    "detail": "Failed to create account. Please try again."
+  }
+}

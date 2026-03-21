@@ -1,0 +1,144 @@
+{
+  "success": true,
+  "data": {
+    "project_id": "proj_abc123def456ghi789",
+    "project_name": "Backend Services",
+    "repository_count": 5,
+    "total_scans": 42,
+    "findings": {
+      "critical": 3,
+      "high": 12,
+      "medium": 28,
+      "low": 45,
+      "total": 88
+    },
+    "top_vulnerabilities": [
+      {
+        "cve_id": "CVE-2024-1234",
+        "severity": "CRITICAL",
+        "affected_repositories": 3,
+        "occurrences": 8,
+        "description": "Remote code execution in authentication service"
+      },
+      {
+        "cve_id": "CVE-2024-5678",
+        "severity": "CRITICAL",
+        "affected_repositories": 2,
+        "occurrences": 4,
+        "description": "SQL injection vulnerability in data access layer"
+      },
+      {
+        "cve_id": "GHSA-v8gr-m533-ghj9",
+        "severity": "HIGH",
+        "affected_repositories": 4,
+        "occurrences": 12,
+        "description": "Cross-site scripting (XSS) in API gateway"
+      },
+      {
+        "cve_id": "CVE-2024-9012",
+        "severity": "HIGH",
+        "affected_repositories": 3,
+        "occurrences": 6,
+        "description": "Path traversal in file upload service"
+      },
+      {
+        "cve_id": "CVE-2024-3456",
+        "severity": "HIGH",
+        "affected_repositories": 2,
+        "occurrences": 5,
+        "description": "Insecure deserialization in message queue consumer"
+      }
+    ],
+    "compliance_status": {
+      "FDA_524B": {
+        "status": "compliant",
+        "findings_count": 15,
+        "high_risk_findings": 2,
+        "last_assessed": "2024-01-22T09:15:00Z"
+      },
+      "HIPAA": {
+        "status": "non_compliant",
+        "findings_count": 8,
+        "high_risk_findings": 3,
+        "last_assessed": "2024-01-22T09:15:00Z",
+        "violations": [
+          "Encryption at rest not enabled for PHI data store",
+          "Audit logging incomplete for data access",
+          "Access controls need strengthening"
+        ]
+      },
+      "SOC2": {
+        "status": "in_progress",
+        "findings_count": 22,
+        "high_risk_findings": 1,
+        "last_assessed": "2024-01-21T16:30:00Z"
+      }
+    },
+    "repositories": [
+      {
+        "repository_id": "repo_auth_service_123",
+        "repository_name": "auth-service",
+        "scan_count": 12,
+        "last_scan_at": "2024-01-22T09:15:00Z",
+        "findings_summary": {
+          "critical": 2,
+          "high": 4,
+          "medium": 8,
+          "low": 12
+        }
+      },
+      {
+        "repository_id": "repo_payment_service_456",
+        "repository_name": "payment-service",
+        "scan_count": 10,
+        "last_scan_at": "2024-01-22T08:30:00Z",
+        "findings_summary": {
+          "critical": 1,
+          "high": 3,
+          "medium": 6,
+          "low": 10
+        }
+      },
+      {
+        "repository_id": "repo_notification_service_789",
+        "repository_name": "notification-service",
+        "scan_count": 8,
+        "last_scan_at": "2024-01-21T14:45:00Z",
+        "findings_summary": {
+          "critical": 0,
+          "high": 2,
+          "medium": 5,
+          "low": 8
+        }
+      },
+      {
+        "repository_id": "repo_api_gateway_012",
+        "repository_name": "api-gateway",
+        "scan_count": 7,
+        "last_scan_at": "2024-01-22T07:00:00Z",
+        "findings_summary": {
+          "critical": 0,
+          "high": 2,
+          "medium": 6,
+          "low": 9
+        }
+      },
+      {
+        "repository_id": "repo_data_service_345",
+        "repository_name": "data-service",
+        "scan_count": 5,
+        "last_scan_at": "2024-01-20T16:20:00Z",
+        "findings_summary": {
+          "critical": 0,
+          "high": 1,
+          "medium": 3,
+          "low": 6
+        }
+      }
+    ]
+  },
+  "metadata": {
+    "cache_hit": false,
+    "execution_time_ms": 125.48
+  }
+}

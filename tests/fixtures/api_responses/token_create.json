@@ -1,0 +1,8 @@
+{
+  "success": true,
+  "message": "Token created successfully. Save this token - you won't see it again!",
+  "token": "complira_tk_abc123xyz789defghijklmnopqrstuvwxyz0123456789ABCDEFGHIJK",
+  "token_id": "token_abc123",
+  "token_prefix": "complira_tk_abc123",
+  "expires_at": "2025-01-15T10:00:00Z"
+}
