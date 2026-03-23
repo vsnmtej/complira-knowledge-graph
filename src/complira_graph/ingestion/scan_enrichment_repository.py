@@ -554,6 +554,76 @@ class ScanEnrichmentRepository:
             extra={"scan_run_id": scan_run_key, "status": status},
         )
 
+    def aql_get_epss_history_batch(
+        self,
+        cve_keys: list[str],
+        cutoff_date: str,
+    ) -> dict[str, list[dict]]:
+        """
+        Fetch 30-day EPSS time-series for a batch of CVE keys.
+
+        cve_keys: list of normalized CVE keys in ArangoDB _key format (e.g. "CVE_2024_1234")
+        cutoff_date: ISO date string "YYYY-MM-DD" — lower bound for score_date filter
+
+        Returns dict[cve_key, list[{"score": float, "date": "YYYY-MM-DD"}]]
+        sorted ascending by date. CVEs with no history return empty list.
+        CVEs not found in vulnerabilities collection are absent from the result.
+
+        On AQL exception: logs and returns {} so EPSSVelocityPipeline treats all CVEs as stable.
+        """
+        if not cve_keys:
+            return {}
+        try:
+            cursor = self._db.aql.execute(
+                """
+                FOR cve_key IN @cve_keys
+                    LET cve_doc = DOCUMENT(CONCAT("vulnerabilities/", cve_key))
+                    LET history = (
+                        cve_doc != null
+                        ? (
+                            FOR e IN has_epss
+                                FILTER e._from == cve_doc._id
+                                LET point = DOCUMENT(e._to)
+                                FILTER point != null
+                                  AND point.score_date >= @cutoff_date
+                                SORT point.score_date ASC
+                                RETURN {
+                                    score: point.epss_score,
+                                    date:  point.score_date
+                                }
+                          )
+                        : []
+                    )
+                    FILTER LENGTH(history) > 0
+                    RETURN {
+                        cve_key: cve_key,
+                        history: history
+                    }
+                """,
+                bind_vars={"cve_keys": cve_keys, "cutoff_date": cutoff_date},
+            )
+        except Exception:
+            log.exception(
+                "scan_enrichment_repo.aql_get_epss_history_batch_failed",
+                extra={"cve_count": len(cve_keys)},
+            )
+            return {}
+
+        result: dict[str, list[dict]] = {}
+        for row in cursor:
+            cve_key = row.get("cve_key")
+            history = row.get("history") or []
+            if cve_key:
+                result[cve_key] = history
+        log.debug(
+            "scan_enrichment_repo.aql_get_epss_history_batch_complete",
+            extra={
+                "queried": len(cve_keys),
+                "found_with_history": len(result),
+            },
+        )
+        return result
+
     def update_scan_run_coverage(
         self,
         scan_run_key: str,

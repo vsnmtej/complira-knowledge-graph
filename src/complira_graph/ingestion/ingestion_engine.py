@@ -179,6 +179,10 @@ class IngestionEngine:
 
         raw_findings = self._parse(adapter, raw_file)
 
+        pre_process = adapter.get("pre_process")
+        if pre_process is not None:
+            raw_findings = pre_process(raw_findings)
+
         bundles: list[IngestionBundle] = []
         for raw in raw_findings:
             try:
@@ -248,8 +252,33 @@ class IngestionEngine:
                     findings_sarif.append(result)
             return findings_sarif
 
+        if fmt == "xml":
+            import xml.etree.ElementTree as ET
+            root = ET.fromstring(raw_file)
+            parse_root_path: str = adapter.get("parse_root") or ""  # type: ignore[assignment]
+            elements = root.findall(parse_root_path) if parse_root_path else [root]
+            findings_xml: list[dict] = []
+            for elem in elements:
+                finding: dict = dict(elem.attrib)
+                # Inject primary SourceLine as sl_* flat keys
+                all_source_lines = list(elem.iter("SourceLine"))
+                primary_sl = next(
+                    (sl for sl in all_source_lines if sl.get("primary") == "true"),
+                    all_source_lines[0] if all_source_lines else None,
+                )
+                if primary_sl is not None:
+                    finding["sl_classname"]  = primary_sl.get("classname", "")
+                    finding["sl_start"]      = primary_sl.get("start", "")
+                    finding["sl_end"]        = primary_sl.get("end", "")
+                    finding["sl_sourcepath"] = primary_sl.get("sourcepath", "")
+                lm = elem.find("LongMessage")
+                if lm is not None and lm.text:
+                    finding["long_message"] = lm.text.strip()
+                findings_xml.append(finding)
+            return findings_xml
+
         raise NotImplementedError(
-            f"parse_format={fmt!r} not yet implemented (xml/csv/graphql are future scope)"
+            f"parse_format={fmt!r} not yet implemented (csv/graphql are future scope)"
         )
 
     def _extract_doc_context(self, adapter: ToolAdapter, data: dict) -> dict:

@@ -48,7 +48,7 @@ class CloudSettings(Settings):
         description="JWT secret key for signing tokens. MUST be set via environment variable in production."
     )
     JWT_ALGORITHM: str = "HS256"
-    JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
+    JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     JWT_REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
     # ========== LLM Integration ==========

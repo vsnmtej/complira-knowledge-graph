@@ -171,10 +171,12 @@ class TestClassifySeverity:
         adapter = ADAPTER_REGISTRY["semgrep"]
         assert engine._classify_severity(adapter, {"severity": "WARNING"}, {}) == "medium"
 
-    def test_checkov_none_severity_maps_to_none(self):
+    def test_checkov_none_severity_maps_to_medium(self):
+        # Open-source Checkov (no --bc-api-key) emits no severity.
+        # severity_map[None] = "medium" to produce a usable fallback.
         engine = IngestionEngine()
         adapter = ADAPTER_REGISTRY["checkov"]
-        assert engine._classify_severity(adapter, {}, {}) is None
+        assert engine._classify_severity(adapter, {}, {}) == "medium"
 
     def test_grype_critical_maps_to_critical(self):
         # _classify_severity runs after _map_fields — severity is already extracted to top-level doc

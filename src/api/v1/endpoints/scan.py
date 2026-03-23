@@ -13,6 +13,7 @@ from typing import List, Optional
 
 import structlog
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
+from typing import Literal
 
 from api.core.security import Customer, get_current_customer
 from api.models.requests.scan import ScanIngestRequest
@@ -20,6 +21,8 @@ from api.models.responses.scan import (
     ScanIngestResponse,
     ScanSessionResponse,
     ScanFindingResponse,
+    LLMTokenUsage,
+    Phase2Summary,
     VEXGenerationResponse,
     CPEMatchingResponse,
 )
@@ -28,6 +31,12 @@ from api.models.responses import APIResponse, ResponseMetadata
 logger = structlog.get_logger()
 
 router = APIRouter()
+
+# Allow-list mapping: sort_by param value → safe AQL field reference (no user input interpolated)
+_SORT_FIELD_MAP = {
+    "blast_radius_score": "f.blast_radius_score",
+    "epss_velocity": "f.epss_velocity",
+}
 
 
 # ---------------------------------------------------------------------------
@@ -40,6 +49,7 @@ _FORMAT_SCAN_TYPE_TO_TOOL = {
     ("json", "sca"): "grype",
     ("json", "dast"): "zap",
     ("json", "container"): "grype",
+    ("json", "cspm"): "prowler",
     ("sarif", "sast"): "sarif",
     ("sarif", "dast"): "sarif",
     ("sarif", "sca"): "sarif",
@@ -105,9 +115,11 @@ async def ingest_scan_endpoint(
         if request.format == "cyclonedx" or request.scan_type == "sbom":
             # SBOM component path
             components_raw = request.payload.get("components", [])
+            dependencies_raw = request.payload.get("dependencies", [])
             result = await svc.ingest_sbom(
                 tenant_id=customer.id,
                 components_raw=components_raw,
+                dependencies_raw=dependencies_raw,
                 sbom_format="cyclonedx",
                 project_id=request.project_id,
                 repository_id=request.repository_id,
@@ -192,7 +204,8 @@ async def get_scan_run(
     """
     GET /v1/scan/{run_id}
 
-    Get scan run details from the scan_runs collection.
+    Get scan run details from the scan_runs collection, including Phase 2
+    intelligence summary stats computed from findings.
     """
     try:
         from api.core.database import get_reference_db
@@ -202,6 +215,64 @@ async def get_scan_run(
 
         if not doc or doc.get("tenant_id") != customer.id:
             raise HTTPException(status_code=404, detail=f"Scan run not found: {run_id}")
+
+        # Compute Phase 2 summary: trend counts + avg blast radius (single AQL pass)
+        summary_cursor = ref_db.aql.execute(
+            """
+            LET all_findings = (
+                FOR f IN scan_findings
+                FILTER f.scan_run_id == @run_id AND f.tenant_id == @tenant_id
+                RETURN {trend: f.epss_trend, br: f.blast_radius_score}
+            )
+            LET br_scores = (FOR x IN all_findings FILTER x.br != null RETURN x.br)
+            LET trend_groups = (
+                FOR x IN all_findings
+                COLLECT trend = x.trend WITH COUNT INTO cnt
+                RETURN {trend: trend, count: cnt}
+            )
+            RETURN {
+                trend_groups: trend_groups,
+                avg_blast_radius: LENGTH(br_scores) > 0 ? AVG(br_scores) : null
+            }
+            """,
+            bind_vars={"run_id": run_id, "tenant_id": customer.id},
+        )
+        summary_raw = list(summary_cursor)
+        summary_data = summary_raw[0] if summary_raw else {}
+
+        trend_dict: dict = {}
+        for row in summary_data.get("trend_groups", []):
+            if row.get("trend"):
+                trend_dict[row["trend"]] = row["count"]
+        avg_blast_radius = summary_data.get("avg_blast_radius")
+
+        # Top-5 findings by blast radius score (separate query — sorted)
+        top5_cursor = ref_db.aql.execute(
+            """
+            FOR f IN scan_findings
+                FILTER f.scan_run_id == @run_id AND f.tenant_id == @tenant_id
+                       AND f.blast_radius_score != null
+                SORT f.blast_radius_score DESC
+                LIMIT 5
+                RETURN f._key
+            """,
+            bind_vars={"run_id": run_id, "tenant_id": customer.id},
+        )
+        top5_keys = list(top5_cursor)
+
+        phase2_summary = Phase2Summary(
+            rising_count=trend_dict.get("rising", 0),
+            stable_count=trend_dict.get("stable", 0),
+            falling_count=trend_dict.get("falling", 0),
+            avg_blast_radius=avg_blast_radius,
+            top_blast_radius_findings=top5_keys,
+        )
+
+        # LLM token usage (written by UC-010)
+        llm_token_usage_raw = doc.get("llm_token_usage")
+        llm_token_usage = (
+            LLMTokenUsage(**llm_token_usage_raw) if llm_token_usage_raw else None
+        )
 
         tools = doc.get("tools_invoked") or []
         response = ScanSessionResponse(
@@ -218,6 +289,9 @@ async def get_scan_run(
             metadata=doc.get("metadata", {}),
             project_id=doc.get("project_id"),
             repository_id=doc.get("repository_id"),
+            coverage_by_framework=doc.get("coverage_by_framework"),
+            llm_token_usage=llm_token_usage,
+            phase2_summary=phase2_summary,
         )
 
         return APIResponse(
@@ -244,11 +318,29 @@ async def list_scan_findings(
     customer: Customer = Depends(get_current_customer),
     limit: int = Query(100, ge=1, le=1000),
     offset: int = Query(0, ge=0),
+    # Phase 2 filter params
+    epss_trend: Optional[Literal["rising", "stable", "falling"]] = Query(
+        None, description="Filter findings by EPSS trend"
+    ),
+    min_blast_radius: Optional[float] = Query(
+        None, ge=0.0, le=1.0, description="Filter findings where blast_radius_score >= value"
+    ),
+    sort_by: Optional[Literal["blast_radius_score", "epss_velocity"]] = Query(
+        None, description="Sort findings by Phase 2 field descending (default: severity ASC)"
+    ),
 ):
     """
     GET /v1/scan/{run_id}/findings
 
     List findings for a scan run from the scan_findings collection.
+
+    All Phase 1 enrichment fields and Phase 2 intelligence fields are included
+    in each finding (null when the pipeline stage has not yet completed).
+
+    Filter parameters:
+    - **epss_trend**: Filter by EPSS trend (rising | stable | falling)
+    - **min_blast_radius**: Return only findings with blast_radius_score >= value [0, 1]
+    - **sort_by**: Sort findings by blast_radius_score or epss_velocity descending
     """
     try:
         from api.core.database import get_reference_db
@@ -260,25 +352,50 @@ async def list_scan_findings(
         if not run_doc or run_doc.get("tenant_id") != customer.id:
             raise HTTPException(status_code=404, detail=f"Scan run not found: {run_id}")
 
+        # Build AQL filter clauses and bind_vars
+        filter_parts = [
+            "f.scan_run_id == @run_id",
+            "f.tenant_id == @tenant_id",
+        ]
+        bind_vars: dict = {
+            "run_id": run_id,
+            "tenant_id": customer.id,
+            "offset": offset,
+            "limit": limit,
+        }
+
+        if epss_trend is not None:
+            filter_parts.append("f.epss_trend == @epss_trend")
+            bind_vars["epss_trend"] = epss_trend
+
+        if min_blast_radius is not None:
+            filter_parts.append("f.blast_radius_score >= @min_blast_radius")
+            bind_vars["min_blast_radius"] = min_blast_radius
+
+        filter_clause = "FILTER " + " AND ".join(filter_parts)
+
+        # Sort: allow-list mapping — never interpolate user input directly
+        if sort_by is not None:
+            sort_field = _SORT_FIELD_MAP[sort_by]  # safe: Literal + allow-list
+            sort_clause = f"SORT {sort_field} DESC"
+        else:
+            sort_clause = "SORT f.severity ASC"
+
         cursor = ref_db.aql.execute(
-            """
+            f"""
             FOR f IN scan_findings
-                FILTER f.scan_run_id == @run_id AND f.tenant_id == @tenant_id
-                SORT f.severity ASC
+                {filter_clause}
+                {sort_clause}
                 LIMIT @offset, @limit
                 RETURN f
             """,
-            bind_vars={
-                "run_id": run_id,
-                "tenant_id": customer.id,
-                "offset": offset,
-                "limit": limit,
-            },
+            bind_vars=bind_vars,
         )
         findings = list(cursor)
 
         findings_response = [
             ScanFindingResponse(
+                # Core fields
                 finding_id=f["_key"],
                 cve_id=f.get("cve_id") or f.get("rule_id") or "N/A",
                 severity=f.get("severity") or "unknown",
@@ -286,6 +403,32 @@ async def list_scan_findings(
                 location=f.get("file_path") or f.get("location") or "",
                 tool_name=f.get("tool", "unknown"),
                 created_at=f.get("ingested_at") or "",
+                # Phase 1 enrichment fields (UC-007)
+                cvss_base=f.get("cvss_base"),
+                epss_score=f.get("epss_score"),
+                epss_percentile=f.get("epss_percentile"),
+                in_kev=f.get("in_kev"),
+                cwe_chain=f.get("cwe_chain"),
+                d3fend_techniques=f.get("d3fend_techniques"),
+                # Phase 1 compaction/risk fields (UC-008)
+                risk_score=f.get("risk_score"),
+                compaction_group_id=f.get("compaction_group_id"),
+                cluster_rank=f.get("cluster_rank"),
+                compacted=f.get("compacted"),
+                # Phase 2 LLM enrichment fields (UC-010)
+                llm_risk_summary=f.get("llm_risk_summary"),
+                llm_remediation=f.get("llm_remediation"),
+                llm_attack_surface=f.get("llm_attack_surface"),
+                llm_enriched_at=f.get("llm_enriched_at"),
+                # Phase 2 blast radius fields (UC-011)
+                blast_radius_score=f.get("blast_radius_score"),
+                affected_components=f.get("affected_components"),
+                blast_radius_path=f.get("blast_radius_path"),
+                blast_radius_computed_at=f.get("blast_radius_computed_at"),
+                # Phase 2 EPSS velocity fields (UC-012)
+                epss_velocity=f.get("epss_velocity"),
+                epss_trend=f.get("epss_trend"),
+                epss_velocity_computed_at=f.get("epss_velocity_computed_at"),
             )
             for f in findings
         ]
@@ -362,6 +505,9 @@ async def list_scans(
                 metadata=r.get("metadata", {}),
                 project_id=r.get("project_id"),
                 repository_id=r.get("repository_id"),
+                coverage_by_framework=r.get("coverage_by_framework"),
+                llm_token_usage=None,
+                phase2_summary=None,
             )
             for r in runs
         ]

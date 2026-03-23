@@ -2,7 +2,7 @@
 Scan ingestion request models.
 """
 
-from typing import Literal, Dict, Any, Optional
+from typing import Literal, Dict, List, Union, Any, Optional
 from pydantic import BaseModel, Field
 
 
@@ -18,14 +18,14 @@ class ScanIngestRequest(BaseModel):
         description="Scanner output format (sarif, cyclonedx, csv, json)"
     )
 
-    scan_type: Literal["sast", "dast", "sca", "container", "sbom", "iac"] = Field(
+    scan_type: Literal["sast", "dast", "sca", "container", "sbom", "iac", "cspm"] = Field(
         ...,
-        description="Type of scan (sast=Static Analysis, dast=Dynamic Analysis, sca=Software Composition Analysis, container=Container Scan, sbom=Software Bill of Materials, iac=Infrastructure as Code)"
+        description="Type of scan (sast=Static Analysis, dast=Dynamic Analysis, sca=Software Composition Analysis, container=Container Scan, sbom=Software Bill of Materials, iac=Infrastructure as Code, cspm=Cloud Security Posture Management)"
     )
 
-    payload: Dict[str, Any] = Field(
+    payload: Union[Dict[str, Any], List[Any]] = Field(
         ...,
-        description="Scanner output (JSON object). For SARIF, this is the full SARIF JSON. For CycloneDX, this is the full SBOM JSON."
+        description="Scanner output. JSON object for most tools; JSON array for Prowler and other tools that output a top-level array."
     )
 
     metadata: Dict[str, Any] = Field(

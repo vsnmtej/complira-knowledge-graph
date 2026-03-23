@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
-import { LayoutDashboard, Key, LogOut, FileSearch, Shield, FolderKanban, GitBranch, BookOpen, UserCircle, Zap, Settings } from "lucide-react";
+import { LayoutDashboard, Key, LogOut, FileSearch, Shield, FolderKanban, GitBranch, BookOpen, UserCircle, Zap, Settings, Sparkles } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function DashboardLayout({
@@ -40,6 +40,7 @@ export default function DashboardLayout({
 
   const navigation = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+    { name: "CISO Chat", href: "/dashboard/chat", icon: Sparkles },
     { name: "Scans", href: "/dashboard/scans", icon: FileSearch },
     { name: "VEX", href: "/dashboard/vex", icon: Shield },
     { name: "Projects", href: "/dashboard/projects", icon: FolderKanban },

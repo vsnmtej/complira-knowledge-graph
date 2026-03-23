@@ -150,7 +150,7 @@ export default function DashboardPage() {
                         {scan.scan_type}
                       </span>
                       <span className="text-xs text-muted-foreground">
-                        {format(new Date(scan.scan_timestamp), "PPp")}
+                        {scan.scan_timestamp ? format(new Date(scan.scan_timestamp), "PPp") : "—"}
                       </span>
                     </div>
                   </div>

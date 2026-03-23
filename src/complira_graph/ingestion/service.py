@@ -245,6 +245,7 @@ class EvidenceIngestionService:
         tenant_id: str,
         components_raw: list[dict[str, Any]],
         sbom_format: Optional[str] = None,
+        dependencies_raw: Optional[list[dict[str, Any]]] = None,
         project_id: Optional[str] = None,
         repository_id: Optional[str] = None,
         scan_run_key: Optional[str] = None,
@@ -256,12 +257,13 @@ class EvidenceIngestionService:
         Creates project_uses_component edges if project_id is available.
 
         Args:
-            tenant_id:      Tenant scope
-            components_raw: List of raw component dicts from the SBOM parser
-            sbom_format:    "cyclonedx" | "spdx" (stored on component doc)
-            project_id:     Optional project for project_uses_component edges
-            repository_id:  Optional repository context for scan_run
-            scan_run_key:   If provided, update existing run; otherwise create new one
+            tenant_id:        Tenant scope
+            components_raw:   List of raw component dicts from the SBOM parser
+            sbom_format:      "cyclonedx" | "spdx" (stored on component doc)
+            dependencies_raw: CycloneDX dependencies[] array (ref → dependsOn[]); None treated as empty
+            project_id:       Optional project for project_uses_component edges
+            repository_id:    Optional repository context for scan_run
+            scan_run_key:     If provided, update existing run; otherwise create new one
 
         Returns:
             ScanIngestResult with components_count
@@ -285,6 +287,13 @@ class EvidenceIngestionService:
             if component_docs and project_id:
                 self._edge_svc.create_project_uses_component_edges(
                     component_docs, project_id, tenant_id
+                )
+
+            if dependencies_raw:
+                self._edge_svc.create_depends_on_edges(
+                    dependencies_raw=dependencies_raw,
+                    scan_run_key=scan_run_key,
+                    tenant_id=tenant_id,
                 )
 
             if create_new_run:
@@ -336,6 +345,40 @@ class EvidenceIngestionService:
                     )
                     continue
 
+            # supplier
+            supplier_raw = raw.get("supplier")
+            supplier = (
+                supplier_raw.get("name")
+                if isinstance(supplier_raw, dict)
+                else None
+            )
+
+            # licenses — full list of expression strings
+            licenses_raw = raw.get("licenses") or []
+            licenses: list[str] = [
+                entry
+                for lic in licenses_raw
+                if isinstance(lic, dict)
+                for entry in [
+                    (lic.get("license") or {}).get("id")
+                    or (lic.get("license") or {}).get("name")
+                ]
+                if entry
+            ]
+
+            # hashes — list of {alg, content} dicts
+            hashes_raw = raw.get("hashes") or []
+            hashes: list[dict] = [
+                {"alg": h.get("alg"), "content": h.get("content")}
+                for h in hashes_raw
+                if isinstance(h, dict) and h.get("alg") and h.get("content")
+            ]
+
+            # legacy single-license field (first entry, preserved for backward compat)
+            legacy_license = licenses[0] if licenses else (
+                raw.get("license") or None
+            )
+
             comp = V22Component(
                 key=normalize_purl(purl),
                 purl=purl,
@@ -345,10 +388,10 @@ class EvidenceIngestionService:
                 purl_source="sbom",
                 sbom_format=sbom_format,
                 cpe=raw.get("cpe"),
-                license=raw.get("license") or (
-                    raw.get("licenses")[0].get("license", {}).get("id")
-                    if isinstance(raw.get("licenses"), list) and raw.get("licenses") else None
-                ),
+                license=legacy_license,
+                supplier=supplier or None,
+                licenses=licenses or None,
+                hashes=hashes or None,
             )
             docs.append(comp.model_dump(by_alias=True, exclude_none=True))
         return docs
@@ -373,6 +416,7 @@ class EvidenceIngestionService:
         pkg_key = uuid.uuid4().hex
         pkg_doc = {
             "_key": pkg_key,
+            "package_id": pkg_key,
             "tenant_id": tenant_id,
             "project_id": project_id,
             "scan_run_id": scan_run_key,

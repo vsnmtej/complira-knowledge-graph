@@ -32,6 +32,10 @@ from complira_graph.utils.keys import (
     normalize_cve_id,
     normalize_purl,
 )
+from complira_graph.ingestion.checkov_control_map import (
+    CHECKOV_NIST_MAP,
+    _normalize_oscal_key,
+)
 
 log = logging.getLogger(__name__)
 
@@ -494,6 +498,48 @@ class EvidenceEdgeService:
         )
 
     # ------------------------------------------------------------------
+    # UC-SBOM-002: depends_on edges (component dependency graph)
+    # ------------------------------------------------------------------
+
+    def create_depends_on_edges(
+        self,
+        dependencies_raw: list[dict],
+        scan_run_key: str,
+        tenant_id: str,
+    ) -> None:
+        """
+        Create depends_on edges from CycloneDX dependencies[] array.
+
+        _from: components/<normalize_purl(ref)>
+        _to:   components/<normalize_purl(dependsOn[i])>
+
+        Dangling _to references are tolerated (component may not be in DB yet;
+        ArangoDB allows dangling edges, matching component_has_vuln pattern).
+        """
+        edges: list[dict] = []
+        for dep in dependencies_raw:
+            from_purl = dep.get("ref")
+            if not from_purl:
+                log.debug("depends_on.skip_missing_ref", extra={"dep": dep})
+                continue
+            from_key = normalize_purl(from_purl)
+            for to_purl in dep.get("dependsOn") or []:
+                to_key = normalize_purl(to_purl)
+                edge_key = generate_edge_key(from_key, to_key, "depends_on")
+                edges.append(
+                    {
+                        "_key": edge_key,
+                        "_from": f"components/{from_key}",
+                        "_to": f"components/{to_key}",
+                        "tenant_id": tenant_id,
+                        "scan_run_id": scan_run_key,
+                    }
+                )
+        if edges:
+            self._db.collection("depends_on").import_bulk(edges, on_duplicate="update")
+            log.info("depends_on.created", extra={"count": len(edges)})
+
+    # ------------------------------------------------------------------
     # UC-011: detected_control_maps_to + control_in_component stubs
     # ------------------------------------------------------------------
 
@@ -501,17 +547,71 @@ class EvidenceEdgeService:
         self, detected_controls: list[dict], tenant_id: str
     ) -> None:
         """
-        Stub: detected_control_maps_to + control_in_component edges.
+        Create detected_control_maps_to and control_in_component edges.
 
-        No current scanner populates detected_controls via the engine path
-        with enough context to create these edges. Returns immediately.
-        Implementation populated when UC-010/UC-011 sources are available.
+        detected_control_maps_to: detected_controls/<fp> → oscal_controls/<key>
+          - check_id looked up in CHECKOV_NIST_MAP (static curated mapping)
+          - source: "rule_engine", confidence: 1.0
+          - additionalProperties: False — no tenant_id/scan_run_id on edge docs
+
+        control_in_component: detected_controls/<fp> → components/<purl_key>
+          - only created when doc has a purl field (IaC Checkov output never has one;
+            reserved for future scanners that emit purl alongside control evidence)
         """
         if not detected_controls:
             return
-        log.debug(
-            "detected_control_edges.stub_skipped",
-            extra={"count": len(detected_controls)},
-        )
-        # Future: create detected_control_maps_to → oscal_controls/<control_key>
-        # Future: create control_in_component → components/<comp_key>
+
+        maps_to_edges: list[dict] = []
+        in_comp_edges: list[dict] = []
+
+        for doc in detected_controls:
+            fp = doc.get("fingerprint") or doc.get("_key", "")
+            if not fp:
+                continue
+
+            check_id = doc.get("check_id", "")
+            for ctrl_id in CHECKOV_NIST_MAP.get(check_id, []):
+                ctrl_key = _normalize_oscal_key(ctrl_id)
+                edge_key = generate_edge_key(fp, ctrl_key, "maps_to")
+                maps_to_edges.append(
+                    {
+                        "_key": edge_key,
+                        "_from": f"detected_controls/{fp}",
+                        "_to": f"oscal_controls/{ctrl_key}",
+                        "source": "rule_engine",
+                        "confidence": 1.0,
+                        "target_collection": "oscal_controls",
+                    }
+                )
+
+            purl = doc.get("purl")
+            if purl:
+                purl_key = normalize_purl(purl)
+                edge_key = generate_edge_key(fp, purl_key, "control_in_comp")
+                in_comp_edges.append(
+                    {
+                        "_key": edge_key,
+                        "_from": f"detected_controls/{fp}",
+                        "_to": f"components/{purl_key}",
+                        "source": "scanner",
+                        "file_path": doc.get("file_path") or None,
+                    }
+                )
+
+        if maps_to_edges:
+            self._db.collection("detected_control_maps_to").import_bulk(
+                maps_to_edges, on_duplicate="update"
+            )
+            log.info(
+                "detected_control_maps_to.created",
+                extra={"count": len(maps_to_edges)},
+            )
+
+        if in_comp_edges:
+            self._db.collection("control_in_component").import_bulk(
+                in_comp_edges, on_duplicate="update"
+            )
+            log.info(
+                "control_in_component.created",
+                extra={"count": len(in_comp_edges)},
+            )

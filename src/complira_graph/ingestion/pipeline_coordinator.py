@@ -1,11 +1,13 @@
 """
-PipelineCoordinator — orchestrates the three post-ingestion pipeline stages.
+PipelineCoordinator — orchestrates all six post-ingestion pipeline stages.
 
 Single entry point for both the BackgroundTask auto-trigger path (from the scan
 ingest endpoint) and the manual trigger path (POST /v1/scans/{id}/enrich).
 
 Stage sequence: EnrichmentPipeline → CompactionPipeline → ControlMappingPipeline
+                → LLMEnrichmentPipeline → BlastRadiusPipeline → EPSSVelocityPipeline
 Status chain:   completed → enriched → compacted → mapped
+                → llm_enriched → blast_radius_computed → velocity_computed
 
 Error handling:
   - Reference DB unreachable: status="enrichment_pending" (retriable)
@@ -24,6 +26,14 @@ from complira_graph.ingestion.scan_enrichment_repository import ScanEnrichmentRe
 from complira_graph.ingestion.enrichment_pipeline import EnrichmentPipeline
 from complira_graph.ingestion.compaction_pipeline import CompactionPipeline
 from complira_graph.ingestion.control_mapping_pipeline import ControlMappingPipeline
+from complira_graph.ingestion.pipeline_llm_client import PipelineLLMClient
+from complira_graph.ingestion.scan_llm_enrichment_repository import ScanLLMEnrichmentRepository
+from complira_graph.ingestion.scan_blast_radius_repository import ScanBlastRadiusRepository
+from complira_graph.ingestion.llm_enrichment_pipeline import LLMEnrichmentPipeline
+from complira_graph.ingestion.blast_radius_pipeline import BlastRadiusPipeline
+from complira_graph.ingestion.epss_velocity_pipeline import EPSSVelocityPipeline
+from complira_graph.ingestion.violation_mapping_pipeline import ViolationMappingPipeline
+from complira_graph.ingestion.scan_violation_repository import ScanViolationRepository
 
 log = logging.getLogger(__name__)
 
@@ -35,13 +45,43 @@ _RETRIABLE_STATUSES = frozenset(
         "compacted",
         "pipeline_failed",
         "enrichment_pending",
+        # Phase 2 — re-trigger from any intermediate Phase 2 status (AC-052)
+        "mapped",
+        "violations_mapped",
+        "llm_enriched",
+        "blast_radius_computed",
     }
 )
 
-# Statuses that allow skipping stages already completed
-_ENRICHMENT_DONE = frozenset({"enriched", "compacted", "mapped"})
-_COMPACTION_DONE = frozenset({"compacted", "mapped"})
-_MAPPING_DONE = frozenset({"mapped"})
+# Statuses that allow skipping Phase 1 stages already completed
+_ENRICHMENT_DONE = frozenset(
+    {
+        "enriched", "compacted", "mapped", "violations_mapped",
+        "llm_enriched", "blast_radius_computed", "velocity_computed",
+    }
+)
+_COMPACTION_DONE = frozenset(
+    {
+        "compacted", "mapped", "violations_mapped",
+        "llm_enriched", "blast_radius_computed", "velocity_computed",
+    }
+)
+_MAPPING_DONE = frozenset(
+    {
+        "mapped", "violations_mapped",
+        "llm_enriched", "blast_radius_computed", "velocity_computed",
+    }
+)
+
+# Compliance violation mapping guard set
+_VIOLATION_DONE = frozenset(
+    {"violations_mapped", "llm_enriched", "blast_radius_computed", "velocity_computed"}
+)
+
+# Phase 2 guard sets (single-read-at-top pattern — same as Phase 1)
+_LLM_DONE      = frozenset({"llm_enriched", "blast_radius_computed", "velocity_computed"})
+_BLAST_DONE    = frozenset({"blast_radius_computed", "velocity_computed"})
+_VELOCITY_DONE = frozenset({"velocity_computed"})
 
 
 class PipelineCoordinator:
@@ -59,9 +99,21 @@ class PipelineCoordinator:
         self._db = db
         self._repo = ScanEnrichmentRepository(db)
         self._run_repo = EvidenceRunRepository(db)
+        # Phase 1 stages (unchanged)
         self._enrichment = EnrichmentPipeline(db, self._repo)
         self._compaction = CompactionPipeline(db, self._repo)
         self._control_mapping = ControlMappingPipeline(db, self._repo)
+        # Phase 2 repositories and client
+        self._llm_repo = ScanLLMEnrichmentRepository(db)
+        self._blast_repo = ScanBlastRadiusRepository(db)
+        self._llm_client = PipelineLLMClient()
+        # Phase 2 stages
+        self._llm_enrichment = LLMEnrichmentPipeline(db, self._repo, self._llm_repo, self._llm_client)
+        self._blast_radius = BlastRadiusPipeline(db, self._repo, self._blast_repo)
+        self._epss_velocity = EPSSVelocityPipeline(db, self._repo)
+        # Compliance violation mapping
+        self._violation_repo = ScanViolationRepository(db)
+        self._violation_mapping = ViolationMappingPipeline(db, self._repo, self._violation_repo)
 
     # ------------------------------------------------------------------
     # Public entry point
@@ -166,6 +218,74 @@ class PipelineCoordinator:
         else:
             log.info(
                 "pipeline_coordinator.control_mapping_skipped",
+                extra={"scan_run_id": scan_run_id, "status": current_status},
+            )
+
+        # Stage 3B: Violation Mapping (Compliance)
+        if force or current_status not in _VIOLATION_DONE:
+            try:
+                self._violation_mapping.run(scan_run_id, tenant_id)
+            except Exception as exc:
+                log.exception(
+                    "pipeline_coordinator.violation_mapping_failed",
+                    extra={"scan_run_id": scan_run_id, "error": str(exc)},
+                )
+                self._mark_failed(scan_run_id, str(exc))
+                return
+        else:
+            log.info(
+                "pipeline_coordinator.violation_mapping_skipped",
+                extra={"scan_run_id": scan_run_id, "status": current_status},
+            )
+
+        # Stage 4: LLM Enrichment (Phase 2)
+        if force or current_status not in _LLM_DONE:
+            try:
+                self._llm_enrichment.run(scan_run_id, tenant_id)
+            except Exception as exc:
+                log.exception(
+                    "pipeline_coordinator.llm_enrichment_failed",
+                    extra={"scan_run_id": scan_run_id, "error": str(exc)},
+                )
+                self._mark_failed(scan_run_id, str(exc))
+                return
+        else:
+            log.info(
+                "pipeline_coordinator.llm_enrichment_skipped",
+                extra={"scan_run_id": scan_run_id, "status": current_status},
+            )
+
+        # Stage 5: Blast Radius (Phase 2)
+        if force or current_status not in _BLAST_DONE:
+            try:
+                self._blast_radius.run(scan_run_id, tenant_id)
+            except Exception as exc:
+                log.exception(
+                    "pipeline_coordinator.blast_radius_failed",
+                    extra={"scan_run_id": scan_run_id, "error": str(exc)},
+                )
+                self._mark_failed(scan_run_id, str(exc))
+                return
+        else:
+            log.info(
+                "pipeline_coordinator.blast_radius_skipped",
+                extra={"scan_run_id": scan_run_id, "status": current_status},
+            )
+
+        # Stage 6: EPSS Velocity (Phase 2)
+        if force or current_status not in _VELOCITY_DONE:
+            try:
+                self._epss_velocity.run(scan_run_id, tenant_id)
+            except Exception as exc:
+                log.exception(
+                    "pipeline_coordinator.epss_velocity_failed",
+                    extra={"scan_run_id": scan_run_id, "error": str(exc)},
+                )
+                self._mark_failed(scan_run_id, str(exc))
+                return
+        else:
+            log.info(
+                "pipeline_coordinator.epss_velocity_skipped",
                 extra={"scan_run_id": scan_run_id, "status": current_status},
             )
 

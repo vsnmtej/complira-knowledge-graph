@@ -29,6 +29,15 @@ from api.v1.endpoints import enrich
 # Phase 6: Post-ingestion intelligence pipeline
 from api.v1.endpoints import pipeline
 
+# Supply Chain Intelligence Layer
+from api.v1.endpoints import supply_chain
+
+# Compliance Violation Mapping
+from api.v1.endpoints import compliance
+
+# CISO RAG Chat
+from api.v1.endpoints import chat
+
 # Future phases:
 # from api.v1.endpoints import blast_radius, epss_velocity, portfolio_risk
 
@@ -72,6 +81,15 @@ api_router.include_router(enrich.router, prefix="", tags=["regulatory-triggers"]
 
 # Phase 6: Post-ingestion Intelligence Pipeline
 api_router.include_router(pipeline.router, prefix="", tags=["pipeline"])
+
+# Supply Chain Intelligence Layer
+api_router.include_router(supply_chain.router, prefix="/supply-chain", tags=["supply-chain"])
+
+# Compliance Violation Mapping
+api_router.include_router(compliance.router, prefix="/compliance", tags=["compliance"])
+
+# CISO RAG Chat
+api_router.include_router(chat.router, prefix="/chat", tags=["chat"])
 
 # Future endpoints (Phase 3+):
 # api_router.include_router(blast_radius.router, prefix="/blast-radius", tags=["blast-radius"])

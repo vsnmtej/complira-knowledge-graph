@@ -13,6 +13,7 @@ Adding a new tool = one new entry in ADAPTER_REGISTRY. No engine code changes.
 
 from __future__ import annotations
 
+import re
 from typing import Any, Callable, Literal, Optional
 
 try:
@@ -242,7 +243,7 @@ ADAPTER_REGISTRY: dict[ToolName, ToolAdapter] = {
         "severity_map": {
             "CRITICAL": "critical", "HIGH":   "high",
             "MEDIUM":   "medium",   "LOW":    "low",
-            None:       None,    # absent without --bc-api-key
+            None:       "medium",  # absent without --bc-api-key → default to medium
         },
         "default_finding_type": "iac_misconfig",
         "result_routing": {
@@ -388,7 +389,7 @@ ADAPTER_REGISTRY: dict[ToolName, ToolAdapter] = {
         "parse_format":         "json_object",
         "parse_root":           "site[*].alerts[*]",
         "multi_root":           [],
-        "fingerprint_fields":   ["pluginid", "uri", "param"],
+        "fingerprint_fields":   ["pluginid", "url", "param"],
         "severity_map": {
             "High":          "high",
             "Medium":        "medium",
@@ -404,7 +405,8 @@ ADAPTER_REGISTRY: dict[ToolName, ToolAdapter] = {
             "pluginid":   "rule_id",
             "alert":      "message",
             "solution":   "fix_guidance",
-            "uri":        "file_path",
+            "url":        "file_path",
+            "other":      "description",
             "cweid":      "_cwe_int",
             "riskdesc":   "_riskdesc_raw",
             "confidence": "tool_confidence",
@@ -415,7 +417,205 @@ ADAPTER_REGISTRY: dict[ToolName, ToolAdapter] = {
         "req_mapping_source":       "rule_engine",
         "deterministic_req_fields": [],
         "secret_raw_field":         None,
-        "pre_process":              None,  # TODO: zap_instances_fanout
+        "pre_process":              None,
+    },
+
+    # ── trivy (SCA — container/OS/code) ─────────────────────────────────────
+    # Output: trivy --format json
+    # Shape: {"Results": [{"Target": "...", "Type": "...", "Vulnerabilities": [...]}]}
+    # Each Vulnerability: {VulnerabilityID, PkgName, InstalledVersion, FixedVersion,
+    #   Severity, Title, Description, PrimaryURL, CweIDs: []string}
+    # Routes to component_has_vuln (same as grype).
+    "trivy": {
+        "tool_name":            "trivy",
+        "parse_format":         "json_object",
+        "parse_root":           "Results[*].Vulnerabilities[*]",
+        "multi_root":           [],
+        "fingerprint_fields":   ["VulnerabilityID", "Target", "PkgName"],
+        "severity_map": {
+            "CRITICAL": "critical", "HIGH":    "high",
+            "MEDIUM":   "medium",   "LOW":     "low",
+            "UNKNOWN":  None,
+        },
+        "default_finding_type": "sca",
+        "result_routing":       {"*": "component_has_vuln"},
+        "result_state_field":   None,
+        "location_anchor":      "purl",
+        "field_map": {
+            "VulnerabilityID":  "cve_id",
+            "Severity":         "severity",
+            "Title":            "rule_id",
+            "Description":      "description",
+            "FixedVersion":     "fix_guidance",
+            "PrimaryURL":       "references",
+            "PkgName":          "component_name",
+            "InstalledVersion": "component_version",
+            "Target":           "file_path",
+            "CweIDs":           "_cwe_raw",
+        },
+        "cwe_source":               "tool_direct",
+        "cwe_extract_pattern":      None,
+        "req_mapping_source":       "none",
+        "deterministic_req_fields": [],
+        "secret_raw_field":         None,
+        "pre_process":              None,
+    },
+
+    # ── npm_audit (SCA — npm 7+ audit JSON) ──────────────────────────────────
+    # Output: npm audit --json  (npm 7+ / arborist v2 format)
+    # Shape: {"vulnerabilities": {"pkg-name": {name, severity, via, range, ...}}}
+    # parse_root "vulnerabilities.*[]" flattens dict values via _extract_list.
+    # npm 6 (advisories format) is out of scope.
+    "npm_audit": {
+        "tool_name":            "npm_audit",
+        "parse_format":         "json_object",
+        "parse_root":           "vulnerabilities.*[]",
+        "multi_root":           [],
+        "fingerprint_fields":   ["name", "range"],
+        "severity_map": {
+            "critical": "critical", "high":     "high",
+            "moderate": "medium",   "low":      "low",
+            "info":     "info",     None:       None,
+        },
+        "default_finding_type": "sca",
+        "result_routing":       {"*": "component_has_vuln"},
+        "result_state_field":   None,
+        "location_anchor":      "purl",
+        "field_map": {
+            "name":      "component_name",
+            "severity":  "severity",
+            "range":     "description",
+            "isDirect":  "tool_confidence",
+        },
+        "cwe_source":               "absent",
+        "cwe_extract_pattern":      None,
+        "req_mapping_source":       "none",
+        "deterministic_req_fields": [],
+        "secret_raw_field":         None,
+        "pre_process":              None,
+    },
+
+    # ── pip_audit (SCA — Python package audit) ───────────────────────────────
+    # Output: pip-audit --format json --aliases --desc
+    # Shape: {"dependencies": [{name, version, vulns: [{id, fix_versions, aliases, description}]}]}
+    # parse_root=None + pre_process=pip_audit_flatten handles denormalization
+    # (vuln dicts don't carry parent name/version; flatten injects them).
+    # pip-audit does not emit severity; all findings have severity=None.
+    "pip_audit": {
+        "tool_name":            "pip_audit",
+        "parse_format":         "json_object",
+        "parse_root":           None,         # pre_process handles full-output flattening
+        "multi_root":           [],
+        "fingerprint_fields":   ["id", "pkg_name"],
+        "severity_map":         {None: None},  # pip-audit has no severity ratings
+        "default_finding_type": "sca",
+        "result_routing":       {"*": "component_has_vuln"},
+        "result_state_field":   None,
+        "location_anchor":      "purl",
+        "field_map": {
+            "id":           "tool_vuln_id",
+            "cve_id":       "cve_id",         # injected by pip_audit_flatten from aliases
+            "description":  "description",
+            "fix_versions": "fix_guidance",
+            "pkg_name":     "component_name",
+            "pkg_version":  "component_version",
+        },
+        "cwe_source":               "absent",
+        "cwe_extract_pattern":      None,
+        "req_mapping_source":       "none",
+        "deterministic_req_fields": [],
+        "secret_raw_field":         None,
+        "pre_process":              None,      # assigned after function definition below
+    },
+
+    # ── sonarqube (SAST — SonarQube Web API issues/search JSON) ─────────────
+    # Output: GET /api/issues/search → {"issues": [...]}
+    # Dual-path severity: field_map lists legacy "severity" first (MAJOR/CRITICAL/...),
+    # then "impacts[0].severity" second (HIGH/MEDIUM/LOW) which overwrites for v10+ output.
+    # Both paths covered in severity_map.
+    "sonarqube": {
+        "tool_name":            "sonarqube",
+        "parse_format":         "json_object",
+        "parse_root":           "issues",
+        "multi_root":           [],
+        "fingerprint_fields":   ["key"],
+        "severity_map": {
+            # Legacy severity (pre-v10)
+            "BLOCKER":  "critical",
+            "CRITICAL": "critical",
+            "MAJOR":    "high",
+            "MINOR":    "low",
+            "INFO":     "info",
+            # Modern severity (v10+, from impacts[0].severity)
+            "HIGH":     "high",
+            "MEDIUM":   "medium",
+            "LOW":      "low",
+            None:       None,
+        },
+        "default_finding_type": "sast",
+        "result_routing":       {"*": "scan_findings"},
+        "result_state_field":   None,
+        "location_anchor":      "file_line",
+        "field_map": {
+            # Legacy fields first; impacts[0].severity overwrites if present (v10+)
+            "severity":             "severity",
+            "rule":                 "rule_id",
+            "message":              "message",
+            "component":            "file_path",
+            "line":                 "line_start",
+            "key":                  "tool_vuln_id",
+            "type":                 "check_name",
+            "impacts[0].severity":  "severity",   # v10+: overwrites legacy severity
+        },
+        "cwe_source":               "extracted",
+        "cwe_extract_pattern":      r"(CWE-\d+)",
+        "req_mapping_source":       "rule_engine",
+        "deterministic_req_fields": [],
+        "secret_raw_field":         None,
+        "pre_process":              None,
+    },
+
+    # ── spotbugs (SAST — SpotBugs XML report) ───────────────────────────────
+    # Output: SpotBugs --xml:withMessages  (addMessages=true required for cweid attribute)
+    # Shape: <BugCollection><BugInstance type="..." priority="1" rank="5" cweid="670">
+    #          <SourceLine classname="..." start="42" end="45" sourcepath="..." primary="true"/>
+    #        </BugInstance></BugCollection>
+    # Engine XML branch flattens element attributes + primary SourceLine as sl_* keys.
+    # priority: 1=High, 2=Normal(medium), 3=Low, 4=Experimental(info)
+    "spotbugs": {
+        "tool_name":            "spotbugs",
+        "parse_format":         "xml",
+        "parse_root":           "BugCollection/BugInstance",
+        "multi_root":           [],
+        "fingerprint_fields":   ["type", "sl_classname", "sl_start"],
+        "severity_map": {
+            "1": "high",
+            "2": "medium",
+            "3": "low",
+            "4": "info",
+            None: None,
+        },
+        "default_finding_type": "sast",
+        "result_routing":       {"*": "scan_findings"},
+        "result_state_field":   None,
+        "location_anchor":      "file_line",
+        "field_map": {
+            "type":          "rule_id",
+            "priority":      "severity",
+            "rank":          "tool_confidence",
+            "category":      "check_name",
+            "cweid":         "_cwe_int",
+            "sl_sourcepath": "file_path",
+            "sl_start":      "line_start",
+            "sl_end":        "line_end",
+            "sl_classname":  "description",
+        },
+        "cwe_source":               "extracted",
+        "cwe_extract_pattern":      r"(\d+)",
+        "req_mapping_source":       "rule_engine",
+        "deterministic_req_fields": [],
+        "secret_raw_field":         None,
+        "pre_process":              None,
     },
 
     # ── sarif (generic SARIF 2.1) ────────────────────────────────────────────
@@ -474,6 +674,117 @@ def _validate_registry() -> None:
 
 
 _validate_registry()
+
+
+# ---------------------------------------------------------------------------
+# Pre-process helpers (defined after registry to avoid forward-reference issues)
+# ---------------------------------------------------------------------------
+
+def pip_audit_flatten(findings: list[dict]) -> list[dict]:
+    """
+    Pre-process hook for pip_audit adapter.
+
+    pip-audit JSON emits a top-level object; the engine passes [full_output_dict]
+    when parse_root=None. This hook denormalizes dependencies[*].vulns[*] into
+    a flat list, injecting parent name/version into each vuln dict, and hoisting
+    the first CVE-format alias into a `cve_id` field.
+
+    Requires: pip-audit --format json --aliases --desc
+    """
+    raw_data = findings[0] if findings else {}
+    flat: list[dict] = []
+    for dep in raw_data.get("dependencies", []):
+        name = dep.get("name", "")
+        version = dep.get("version", "")
+        for vuln in dep.get("vulns", []):
+            entry = dict(vuln)
+            entry["pkg_name"] = name
+            entry["pkg_version"] = version
+            for alias in entry.get("aliases") or []:
+                if re.match(r"^CVE-\d{4}-\d{4,}$", alias, re.IGNORECASE):
+                    entry["cve_id"] = alias
+                    break
+            flat.append(entry)
+    return flat
+
+
+# Wire pre_process hooks after function definition
+ADAPTER_REGISTRY["pip_audit"]["pre_process"] = pip_audit_flatten
+
+
+# ---------------------------------------------------------------------------
+# Prowler (Cloud Security Posture Management — AWS/GCP/Azure)
+# Output: prowler -M json  →  top-level JSON array of findings
+# Shape: [{CheckID, CheckTitle, Status, Severity, ResourceArn,
+#           ServiceName, Region, AccountId, Compliance, Remediation, ...}]
+# Routes FAIL/WARNING → scan_findings; PASS/MUTED → dropped.
+# NIST 800-53 control IDs are embedded in Compliance["NIST-800-53-Rev5"].
+# ---------------------------------------------------------------------------
+
+def prowler_flatten(items: list) -> list:
+    """Flatten nested Prowler fields and filter to actionable statuses."""
+    result = []
+    for item in items:
+        if item.get("Status") not in ("FAIL", "WARNING"):
+            continue
+        flat = dict(item)
+        # Flatten Remediation
+        rem = flat.get("Remediation") or {}
+        flat["_fix_guidance"] = rem.get("Recommendation") or rem.get("Code") or ""
+        # Flatten Compliance — extract NIST 800-53 control IDs
+        comp = flat.get("Compliance") or {}
+        nist_controls = comp.get("NIST-800-53-Rev5") or []
+        flat["_nist_controls"] = ", ".join(nist_controls) if nist_controls else ""
+        flat["_hipaa_refs"] = ", ".join(comp.get("HIPAA") or [])
+        flat["_cis_refs"]   = ", ".join(comp.get("CIS-AWS-Foundations-Benchmark-1.4") or [])
+        result.append(flat)
+    return result
+
+
+ADAPTER_REGISTRY["prowler"] = {
+    "tool_name":            "prowler",
+    "parse_format":         "json_array",
+    "parse_root":           None,
+    "multi_root":           [],
+    "fingerprint_fields":   ["FindingUniqueId"],
+    "severity_map": {
+        "critical":      "critical",
+        "high":          "high",
+        "medium":        "medium",
+        "low":           "low",
+        "informational": "info",
+        "info":          "info",
+    },
+    "default_finding_type": "cspm",
+    "result_state_field":   "Status",
+    "result_routing": {
+        "FAIL":    "scan_findings",
+        "WARNING": "scan_findings",
+        "*":       "_ignored",
+    },
+    "location_anchor":      "line",
+    "field_map": {
+        "CheckID":       "rule_id",
+        "CheckTitle":    "message",
+        "StatusExtended": "description",
+        "Severity":      "severity",
+        "ResourceArn":   "file_path",
+        "ResourceType":  "resource_type",
+        "ServiceName":   "component_name",
+        "Region":        "region",
+        "AccountId":     "account_id",
+        "_fix_guidance": "fix_guidance",
+        "_nist_controls": "nist_control_refs",
+        "_hipaa_refs":   "hipaa_refs",
+        "_cis_refs":     "cis_refs",
+    },
+    "cwe_source":               "none",
+    "cwe_extract_pattern":      None,
+    "req_mapping_source":       "none",
+    "deterministic_req_fields": [],
+    "secret_raw_field":         None,
+    "pre_process":              prowler_flatten,
+}
 
 
 # ---------------------------------------------------------------------------

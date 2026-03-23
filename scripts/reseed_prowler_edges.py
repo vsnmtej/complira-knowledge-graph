@@ -18,9 +18,9 @@ from arango import ArangoClient
 from complira_graph.ingestion.pipeline_coordinator import PipelineCoordinator
 
 ARANGO_URL = "http://localhost:8529"
-DB_NAME = "complira_ref"
+DB_NAME = "complira_graph"
 DB_USER = "root"
-DB_PASS = "openSesame"
+DB_PASS = "your_arango_password_here"
 
 
 def main() -> None:

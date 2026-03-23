@@ -323,25 +323,186 @@ class TestEvidenceEdges:
 
 
 # ---------------------------------------------------------------------------
-# detected_control_edges stub
+# detected_control_edges
 # ---------------------------------------------------------------------------
 
-class TestDetectedControlEdgesStub:
-    def test_stub_does_not_write_edges(self):
+class TestDetectedControlEdges:
+    def test_creates_maps_to_edge_for_known_check_id(self):
+        """AC-001: import_bulk called on detected_control_maps_to for known check_id."""
         svc, db, col = _make_svc()
-        controls = [{"_key": "ctrl1", "check_id": "CKV_AWS_1"}]
+        controls = [{"_key": "fp1", "fingerprint": "fp1", "check_id": "CKV_AWS_19"}]
+
+        svc.create_detected_control_edges(controls, tenant_id="t1")
+
+        db.collection.assert_any_call("detected_control_maps_to")
+        col.import_bulk.assert_called()
+
+    def test_edge_fields_match_schema(self):
+        """AC-002: edge has _from, _to, source=rule_engine, confidence=1.0, target_collection=oscal_controls."""
+        svc, db, col = _make_svc()
+        edges_written = []
+        col.import_bulk.side_effect = lambda edges, **kw: edges_written.extend(edges)
+
+        controls = [{"_key": "fp1", "fingerprint": "fp1", "check_id": "CKV_AWS_19"}]
+        svc.create_detected_control_edges(controls, tenant_id="t1")
+
+        assert len(edges_written) >= 1
+        edge = edges_written[0]
+        assert edge["_from"] == "detected_controls/fp1"
+        assert edge["_to"].startswith("oscal_controls/")
+        assert edge["source"] == "rule_engine"
+        assert edge["confidence"] == 1.0
+        assert edge["target_collection"] == "oscal_controls"
+
+    def test_no_extra_fields_on_maps_to_edge(self):
+        """AC-008: edge doc contains only schema-allowed fields (additionalProperties: False)."""
+        svc, db, col = _make_svc()
+        edges_written = []
+        col.import_bulk.side_effect = lambda edges, **kw: edges_written.extend(edges)
+
+        controls = [{"_key": "fp1", "fingerprint": "fp1", "check_id": "CKV_AWS_19",
+                     "tenant_id": "t1", "scan_run_id": "run1"}]
+        svc.create_detected_control_edges(controls, tenant_id="t1")
+
+        allowed = {"_key", "_from", "_to", "source", "confidence", "target_collection", "embedding_model"}
+        for edge in edges_written:
+            extra = set(edge.keys()) - allowed
+            assert not extra, f"Unexpected fields on detected_control_maps_to edge: {extra}"
+
+    def test_skips_unknown_check_id_no_error(self):
+        """AC-003: unknown check_id → no import_bulk call, no exception."""
+        svc, db, col = _make_svc()
+        controls = [{"_key": "fp2", "fingerprint": "fp2", "check_id": "CKV_CUSTOM_UNKNOWN_99"}]
 
         svc.create_detected_control_edges(controls, tenant_id="t1")
 
         col.import_bulk.assert_not_called()
-        db.aql.execute.assert_not_called()
 
-    def test_stub_noop_on_empty(self):
+    def test_noop_on_empty_list(self):
+        """AC-004: empty list → no DB calls."""
         svc, db, col = _make_svc()
 
         svc.create_detected_control_edges([], tenant_id="t1")
 
         col.import_bulk.assert_not_called()
+        db.aql.execute.assert_not_called()
+
+    def test_edge_key_is_deterministic(self):
+        """AC-006: same inputs → same _key."""
+        svc, db, col = _make_svc()
+        keys_run1 = []
+        keys_run2 = []
+
+        col.import_bulk.side_effect = lambda edges, **kw: None
+
+        svc2, db2, col2 = _make_svc()
+
+        edges1 = []
+        edges2 = []
+        col.import_bulk.side_effect = lambda edges, **kw: edges1.extend(edges)
+        col2.import_bulk.side_effect = lambda edges, **kw: edges2.extend(edges)
+
+        controls = [{"_key": "fp3", "fingerprint": "fp3", "check_id": "CKV_AWS_7"}]
+        svc.create_detected_control_edges(controls, tenant_id="t1")
+        svc2.create_detected_control_edges(controls, tenant_id="t1")
+
+        assert edges1[0]["_key"] == edges2[0]["_key"]
+
+    def test_import_bulk_uses_on_duplicate_update(self):
+        """AC-007: import_bulk called with on_duplicate='update'."""
+        svc, db, col = _make_svc()
+        controls = [{"_key": "fp4", "fingerprint": "fp4", "check_id": "CKV_AWS_7"}]
+
+        svc.create_detected_control_edges(controls, tenant_id="t1")
+
+        call_kwargs = col.import_bulk.call_args[1]
+        assert call_kwargs.get("on_duplicate") == "update"
+
+    def test_creates_control_in_component_edge_when_purl_present(self):
+        """AC-005: purl present → control_in_component edge created."""
+        svc, db, col = _make_svc()
+        controls_col = MagicMock()
+        controls_col.import_bulk.return_value = {}
+
+        written_collections = {}
+
+        def _col(name):
+            m = MagicMock()
+            m.import_bulk.side_effect = lambda edges, **kw: written_collections.update({name: edges})
+            return m
+
+        db.collection.side_effect = _col
+
+        controls = [{
+            "_key": "fp5",
+            "fingerprint": "fp5",
+            "check_id": "CKV_AWS_19",
+            "purl": "pkg:npm/express@4.18.2",
+            "file_path": "terraform/main.tf",
+        }]
+        svc.create_detected_control_edges(controls, tenant_id="t1")
+
+        assert "control_in_component" in written_collections
+        in_comp_edges = written_collections["control_in_component"]
+        assert len(in_comp_edges) == 1
+        assert in_comp_edges[0]["_from"] == "detected_controls/fp5"
+        assert in_comp_edges[0]["_to"].startswith("components/")
+        assert in_comp_edges[0]["source"] == "scanner"
+        assert in_comp_edges[0]["file_path"] == "terraform/main.tf"
+
+    def test_no_control_in_component_when_no_purl(self):
+        """control_in_component not created when purl absent."""
+        svc, db, col = _make_svc()
+        collections_written = []
+        db.collection.side_effect = lambda name: (
+            collections_written.append(name) or col
+        )
+
+        controls = [{"_key": "fp6", "fingerprint": "fp6", "check_id": "CKV_AWS_19"}]
+        svc.create_detected_control_edges(controls, tenant_id="t1")
+
+        assert "control_in_component" not in collections_written
+
+    def test_no_extra_fields_on_control_in_component_edge(self):
+        """AC-008: control_in_component edge has only schema-allowed fields."""
+        svc, db, col = _make_svc()
+        written_collections: dict = {}
+
+        def _col(name):
+            m = MagicMock()
+            m.import_bulk.side_effect = lambda edges, **kw: written_collections.update({name: edges})
+            return m
+
+        db.collection.side_effect = _col
+
+        controls = [{
+            "_key": "fp7",
+            "fingerprint": "fp7",
+            "check_id": "CKV_AWS_19",
+            "purl": "pkg:npm/lodash@4.17.21",
+            "tenant_id": "t1",
+        }]
+        svc.create_detected_control_edges(controls, tenant_id="t1")
+
+        allowed = {"_key", "_from", "_to", "source", "file_path"}
+        if "control_in_component" in written_collections:
+            for edge in written_collections["control_in_component"]:
+                extra = set(edge.keys()) - allowed
+                assert not extra, f"Unexpected fields on control_in_component edge: {extra}"
+
+    def test_multi_control_per_check_id(self):
+        """check_id that maps to multiple controls creates one edge per control."""
+        svc, db, col = _make_svc()
+        edges_written = []
+        col.import_bulk.side_effect = lambda edges, **kw: edges_written.extend(edges)
+
+        # CKV_AWS_20 maps to ["AC-3", "AC-6"] — 2 controls
+        controls = [{"_key": "fp8", "fingerprint": "fp8", "check_id": "CKV_AWS_20"}]
+        svc.create_detected_control_edges(controls, tenant_id="t1")
+
+        to_targets = [e["_to"] for e in edges_written]
+        assert "oscal_controls/ac-3" in to_targets
+        assert "oscal_controls/ac-6" in to_targets
 
 
 # ---------------------------------------------------------------------------

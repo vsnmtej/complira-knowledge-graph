@@ -129,10 +129,16 @@ export const authOptions: NextAuthOptions = {
         token.frameworks = compliraUser.frameworks;
         token.accessToken = compliraUser.accessToken;
         token.refreshToken = compliraUser.refreshToken;
+        // Store expiry: access token is valid for 15 min from now
+        token.accessTokenExpires = Date.now() + 59 * 60 * 1000;
       }
 
-      // Update session — handles both profile refresh and token refresh
-      if (trigger === "update") {
+      // Auto-refresh when access token is expired or about to expire (within 60s)
+      const shouldRefresh =
+        trigger === "update" ||
+        (token.accessTokenExpires && Date.now() > (token.accessTokenExpires as number) - 120_000);
+
+      if (shouldRefresh) {
         try {
           // Try to refresh the access token via backend
           const refreshResponse = await fetch(`${API_URL}/v1/auth/refresh`, {
@@ -144,6 +150,7 @@ export const authOptions: NextAuthOptions = {
           if (refreshResponse.ok) {
             const refreshData = await refreshResponse.json();
             token.accessToken = refreshData.access_token;
+            token.accessTokenExpires = Date.now() + 59 * 60 * 1000;
             if (refreshData.refresh_token) {
               token.refreshToken = refreshData.refresh_token;
             }

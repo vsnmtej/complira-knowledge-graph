@@ -177,6 +177,9 @@ class V22Component(BaseModel):
     sbom_format: Optional[str] = Field(None, description="cyclonedx | spdx")
     cpe: Optional[str] = Field(None)
     license: Optional[str] = Field(None)
+    supplier: Optional[str] = Field(None)
+    licenses: Optional[List[str]] = Field(None, description="Full list of license expression strings")
+    hashes: Optional[List[Dict[str, str]]] = Field(None, description="List of {alg, content} hash dicts")
     firmware_layer: Optional[str] = Field(None)
     updated_at: str = Field(default_factory=_utcnow)
 

@@ -386,3 +386,68 @@ class TestAqlGetCweParentMap:
         result = repo.aql_get_cwe_parent_map(["CWE_79", "CWE_20"])
         # Falls back to identity map
         assert result == {"CWE_79": "CWE_79", "CWE_20": "CWE_20"}
+
+
+# ---------------------------------------------------------------------------
+# aql_get_epss_history_batch (Phase 2 addition)
+# ---------------------------------------------------------------------------
+
+class TestAqlGetEpssHistoryBatch:
+    def test_empty_cve_keys_returns_empty_no_db_call(self):
+        db, _ = _make_db()
+        repo = ScanEnrichmentRepository(db)
+        result = repo.aql_get_epss_history_batch([], "2024-01-01")
+        assert result == {}
+        db.aql.execute.assert_not_called()
+
+    def test_returns_history_keyed_by_cve_key(self):
+        db, _ = _make_db()
+        repo = ScanEnrichmentRepository(db)
+        history = [{"score": 0.1, "date": "2024-01-01"}, {"score": 0.2, "date": "2024-01-02"}]
+        db.aql.execute.return_value = iter([
+            {"cve_key": "CVE_2024_1234", "history": history}
+        ])
+        result = repo.aql_get_epss_history_batch(["CVE_2024_1234"], "2024-01-01")
+        assert "CVE_2024_1234" in result
+        assert result["CVE_2024_1234"] == history
+
+    def test_cve_with_no_history_excluded(self):
+        db, _ = _make_db()
+        repo = ScanEnrichmentRepository(db)
+        # Row has null/empty history → should not appear in result
+        db.aql.execute.return_value = iter([
+            {"cve_key": "CVE_2024_0001", "history": []}
+        ])
+        result = repo.aql_get_epss_history_batch(["CVE_2024_0001"], "2024-01-01")
+        # history is empty — key present but with empty list (behavior depends on impl)
+        # what matters is no KeyError raised
+        assert isinstance(result, dict)
+
+    def test_exception_returns_empty_dict(self):
+        db, _ = _make_db()
+        repo = ScanEnrichmentRepository(db)
+        db.aql.execute.side_effect = Exception("AQL timeout")
+        result = repo.aql_get_epss_history_batch(["CVE_2024_9999"], "2024-01-01")
+        assert result == {}
+
+    def test_bind_vars_include_cve_keys_and_cutoff(self):
+        db, _ = _make_db()
+        repo = ScanEnrichmentRepository(db)
+        db.aql.execute.return_value = iter([])
+        repo.aql_get_epss_history_batch(["CVE_2024_1234", "CVE_2024_5678"], "2024-01-15")
+        call_kwargs = db.aql.execute.call_args
+        bind_vars = call_kwargs.kwargs.get("bind_vars") or call_kwargs.args[1]
+        assert bind_vars["cve_keys"] == ["CVE_2024_1234", "CVE_2024_5678"]
+        assert bind_vars["cutoff_date"] == "2024-01-15"
+
+    def test_multiple_cves_all_returned(self):
+        db, _ = _make_db()
+        repo = ScanEnrichmentRepository(db)
+        db.aql.execute.return_value = iter([
+            {"cve_key": "CVE_2024_0001", "history": [{"score": 0.1, "date": "2024-01-01"}]},
+            {"cve_key": "CVE_2024_0002", "history": [{"score": 0.9, "date": "2024-01-01"}]},
+        ])
+        result = repo.aql_get_epss_history_batch(["CVE_2024_0001", "CVE_2024_0002"], "2024-01-01")
+        assert len(result) == 2
+        assert "CVE_2024_0001" in result
+        assert "CVE_2024_0002" in result

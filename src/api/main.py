@@ -48,10 +48,17 @@ def create_app() -> FastAPI:
         if allowed_hosts and allowed_hosts[0]:
             app.add_middleware(TrustedHostMiddleware, allowed_hosts=allowed_hosts)
 
-    # CORS middleware — uses config values (defaults to ["*"] in dev, restrict in production)
+    # CORS middleware — always include all localhost dev ports
+    cors_origins = list(settings.CORS_ALLOW_ORIGINS)
+    for dev_origin in [
+        "http://localhost:3000", "http://localhost:3001",
+        "http://127.0.0.1:3000", "http://127.0.0.1:3001",
+    ]:
+        if dev_origin not in cors_origins:
+            cors_origins.append(dev_origin)
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.CORS_ALLOW_ORIGINS,
+        allow_origins=cors_origins,
         allow_credentials=settings.CORS_ALLOW_CREDENTIALS,
         allow_methods=settings.CORS_ALLOW_METHODS,
         allow_headers=settings.CORS_ALLOW_HEADERS,

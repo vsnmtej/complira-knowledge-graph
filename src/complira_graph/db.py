@@ -185,6 +185,9 @@ EDGE_COLLECTIONS = [
     "evidence_links_finding",        # EvidencePackage → ScanFinding (traceability)
     "evidence_for_project",          # EvidencePackage → Project (ownership)
     "project_uses_component",        # Project → Component (global component usage, Fix 1)
+
+    # Compliance Violation Layer
+    "finding_violates_control",      # ScanFinding → NIST 800-53 control (deterministic CVE→CWE→CAPEC→ATT&CK→Control chain)
 ]
 
 # ========== Index Definitions ==========
@@ -390,6 +393,11 @@ INDEXES = {
     "project_uses_component": [
         {"type": "persistent", "fields": ["tenant_id"]},
         {"type": "persistent", "fields": ["tenant_id", "project_id"]},
+    ],
+    "finding_violates_control": [
+        {"type": "persistent", "fields": ["tenant_id", "scan_run_id"]},
+        {"type": "persistent", "fields": ["framework"]},
+        {"type": "persistent", "fields": ["control_id"]},
     ],
 }
 

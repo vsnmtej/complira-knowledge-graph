@@ -135,13 +135,31 @@ async def get_customer_from_api_key(api_key: str):
                             key_id=key_doc.get('key_id'),
                         )
 
-                        # TODO: Update last_used_at timestamp in background task
-                        # db.collection("customer_api_keys").update({
-                        #     "_key": key_doc["_key"],
-                        #     "last_used_at": datetime.utcnow().isoformat() + "Z"
-                        # })
-
                         return customer_profile
+
+                    # Fallback: customer_id may be an org _key (new JWT-created API keys)
+                    if db.has_collection("organizations"):
+                        org_cursor = db.aql.execute(
+                            "FOR org IN organizations FILTER org._key == @id RETURN org",
+                            bind_vars={"id": customer_id},
+                        )
+                        orgs = list(org_cursor)
+                        if orgs:
+                            org = orgs[0]
+                            customer_profile = CustomerProfile(
+                                _key=org["_key"],
+                                name=org["name"],
+                                tier=org.get("tier", "free"),
+                                frameworks=org.get("frameworks", []),
+                                database_name=f"complira_tenant_{org['_key']}",
+                            )
+                            logger.debug(
+                                "API key validated (multi-key, org-based)",
+                                customer_id=customer_profile._key,
+                                customer_name=customer_profile.name,
+                                key_id=key_doc.get('key_id'),
+                            )
+                            return customer_profile
 
         # Fallback: Check customer_profiles collection (legacy single-key system)
         query = """
