@@ -456,7 +456,11 @@ COMPLIRA_TOOLS: list[dict] = [
                         "For dashboard: {total, critical, high, medium, low, kev_count, epss_high, "
                         "projects: [{name, risk_score, critical, high}], "
                         "top_cves: [{cve_id, severity, epss}], scan_trend: [{date, critical, high}]}. "
-                        "For heatmap: {findings: [{cve_id, likelihood_pct, impact_usd, severity, label}]}. "
+                        "For heatmap: pass the COMPLETE dict returned by get_risk_heatmap_data — "
+                        "keys include chain_steps, ale_total_usd, var_95_usd, var_99_usd, "
+                        "revenue_context_usd, ale_as_pct_revenue, frameworks_violated, "
+                        "top_intervention, iam_intervention. Do NOT reshape or summarise it. "
+                        "Spread/pass through the full object as data. "
                         "For slides: {title, org, date, slides: [{heading, bullets: [str], metric?: str}]}."
                     ),
                 },
@@ -2151,10 +2155,239 @@ new Chart(document.getElementById('sev'),{{type:'doughnut',data:{{labels:['Criti
 </body></html>"""
 
 
+def _render_heatmap(data: dict, title: str) -> str:
+    """Render an exploit-chain risk heatmap using get_risk_heatmap_data output."""
+    steps        = data.get("chain_steps") or []
+    ale          = data.get("ale_total_usd") or 0
+    var95        = data.get("var_95_usd") or 0
+    var99        = data.get("var_99_usd") or 0
+    revenue      = data.get("revenue_context_usd") or 85_000_000
+    ale_pct      = data.get("ale_as_pct_revenue") or 0
+    cve_id       = data.get("cve_id") or ""
+    component    = data.get("component") or ""
+    epss_pct     = data.get("epss_pct")
+    kev          = data.get("kev", False)
+    frameworks   = data.get("frameworks_violated") or []
+    intervention = data.get("top_intervention") or {}
+    iam_fix      = data.get("iam_intervention")
+
+    def fmt_usd(v: float) -> str:
+        if v >= 1_000_000_000:
+            return f"${v/1_000_000_000:.1f}B"
+        if v >= 1_000_000:
+            return f"${v/1_000_000:.1f}M"
+        if v >= 1_000:
+            return f"${v/1_000:.0f}K"
+        return f"${v:.0f}"
+
+    # Bubble chart: x=likelihood_pct, y=financial_impact_usd, r∝1/resistance
+    TIER_COLOUR = {"CRITICAL": "#ef4444", "HIGH": "#f59e0b", "MEDIUM": "#3b82f6"}
+    bubble_data = []
+    for s in steps:
+        r = s.get("resistance_score") or 0.05
+        bubble_r = max(8, min(40, int((1 - r) * 35 + 6)))
+        tier      = s.get("severity_tier", "HIGH")
+        colour    = TIER_COLOUR.get(tier, "#f59e0b")
+        bubble_data.append({
+            "x":     s.get("likelihood_pct", 0),
+            "y":     s.get("financial_impact_usd", 0),
+            "r":     bubble_r,
+            "label": s.get("label", f"Step {s.get('step')}"),
+            "step":  s.get("step", 0),
+            "colour": colour,
+            "tier":  tier,
+        })
+
+    # Build per-step HTML rows
+    step_rows = ""
+    for s in steps:
+        tier   = s.get("severity_tier", "HIGH")
+        colour = TIER_COLOUR.get(tier, "#f59e0b")
+        r_val  = s.get("resistance_score", 0)
+        r_pct  = int(r_val * 100)
+        r_bar_colour = "#ef4444" if r_pct < 20 else "#f59e0b" if r_pct < 50 else "#10b981"
+        step_rows += (
+            f'<tr>'
+            f'<td style="color:{colour};font-weight:700">Step {s.get("step")}</td>'
+            f'<td>{s.get("label","")}</td>'
+            f'<td style="text-align:right;color:#a78bfa">{s.get("likelihood_pct",0):.1f}%</td>'
+            f'<td style="text-align:right;color:#10b981">{fmt_usd(s.get("financial_impact_usd",0))}</td>'
+            f'<td style="text-align:center">'
+            f'  <div style="display:inline-flex;align-items:center;gap:4px">'
+            f'    <div style="width:40px;height:6px;background:#27272a;border-radius:3px;overflow:hidden">'
+            f'      <div style="width:{r_pct}%;height:100%;background:{r_bar_colour}"></div></div>'
+            f'    <span style="color:{r_bar_colour};font-size:10px">{r_pct}%</span>'
+            f'  </div>'
+            f'</td>'
+            f'<td style="color:#71717a;font-size:11px">{s.get("control_gap","")}</td>'
+            f'</tr>'
+        )
+
+    fw_badges = "".join(
+        f'<span style="background:#27272a;color:#a1a1aa;padding:2px 8px;border-radius:12px;font-size:11px">{f}</span> '
+        for f in frameworks[:6]
+    )
+
+    intervention_html = ""
+    if intervention:
+        intervention_html = f"""
+<div style="background:#052e16;border:1px solid #16a34a;border-radius:12px;padding:16px;margin-bottom:16px">
+  <div style="font-size:11px;color:#4ade80;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">⚡ Highest-Leverage Intervention</div>
+  <div style="font-weight:600;color:#fff;margin-bottom:4px">{intervention.get('action','')}</div>
+  <div style="display:flex;gap:20px;font-size:12px;color:#a1a1aa">
+    <span>Risk removed: <strong style="color:#4ade80">{fmt_usd(intervention.get('risk_removed_usd',0))}</strong></span>
+    <span>Effort: <strong style="color:#4ade80">{intervention.get('effort','')}</strong></span>
+    <span>Breaks chain at: <strong style="color:#4ade80">Step {intervention.get('breaks_chain_at_step','?')}</strong></span>
+  </div>
+</div>"""
+    if iam_fix:
+        intervention_html += f"""
+<div style="background:#1c1400;border:1px solid #ca8a04;border-radius:12px;padding:14px;margin-bottom:16px">
+  <div style="font-size:11px;color:#fbbf24;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">🔐 IAM Hardening (defence-in-depth)</div>
+  <div style="font-weight:600;color:#fff;margin-bottom:4px">{iam_fix.get('action','')}</div>
+  <div style="display:flex;gap:20px;font-size:12px;color:#a1a1aa">
+    <span>Risk removed: <strong style="color:#fbbf24">{fmt_usd(iam_fix.get('risk_removed_usd',0))}</strong></span>
+    <span>Effort: <strong style="color:#fbbf24">{iam_fix.get('effort','')}</strong></span>
+  </div>
+</div>"""
+
+    # Build Chart.js bubble datasets — one per severity tier for legend
+    datasets_by_tier: dict = {}
+    for b in bubble_data:
+        t = b["tier"]
+        if t not in datasets_by_tier:
+            datasets_by_tier[t] = {"label": t, "backgroundColor": b["colour"] + "cc", "borderColor": b["colour"], "data": []}
+        datasets_by_tier[t]["data"].append({"x": b["x"], "y": b["y"], "r": b["r"], "_label": b["label"]})
+    datasets_json = json.dumps(list(datasets_by_tier.values()))
+
+    # Horizontal annotation lines for ALE / VaR
+    ale_annotation  = json.dumps({"type": "line", "yMin": ale,  "yMax": ale,  "borderColor": "#f59e0b", "borderWidth": 1, "borderDash": [4, 4], "label": {"display": True, "content": f"ALE {fmt_usd(ale)}", "color": "#f59e0b", "font": {"size": 10}}})
+    var95_annotation = json.dumps({"type": "line", "yMin": var95, "yMax": var95, "borderColor": "#ef4444", "borderWidth": 1, "borderDash": [4, 4], "label": {"display": True, "content": f"VaR95 {fmt_usd(var95)}", "color": "#ef4444", "font": {"size": 10}}})
+
+    kev_badge = ' <span style="background:#7c2d12;color:#fca5a5;padding:1px 6px;border-radius:4px;font-size:11px">CISA KEV</span>' if kev else ""
+    epss_str  = f" · EPSS {epss_pct}%" if epss_pct is not None else ""
+
+    return f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{title}</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+<style>
+  *{{box-sizing:border-box;margin:0;padding:0}}
+  body{{background:#0f1117;color:#e4e4e7;font-family:system-ui,-apple-system,sans-serif;font-size:13px;padding:20px}}
+  h1{{font-size:18px;font-weight:700;color:#fff;margin-bottom:2px}}
+  .sub{{color:#71717a;font-size:12px;margin-bottom:16px}}
+  .cards{{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:16px}}
+  .card{{background:#18181b;border:1px solid #27272a;border-radius:10px;padding:12px}}
+  .card-label{{font-size:10px;color:#71717a;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}}
+  .card-value{{font-size:20px;font-weight:700}}
+  .section{{background:#18181b;border:1px solid #27272a;border-radius:12px;padding:16px;margin-bottom:16px}}
+  .section h3{{font-size:12px;font-weight:600;color:#a1a1aa;text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px}}
+  table{{width:100%;border-collapse:collapse}}
+  th{{text-align:left;font-size:10px;color:#52525b;text-transform:uppercase;padding:0 8px 8px}}
+  th.r{{text-align:right}}
+  td{{padding:7px 8px;border-top:1px solid #1f1f23;color:#d4d4d8;vertical-align:middle}}
+  .footer{{margin-top:16px;text-align:center;font-size:11px;color:#3f3f46}}
+  canvas{{max-height:280px}}
+</style>
+</head>
+<body>
+<h1>🔥 {title}</h1>
+<div class="sub">{cve_id} · {component}{epss_str}{kev_badge} · Generated {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M')} UTC</div>
+
+<div class="cards">
+  <div class="card"><div class="card-label">ALE (Annual)</div><div class="card-value" style="color:#f59e0b">{fmt_usd(ale)}</div></div>
+  <div class="card"><div class="card-label">VaR 95th pct</div><div class="card-value" style="color:#ef4444">{fmt_usd(var95)}</div></div>
+  <div class="card"><div class="card-label">VaR 99th pct</div><div class="card-value" style="color:#ef4444">{fmt_usd(var99)}</div></div>
+  <div class="card"><div class="card-label">ALE / Revenue</div><div class="card-value" style="color:#a78bfa">{ale_pct}%</div></div>
+  <div class="card"><div class="card-label">Chain Steps</div><div class="card-value" style="color:#fff">{len(steps)}</div></div>
+  <div class="card"><div class="card-label">Frameworks</div><div class="card-value" style="color:#10b981">{len(frameworks)}</div></div>
+</div>
+
+{intervention_html}
+
+<div class="section">
+  <h3>Exploit Chain — Likelihood × Financial Impact</h3>
+  <canvas id="heatmap"></canvas>
+</div>
+
+<div class="section">
+  <h3>Chain Step Breakdown</h3>
+  <table>
+    <thead><tr>
+      <th>Step</th><th>Label</th>
+      <th class="r">Likelihood</th><th class="r">Financial Impact</th>
+      <th style="text-align:center">Control Resistance</th><th>Gap</th>
+    </tr></thead>
+    <tbody>{step_rows}</tbody>
+  </table>
+</div>
+
+<div class="section">
+  <h3>Regulatory Frameworks at Risk</h3>
+  <div style="display:flex;flex-wrap:wrap;gap:6px">{fw_badges or '<span style="color:#71717a">None detected</span>'}</div>
+</div>
+
+<div class="footer">Complira Security Intelligence · complira.dev</div>
+<script>
+Chart.register(window['chartjs-plugin-annotation']);
+const datasets = {datasets_json};
+const ctx = document.getElementById('heatmap').getContext('2d');
+new Chart(ctx, {{
+  type: 'bubble',
+  data: {{ datasets }},
+  options: {{
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: {{
+      legend: {{ labels: {{ color: '#a1a1aa', font: {{ size: 11 }} }} }},
+      tooltip: {{
+        callbacks: {{
+          label: function(ctx) {{
+            const d = ctx.raw;
+            const label = d._label || '';
+            const usd = new Intl.NumberFormat('en-US', {{style:'currency',currency:'USD',maximumFractionDigits:0}}).format(d.y);
+            return [label, `Likelihood: ${{d.x}}%`, `Impact: ${{usd}}`];
+          }}
+        }}
+      }},
+      annotation: {{
+        annotations: {{
+          ale: {ale_annotation},
+          var95: {var95_annotation}
+        }}
+      }}
+    }},
+    scales: {{
+      x: {{
+        title: {{ display: true, text: 'Cumulative Likelihood (%)', color: '#71717a', font: {{ size: 11 }} }},
+        min: 0, max: 100,
+        ticks: {{ color: '#71717a', font: {{ size: 10 }}, callback: v => v + '%' }},
+        grid: {{ color: '#1f1f23' }}
+      }},
+      y: {{
+        title: {{ display: true, text: 'Financial Impact (USD)', color: '#71717a', font: {{ size: 11 }} }},
+        ticks: {{
+          color: '#71717a', font: {{ size: 10 }},
+          callback: v => v >= 1e9 ? '$' + (v/1e9).toFixed(1) + 'B' : v >= 1e6 ? '$' + (v/1e6).toFixed(0) + 'M' : '$' + (v/1e3).toFixed(0) + 'K'
+        }},
+        grid: {{ color: '#1f1f23' }}
+      }}
+    }}
+  }}
+}});
+</script>
+</body></html>"""
+
+
 def _render_artifact(subtype: str, title: str, data: dict) -> str:
     """Dispatch to the correct server-side renderer."""
     if subtype == "fair_report":
         return _render_fair_report(data, title)
+    if subtype == "heatmap":
+        return _render_heatmap(data, title)
     return _render_dashboard(data, title)
 
 
