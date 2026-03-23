@@ -399,7 +399,7 @@ function MessageBubble({ message }: { message: ChatMessage }) {
 // Main page
 // ---------------------------------------------------------------------------
 
-export default function CISOChatPage() {
+export default function AskCompliraPage() {
   const { data: session } = useSession();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
@@ -574,7 +574,13 @@ export default function CISOChatPage() {
                 setActiveArtifactId(newArtifact.id);
               }
             } else if (event.type === "error") {
-              setError(event.message ?? "Unknown error");
+              const raw = event.content ?? event.message ?? "Unknown error";
+              const friendly = raw.includes("usage limits")
+                ? "API usage limit reached. Access will be restored on 2026-04-01. Please try again then."
+                : raw.includes("Claude API error:")
+                ? raw.replace(/Claude API error:\s*Error code:\s*\d+\s*-\s*\{.*'message':\s*'([^']+)'.*\}/s, "$1").trim()
+                : raw;
+              setError(friendly);
               setIsGeneratingArtifact(false);
               setStreamingStatus(null);
               streamDone = true;

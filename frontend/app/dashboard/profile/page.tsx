@@ -158,7 +158,7 @@ export default function ProfilePage() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <p className="text-xs text-muted-foreground">Account Created</p>
-                <p className="text-sm mt-0.5">{format(new Date(profile.created_at), "PPP")}</p>
+                <p className="text-sm mt-0.5">{profile.created_at ? format(new Date(profile.created_at), "PPP") : "—"}</p>
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Email Status</p>

@@ -1,5 +1,5 @@
 """
-CISO RAG Chat — full streaming agentic loop with AQL-backed tools.
+Complira RAG Chat — full streaming agentic loop with AQL-backed tools.
 
 POST /v1/chat/stream
   Body:     {"messages": [{"role": "user", "content": "..."}, ...]}
@@ -13,7 +13,7 @@ Agentic loop (true streaming throughout, not hybrid):
   5. Inject tool_result → loop until Claude stops calling tools
   6. MAX_LOOPS=6 guard prevents infinite tool spirals
 
-Extend: add an entry to CISO_TOOLS + _TOOL_REGISTRY. No other changes needed.
+Extend: add an entry to COMPLIRA_TOOLS + _TOOL_REGISTRY. No other changes needed.
 """
 
 from __future__ import annotations
@@ -46,7 +46,7 @@ MAX_TOKENS = 4096   # Claude only generates JSON data — HTML rendered server-s
 # System prompt
 # ---------------------------------------------------------------------------
 
-SYSTEM_PROMPT = """You are a cybersecurity compliance analyst for a CISO, powered by Complira's vulnerability knowledge graph.
+SYSTEM_PROMPT = """You are Complira, a cybersecurity intelligence assistant for security, engineering, compliance, and executive stakeholders.
 
 You have real-time access to live vulnerability and compliance data via query tools.
 ALWAYS call a tool before answering questions about findings, components, compliance, or CVE details.
@@ -77,6 +77,7 @@ Never invent numbers, CVE IDs, component names, or regulatory statuses.
 | "control effectiveness", "FAIR-CAM", "resistance score", "patch management maturity" | get_control_effectiveness |
 | "penalty exposure", "regulatory fines", "HIPAA penalty", "CRA fine", "FDA fine" | get_penalty_exposure |
 | "ROI of patching", "cost-benefit of fixing", "remediation value" | get_remediation_roi |
+| "risk heatmap", "exploit chain diagram", "attack path visual", "risk matrix", "likelihood vs impact chart" | get_risk_heatmap_data (ALWAYS call BEFORE emit_artifact for any heatmap/exploit-chain visual — without it emit_artifact renders zeros) |
 | user asks to BUILD/CREATE/GENERATE a dashboard, report, heatmap, slides | emit_artifact (after data tools) |
 
 ## Multi-tool answers
@@ -109,7 +110,7 @@ No other tool draws these connections deterministically from ground-truth scanne
 # Tool definitions sent to Claude
 # ---------------------------------------------------------------------------
 
-CISO_TOOLS: list[dict] = [
+COMPLIRA_TOOLS: list[dict] = [
     {
         "name": "get_vulnerability_summary",
         "description": (
@@ -396,6 +397,31 @@ CISO_TOOLS: list[dict] = [
             "type": "object",
             "properties": {
                 "cve_id": {"type": "string", "description": "e.g. CVE-2021-44228"}
+            },
+            "required": ["cve_id"],
+        },
+    },
+    {
+        "name": "get_risk_heatmap_data",
+        "description": (
+            "Returns structured exploit-chain data for rendering a risk heatmap. "
+            "Each step in the attack chain includes: cumulative likelihood percentage, "
+            "financial impact in USD, FAIR-CAM resistance score, and control gap evidence. "
+            "Also returns ALE, VaR 95/99, revenue context, frameworks violated, and the top "
+            "intervention (action + risk removed + effort). "
+            "ALWAYS call this tool before calling emit_artifact to render a risk heatmap, "
+            "exploit chain diagram, or risk matrix. Without this call the heatmap will have "
+            "no real financial data — emit_artifact will produce zeros or hallucinated values. "
+            "Use when the user asks for: risk heatmap, exploit chain diagram, attack path "
+            "visualisation, risk matrix, or any visual showing likelihood vs financial impact."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "cve_id": {
+                    "type": "string",
+                    "description": "CVE identifier e.g. CVE-2021-44228",
+                }
             },
             "required": ["cve_id"],
         },
@@ -1319,6 +1345,285 @@ def _tool_get_remediation_roi(db: Any, tenant_id: str, inp: dict) -> dict:
     }
 
 
+def _tool_get_risk_heatmap_data(db: Any, tenant_id: str, inp: dict) -> dict:
+    """
+    Returns structured exploit-chain data for risk heatmap visualisation.
+
+    Each chain step has:
+      likelihood_pct   — cumulative probability of reaching this step (0-100)
+      financial_impact_usd — expected loss if attacker reaches this step
+      resistance_score — FAIR-CAM composite effectiveness for controls at this step (0-1)
+      severity_tier    — CRITICAL | HIGH | MEDIUM for colour coding
+
+    Data sources: scan_findings (CVE/EPSS/KEV), fair_scenarios (ALE/VaR/loss magnitudes),
+    iam_graphs (privilege escalation chain), control_assessments (FAIR-CAM scores).
+    """
+    cve_id = inp.get("cve_id", "").strip()
+    if not cve_id:
+        return {"error": "cve_id required"}
+
+    # ── CVE base data ──────────────────────────────────────────────────────
+    cve_rows = list(db.aql.execute(
+        """
+        FOR f IN scan_findings
+            FILTER f.tenant_id == @tid AND f.cve_id == @cve
+            SORT f.epss_score DESC NULLS LAST
+            LIMIT 1
+            RETURN {
+                cve_id:    f.cve_id,
+                cvss:      f.cvss_v3_base_score,
+                epss:      f.epss_score,
+                kev:       f.kev,
+                severity:  f.severity,
+                component: f.component_name,
+                version:   f.component_version
+            }
+        """,
+        bind_vars={"tid": tenant_id, "cve": cve_id},
+    ))
+    cve_data = cve_rows[0] if cve_rows else {}
+
+    # ── FAIR scenarios ─────────────────────────────────────────────────────
+    scenario_rows = list(db.aql.execute(
+        """
+        FOR s IN fair_scenarios
+            FILTER s.tenant_id == @tid AND @cve IN s.cve_ids
+            LET threat = DOCUMENT(CONCAT("threat_profiles/", s.threat_profile_key))
+            LET asset  = DOCUMENT(CONCAT("asset_valuations/", s.asset_key))
+            RETURN {
+                name:               s.name,
+                primary_effect:     s.primary_effect,
+                tef_most_likely:    s.tef_most_likely,
+                susceptibility:     s.susceptibility,
+                resistance:         s.resistance_strength,
+                ale_usd:            s.ale_usd,
+                var_95_usd:         s.var_95_usd,
+                var_99_usd:         s.var_99_usd,
+                primary_loss_ml:    s.primary_loss_most_likely,
+                secondary_loss_ml:  s.secondary_loss_most_likely,
+                control_gaps:       s.control_gaps,
+                max_blast_radius:   s.max_blast_radius,
+                revenue_context:    s.annual_revenue_context_usd,
+                asset_name:         asset.asset_name,
+                asset_type:         asset.asset_type,
+                record_count:       asset.record_count,
+                sensitivity:        asset.sensitivity,
+                threat_community:   threat.threat_community
+            }
+        """,
+        bind_vars={"tid": tenant_id, "cve": cve_id},
+    ))
+
+    # ── Control assessments (FAIR-CAM) ─────────────────────────────────────
+    ctrl_rows = list(db.aql.execute(
+        """
+        FOR c IN control_assessments
+            FILTER c.tenant_id == @tid
+            RETURN {function: c.fair_cam_function, effectiveness: c.composite_effectiveness}
+        """,
+        bind_vars={"tid": tenant_id},
+    ))
+
+    # ── IAM graph ─────────────────────────────────────────────────────────
+    iam_rows = list(db.aql.execute(
+        "FOR g IN iam_graphs FILTER g.tenant_id == @tid LIMIT 1 RETURN g",
+        bind_vars={"tid": tenant_id},
+    ))
+    iam_graph = iam_rows[0] if iam_rows else {}
+
+    # ── Regulatory frameworks (from finding_violates_control edges) ────────
+    fw_rows = list(db.aql.execute(
+        """
+        RETURN SORTED_UNIQUE(
+            FOR e IN finding_violates_control
+                FILTER e.tenant_id == @tid
+                RETURN e.framework
+        )
+        """,
+        bind_vars={"tid": tenant_id},
+    ))
+    frameworks = fw_rows[0] if fw_rows else []
+
+    # ── Assemble values ────────────────────────────────────────────────────
+    epss     = cve_data.get("epss") or 0.0
+    cvss     = cve_data.get("cvss") or 0.0
+    kev      = cve_data.get("kev", False)
+    comp     = cve_data.get("component") or "unknown component"
+    ver      = cve_data.get("version") or ""
+
+    scenarios_sorted = sorted(scenario_rows, key=lambda s: s.get("ale_usd") or 0, reverse=True)
+    worst       = scenarios_sorted[0] if scenarios_sorted else {}
+    total_ale   = sum(s.get("ale_usd") or 0 for s in scenario_rows)
+    var95       = max((s.get("var_95_usd") or 0 for s in scenario_rows), default=0)
+    var99       = max((s.get("var_99_usd") or 0 for s in scenario_rows), default=0)
+    revenue     = worst.get("revenue_context") or 85_000_000
+    pl_ml       = worst.get("primary_loss_ml") or 5_000_000
+    sl_ml       = worst.get("secondary_loss_ml") or 8_000_000
+    susceptibility = worst.get("susceptibility") or (0.85 if kev else 0.5)
+
+    ctrl_map = {c["function"]: c["effectiveness"] for c in ctrl_rows}
+    resistance_exploit = ctrl_map.get("Resistance", 0.05)
+    resistance_detect  = ctrl_map.get("Detection",  0.20)
+    resistance_egress  = ctrl_map.get("Avoidance",  0.10)
+
+    # IAM: find internet-reachable entry role associated with this CVE
+    nodes_by_arn = {n["arn"]: n for n in iam_graph.get("nodes", [])}
+    entry_role = None
+    for node in iam_graph.get("nodes", []):
+        if node.get("reachable_from_internet") and cve_id in node.get("note", ""):
+            entry_role = node
+            break
+    if not entry_role:
+        for node in iam_graph.get("nodes", []):
+            if node.get("reachable_from_internet") and not node.get("is_admin"):
+                entry_role = node
+                break
+
+    entry_arn = entry_role["arn"] if entry_role else None
+    privesc_paths = [
+        e for e in iam_graph.get("edges", [])
+        if e.get("source") == entry_arn
+    ] if entry_arn else []
+    privesc_paths.sort(key=lambda p: (
+        0 if p.get("combined_with_cve") == cve_id else 1,
+        p.get("hop_count", 99),
+    ))
+    data_access_edges = [
+        e for e in iam_graph.get("data_access_edges", [])
+        if e.get("source") == entry_arn
+    ] if entry_arn else []
+    has_admin = any(
+        nodes_by_arn.get(e["target"], {}).get("is_admin", False) for e in privesc_paths
+    )
+
+    phi_assets = [
+        e for e in data_access_edges
+        if e.get("data_classification") == "PHI" or (e.get("record_count") or 0) > 100_000
+    ]
+    total_phi_records = sum(e.get("record_count") or 0 for e in phi_assets)
+
+    # ── Build chain steps ──────────────────────────────────────────────────
+    p1 = min(epss * 100, 99.0) if epss else (97.0 if kev else 50.0)
+    chain_steps = [
+        {
+            "step":                 1,
+            "label":                f"Initial exploitation ({comp} {ver})".strip(),
+            "attack_action":        f"RCE/injection via {cve_id}",
+            "likelihood_pct":       round(p1, 1),
+            "resistance_score":     round(resistance_exploit, 2),
+            "financial_impact_usd": round(pl_ml * 0.3),
+            "control_gap":          "Unpatched CVE — near-zero resistance",
+            "severity_tier":        "CRITICAL" if cvss >= 9.0 or kev else "HIGH",
+            "kev":                  kev,
+        }
+    ]
+
+    # Step 2: credential / data access
+    p2 = round(p1 * susceptibility, 1)
+    chain_steps.append({
+        "step":                 2,
+        "label":                "Credential theft + data access" if data_access_edges else "Lateral movement",
+        "attack_action":        "Query IMDS → inherit IAM credentials → enumerate S3/DynamoDB" if data_access_edges else "Move to adjacent service",
+        "likelihood_pct":       p2,
+        "resistance_score":     round(resistance_egress, 2),
+        "financial_impact_usd": round(pl_ml * 0.7),
+        "control_gap":          "No egress blocking; IMDS v1 accessible" if data_access_edges else "Insufficient network segmentation",
+        "severity_tier":        "CRITICAL",
+        "data_assets":          [
+            f"{e.get('target', '?')} ({e.get('record_count', 0):,} records)"
+            for e in data_access_edges[:3]
+        ],
+    })
+
+    p3 = p2
+    if phi_assets:
+        p3 = round(p2 * (1 - resistance_detect), 1)
+        chain_steps.append({
+            "step":                 3,
+            "label":                f"PHI exfiltration ({total_phi_records:,} records)",
+            "attack_action":        "Bulk S3 GetObject; exfil before detection",
+            "likelihood_pct":       p3,
+            "resistance_score":     round(resistance_detect, 2),
+            "financial_impact_usd": round(pl_ml + sl_ml * 0.4),
+            "control_gap":          "S3 access logging insufficient — exfiltration undetected",
+            "severity_tier":        "CRITICAL",
+            "record_count":         total_phi_records,
+        })
+
+    # IAM escalation hops
+    p_current = p3
+    iam_financial_base = pl_ml + sl_ml * 0.6
+    for i, hop in enumerate(privesc_paths[:3]):
+        p_current = round(p_current * 0.98, 1)
+        target_node = nodes_by_arn.get(hop.get("target", ""), {})
+        target_name = target_node.get("friendly_name") or hop.get("target", "?").split("/")[-1]
+        financial = iam_financial_base * (1.5 ** (i + 1))
+        chain_steps.append({
+            "step":                 len(chain_steps) + 1,
+            "label":                f"IAM escalation hop {i + 1}: {target_name}",
+            "attack_action":        hop.get("reason") or "Role assumption via over-permissioned policy",
+            "likelihood_pct":       p_current,
+            "resistance_score":     0.02,
+            "financial_impact_usd": round(min(financial, revenue * 5)),
+            "control_gap":          "iam:PassRole over-permissioned on service role",
+            "severity_tier":        "CRITICAL",
+            "blast_radius":         "FULL_ACCOUNT_COMPROMISE" if target_node.get("is_admin") else "ELEVATED_PRIVILEGES",
+        })
+
+    if has_admin:
+        p_final = round(p_current * 0.95, 1)
+        chain_steps.append({
+            "step":                 len(chain_steps) + 1,
+            "label":                "Full account compromise + ransomware",
+            "attack_action":        "iam:CreatePolicyVersion → admin policy → mass encrypt S3 + delete snapshots",
+            "likelihood_pct":       p_final,
+            "resistance_score":     0.01,
+            "financial_impact_usd": round(min(pl_ml + sl_ml, revenue * 3)),
+            "control_gap":          "No MFA on break-glass admin; no SCPs blocking destructive actions",
+            "severity_tier":        "CRITICAL",
+            "blast_radius":         "FULL_ACCOUNT_COMPROMISE",
+        })
+
+    top_intervention = {
+        "action":               f"Patch {comp} — eliminates entire chain at step 1",
+        "risk_removed_usd":     round(total_ale),
+        "effort":               "Low — library version bump",
+        "breaks_chain_at_step": 1,
+    }
+    iam_intervention = None
+    if len(chain_steps) >= 4:
+        iam_intervention = {
+            "action":               "Remove iam:PassRole from service role — severs escalation at hop 1",
+            "risk_removed_usd":     round(total_ale * 0.70),
+            "effort":               "Very low — IAM policy edit (30 min)",
+            "breaks_chain_at_step": 4,
+        }
+
+    return {
+        "cve_id":              cve_id,
+        "component":           f"{comp} {ver}".strip(),
+        "cvss":                cvss,
+        "epss_pct":            round(epss * 100, 1) if epss else None,
+        "kev":                 kev,
+        "chain_steps":         chain_steps,
+        "total_steps":         len(chain_steps),
+        "ale_total_usd":       round(total_ale) if total_ale else None,
+        "var_95_usd":          round(var95) if var95 else None,
+        "var_99_usd":          round(var99) if var99 else None,
+        "revenue_context_usd": revenue,
+        "ale_as_pct_revenue":  round(total_ale / revenue * 100, 1) if total_ale and revenue else None,
+        "frameworks_violated": frameworks,
+        "top_intervention":    top_intervention,
+        "iam_intervention":    iam_intervention,
+        "heatmap_axes": {
+            "x_axis":  "likelihood_pct (0-100%)",
+            "y_axis":  "financial_impact_usd",
+            "size":    "resistance_score (smaller = weaker controls = bigger bubble = bigger problem)",
+            "colour":  "severity_tier (CRITICAL=red, HIGH=amber, MEDIUM=yellow)",
+        },
+    }
+
+
 # ---------------------------------------------------------------------------
 # Tool dispatch registry
 # ---------------------------------------------------------------------------
@@ -1346,6 +1651,7 @@ _TOOL_REGISTRY: dict[str, Any] = {
     "get_control_effectiveness":   _tool_get_control_effectiveness,
     "get_penalty_exposure":        _tool_get_penalty_exposure,
     "get_remediation_roi":         _tool_get_remediation_roi,
+    "get_risk_heatmap_data":       _tool_get_risk_heatmap_data,
 }
 
 
@@ -1887,7 +2193,7 @@ async def _agentic_stream(
                 model=MODEL,
                 max_tokens=MAX_TOKENS,
                 system=SYSTEM_PROMPT,
-                tools=CISO_TOOLS,
+                tools=COMPLIRA_TOOLS,
                 tool_choice={"type": "auto"},
                 messages=current_messages,
             ) as stream:
@@ -1925,6 +2231,16 @@ async def _agentic_stream(
                             active_tool = None
                             active_tool_json = ""
 
+        except anthropic.RateLimitError as exc:
+            yield _sse({"type": "error", "content": "API usage limit reached. Please try again later."})
+            return
+        except anthropic.APIStatusError as exc:
+            if exc.status_code == 400 and "usage limits" in str(exc):
+                yield _sse({"type": "error", "content": "API usage limit reached. Please try again later."})
+            else:
+                msg = exc.message if hasattr(exc, "message") else str(exc)
+                yield _sse({"type": "error", "content": msg})
+            return
         except anthropic.APIError as exc:
             yield _sse({"type": "error", "content": f"Claude API error: {exc}"})
             return

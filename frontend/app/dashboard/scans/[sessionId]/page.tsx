@@ -416,7 +416,7 @@ export default function ScanDetailsPage() {
                       <span className="text-sm">{finding.tool_name}</span>
                     </td>
                     <td className="px-4 py-3 text-sm text-muted-foreground">
-                      {format(new Date(finding.created_at), "PP")}
+                      {finding.created_at ? format(new Date(finding.created_at), "PP") : "—"}
                     </td>
                   </tr>
                 ))}

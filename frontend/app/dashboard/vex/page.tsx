@@ -108,7 +108,7 @@ export default function VEXPage() {
                       {vex.vex_id}
                     </Link>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      {format(new Date(vex.created_at), "PPp")}
+                      {vex.created_at ? format(new Date(vex.created_at), "PPp") : "—"}
                     </p>
                   </div>
                 </div>

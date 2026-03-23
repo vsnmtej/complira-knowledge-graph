@@ -508,7 +508,7 @@ export default function RepositoryDetailPage() {
                         {getStatusIcon(scan.status)}
                       </td>
                       <td className="px-4 py-3 text-sm text-muted-foreground">
-                        {format(new Date(scan.scan_timestamp), "PP")}
+                        {scan.scan_timestamp ? format(new Date(scan.scan_timestamp), "PP") : "—"}
                       </td>
                     </tr>
                   ))}

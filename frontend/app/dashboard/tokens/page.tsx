@@ -219,7 +219,7 @@ export default function TokensPage() {
                       {token.last_used ? format(new Date(token.last_used), "PP") : "Never"}
                     </td>
                     <td className="px-4 py-3 text-sm text-muted-foreground">
-                      {format(new Date(token.expires_at), "PP")}
+                      {token.expires_at ? format(new Date(token.expires_at), "PP") : "—"}
                     </td>
                     <td className="px-4 py-3">
                       {token.revoked ? (

@@ -40,7 +40,7 @@ export default function DashboardLayout({
 
   const navigation = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-    { name: "CISO Chat", href: "/dashboard/chat", icon: Sparkles },
+    { name: "Ask Complira", href: "/dashboard/chat", icon: Sparkles },
     { name: "Scans", href: "/dashboard/scans", icon: FileSearch },
     { name: "VEX", href: "/dashboard/vex", icon: Shield },
     { name: "Projects", href: "/dashboard/projects", icon: FolderKanban },
