@@ -1367,7 +1367,7 @@ def _tool_get_risk_heatmap_data(db: Any, tenant_id: str, inp: dict) -> dict:
         """
         FOR f IN scan_findings
             FILTER f.tenant_id == @tid AND f.cve_id == @cve
-            SORT f.epss_score DESC NULLS LAST
+            SORT f.epss_score == null ? 0 : f.epss_score DESC
             LIMIT 1
             RETURN {
                 cve_id:    f.cve_id,
