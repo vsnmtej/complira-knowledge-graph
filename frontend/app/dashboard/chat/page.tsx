@@ -578,7 +578,7 @@ export default function AskCompliraPage() {
               const friendly = raw.includes("usage limits")
                 ? "API usage limit reached. Access will be restored on 2026-04-01. Please try again then."
                 : raw.includes("Claude API error:")
-                ? raw.replace(/Claude API error:\s*Error code:\s*\d+\s*-\s*\{.*'message':\s*'([^']+)'.*\}/s, "$1").trim()
+                ? (raw.match(/'message':\s*'([^']+)'/) ?? [])[1]?.trim() ?? raw
                 : raw;
               setError(friendly);
               setIsGeneratingArtifact(false);
