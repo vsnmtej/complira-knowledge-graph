@@ -83,6 +83,180 @@ You can test API requests directly from your browser!
 
 ---
 
+## Situation Room API
+
+The Situation Room translates raw simulation graph data into persona-appropriate business views
+with **zero CVE IDs** in any response. All vulnerability data is aggregated to business metrics
+before leaving the abstraction layer.
+
+**Authentication:** Bearer token (web session) or `X-API-Key` header.
+
+### `GET /v1/situation/ciso`
+
+Returns `CISOSituation` — posture score, ATT&CK threat categories, compliance control failures,
+simulated MTTD, and prioritised action items. Also writes a `posture_snapshot` for historical
+trending.
+
+**Response (200 OK):**
+```json
+{
+  "posture_score": 72,
+  "posture_delta": -3,
+  "attck_coverage_pct": 58.0,
+  "control_failure_count": 2,
+  "threat_categories": [
+    {
+      "bucket_name": "remote_code_execution",
+      "display_name": "Remote Code Execution",
+      "breach_probability": 0.62,
+      "critical_asset_count": 3,
+      "trend": null
+    }
+  ],
+  "control_failures": [
+    { "framework": "CRA", "failure_count": 1, "coverage_pct": 72.0 }
+  ],
+  "mttd_hours": 18.0,
+  "mttd_target_hours": 24.0,
+  "action_priorities": [
+    {
+      "rank": 1,
+      "description": "Remediate Remote Code Execution attack vectors (62% breach probability)",
+      "owner": "Security Engineering",
+      "due_label": "30 days",
+      "urgency": "high"
+    }
+  ],
+  "snapshot_timestamp": "2026-04-14T00:00:00Z",
+  "data_staleness_warning": null
+}
+```
+
+**Posture score formula:**
+`100 − round(mean_chain_probability × 40) − (gap_count × 3) − round(soc_miss_rate × 20) + round(attck_coverage × 0.1)` clamped [0, 100].
+
+**Note:** No CVE IDs, CVSS scores, or EPSS data appear in any field of this response.
+Trigger a new simulation to refresh stale threat data (`data_staleness_warning` will be set
+when rollup data is from a prior run).
+
+---
+
+### `GET /v1/situation/board`
+
+Returns `BoardSituation` — breach probability, financial exposure range, regulatory fine risk
+(per framework), reputational risk score, and governance-language board priorities.
+
+**Response (200 OK):**
+```json
+{
+  "breach_probability_pct": 42.0,
+  "breach_probability_delta": null,
+  "financial_exposure_usd_low": 500000,
+  "financial_exposure_usd_high": 2500000,
+  "regulatory_fine_risk": [
+    {
+      "framework": "NIS2",
+      "estimated_fine_usd": 5000000,
+      "probability": 0.3
+    }
+  ],
+  "reputational_risk_score": 0.35,
+  "board_priorities": [],
+  "snapshot_timestamp": "2026-04-14T00:00:00Z"
+}
+```
+
+---
+
+## Simulation API
+
+The simulation layer uses the **Complira Simulation Engine (CSE)** — an in-process,
+subprocess-based multi-agent simulation engine. CSE replaced the external MiroFish
+HTTP client in Phase 5 Web UI. See `src/complira_graph/cse/` for the implementation.
+
+### `POST /v1/cse/simulations/create`
+
+Prepares and starts a CSE simulation run for the authenticated tenant.
+Reads the tenant's attack surface (CVEs + components) from ArangoDB, generates
+5 agent profiles (Attacker, SOCAnalyst, DevSecOps, CISO, Regulator), writes
+`simulation_config.json`, and launches the simulation subprocess.
+
+**Request body:**
+```json
+{ "trigger_type": "kev_triggered" }
+```
+
+Supported `trigger_type` values:
+- `kev_triggered` — focused KEV-triggered run (48 rounds, 1h per round, CRA deadline round 24)
+- `monthly_posture_sim` — full monthly posture run (720 rounds, 1h per round)
+
+**Response (200 OK):**
+```json
+{ "sim_id": "550e8400-e29b-41d4-a716-446655440000", "status": "running", "tenant_id": "tenant_abc" }
+```
+
+**Errors:**
+- `422 insufficient_attack_surface` — no exploitable CVEs found for tenant
+- `422 invalid_trigger_type` — unknown trigger_type value
+- `500 simulation_prepare_failed` — internal error during preparation
+
+---
+
+### `GET /v1/cse/simulations/{sim_id}/status`
+
+Polls live CSE run state for the authenticated tenant.
+Returns ArangoDB writeback data joined with run_state.json for round progress.
+Designed for 3-second polling from `SimulationLivePanel`.
+
+**Response (200 OK):**
+```json
+{
+  "sim_id": "550e8400-e29b-41d4-a716-446655440000",
+  "tenant_id": "tenant_abc",
+  "status": "running",
+  "trigger_type": "kev_triggered",
+  "started_at": "2026-04-14T10:00:00Z",
+  "current_round": 12,
+  "total_rounds": 48,
+  "agent_count": 5,
+  "chain_count": null,
+  "chain_probability": null,
+  "board_narrative": null,
+  "top_3_actions": [],
+  "recent_events": [
+    { "round_no": 12, "agent_type": "Attacker", "action_type": "EXPLOIT_CVE", "outcome": "CVE-2021-44228 exploited" }
+  ]
+}
+```
+
+**Errors:**
+- `404` — run not found or belongs to a different tenant
+
+---
+
+### `GET /v1/simulation/{run_id}/status`
+
+Returns Complira-side simulation run metadata (stored in `simulation_runs` collection).
+
+**Response (200 OK):**
+```json
+{
+  "run_id": "run_test_001",
+  "cve_id": "CVE-2021-44228",
+  "status": "completed",
+  "started_at": "2026-04-12T10:00:00Z",
+  "completed_at": "2026-04-12T10:05:00Z",
+  "agent_count": 12,
+  "round_count": 8,
+  "chain_count": 2,
+  "soc_blind_spot_count": 1,
+  "top_playbook_action": "Patch log4j-core immediately",
+  "recent_events": []
+}
+```
+
+---
+
 ## Core Endpoints
 
 ### 📚 Reference Data (Authentication Required)

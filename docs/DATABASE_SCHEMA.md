@@ -394,5 +394,54 @@ graph TB
 
 ---
 
-**Last Updated:** 2026-03-06
-**Schema Version:** 1.0 (Phase 1 Complete)
+---
+
+## Simulation Collections (v3 — Situation Room / CSE)
+
+Added by `scripts/init_simulation_schema.py`. All writes use UPSERT-only semantics (Prefect-retry safe).
+
+CSE (Complira Simulation Engine) writes to these collections via `SimulationWritebackService`
+after a simulation run completes. The `agent_action_logs` collection is new in Phase 5.
+
+### Document Collections
+
+| Collection | Purpose | Key Fields |
+|-----------|---------|------------|
+| `simulation_runs` | One doc per completed simulation run | `_key` (= sim_id), `tenant_id`, `trigger_type`, `status`, `agent_count`, `started_at`, `completed_at` |
+| `agent_action_logs` | Per-round action log from CSE subprocess (new in Phase 5) | `_key`, `sim_id`, `tenant_id`, `round_no`, `agent_type`, `action_type`, `outcome`, `significance` |
+| `attack_chain_findings` | One doc per discovered attack chain in a run | `_key`, `run_id`, `tenant_id`, `chain_nodes`, `chain_edges`, `soc_blind_spots`, `confidence`, `chain_probability` |
+| `response_playbook_steps` | Remediation steps produced by simulation | `_key`, `run_id`, `finding_key`, `action`, `priority` |
+| `compliance_gap_findings` | Control failures found during simulation | `_key`, `run_id`, `tenant_id`, `requirement_key`, `framework`, `severity` |
+| `simulation_agent_logs` | Per-round agent event log | `_key`, `run_id`, `agent_id`, `round`, `event_type`, `significance`, `payload` |
+| `threat_category_rollups` | ATT&CK tactic bucket rollup — **no CVE IDs** | `_key` (`run_id_bucket`), `run_id`, `tenant_id`, `bucket_name`, `display_name`, `max_chain_probability`, `critical_asset_count`, `technique_ids` |
+| `business_impact_findings` | CFO + board_member agent outputs | `_key`, `run_id`, `tenant_id`, `agent_type`, `impact_type`, `estimated_value`, `currency`, `narrative`, `framework`, `confidence` |
+| `posture_snapshots` | Time-series posture score history for trending | `_key` (`tenant_id_iso_timestamp`), `tenant_id`, `posture_score`, `attck_coverage_pct`, `mttd_hours`, `computed_at`, `run_id` |
+
+### Edge Collections
+
+| Collection | From → To | Purpose |
+|-----------|-----------|---------|
+| `sim_ran_on` | `simulation_runs → devices` | Device participation in run |
+| `sim_triggered_by` | `simulation_runs → vulnerabilities/incidents` | Run provenance |
+| `chain_surfaces_cve` | `attack_chain_findings → vulnerabilities` | Chain–CVE link |
+| `chain_informs_vex` | `attack_chain_findings → vex_statements` | Advisory link (read-only; never mutates VEX status) |
+| `chain_involves_component` | `attack_chain_findings → sbom_components` | Affected component |
+| `chain_calibrates_fair` | `attack_chain_findings → fair_scenarios` | FAIR confidence update (gated: confidence ≥ 0.6) |
+| `playbook_addresses_finding` | `response_playbook_steps → attack_chain_findings` | Playbook–chain link |
+| `gap_violates_requirement` | `compliance_gap_findings → regulatory_requirements` | Gap–control mapping |
+
+### SituationAbstractionLayer
+
+The `SituationAbstractionLayer` reads from `threat_category_rollups`, `business_impact_findings`,
+`posture_snapshots`, `attack_chain_findings`, and `compliance_gap_findings` to compute:
+
+- `CISOSituation` — posture score, ATT&CK threat categories, control failures, MTTD, priorities
+- `BoardSituation` — breach probability, financial exposure, regulatory fine risk, board priorities
+
+**Design constraint:** neither model contains CVE IDs, CVSS scores, or package-level vulnerability data.
+All data is aggregated at ATT&CK tactic bucket level or higher before entering these models.
+
+---
+
+**Last Updated:** 2026-04-14
+**Schema Version:** 2.0 (Phase 3 Simulation + v3 Situation Room)

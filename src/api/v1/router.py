@@ -38,6 +38,15 @@ from api.v1.endpoints import compliance
 # CISO RAG Chat
 from api.v1.endpoints import chat
 
+# Situation Room
+from api.v1.endpoints import situation
+
+# Simulation status
+from api.v1.endpoints import simulation
+
+# CSE simulation
+from api.v1.endpoints import cse
+
 # Future phases:
 # from api.v1.endpoints import blast_radius, epss_velocity, portfolio_risk
 
@@ -90,6 +99,15 @@ api_router.include_router(compliance.router, prefix="/compliance", tags=["compli
 
 # CISO RAG Chat
 api_router.include_router(chat.router, prefix="/chat", tags=["chat"])
+
+# Situation Room
+api_router.include_router(situation.router, prefix="", tags=["situation"])
+
+# Simulation status
+api_router.include_router(simulation.router, prefix="", tags=["simulation"])
+
+# CSE simulation
+api_router.include_router(cse.router, prefix="", tags=["cse"])
 
 # Future endpoints (Phase 3+):
 # api_router.include_router(blast_radius.router, prefix="/blast-radius", tags=["blast-radius"])
