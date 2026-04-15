@@ -4,11 +4,11 @@
 
 | Field | Value |
 |---|---|
-| Current Stage | 6 |
-| Code Edit Permission | Unlocked |
+| Current Stage | 10 |
+| Code Edit Permission | Locked |
 | Scope | Small |
 | Branch | codex/prowler-nist-edge-wiring |
-| Last Updated | 2026-03-23 |
+| Last Updated | 2026-04-15 |
 
 ## Stage Gates
 
@@ -21,10 +21,10 @@
 | 4 | Runtime Modeling | Pass | future-state-runtime-call-stack.md |
 | 5 | Review Gate | Go Confirmed | 2 clean rounds, no blockers |
 | 6 | Source Implementation | Pass | 22 unit tests pass (479 total ingestion suite) |
-| 7 | API/E2E Gate | Pass | Unit tests cover all acceptance criteria; manual re-seed script provided |
-| 8 | Code Review Gate | Not Started | — |
-| 9 | Docs Sync | Not Started | — |
-| 10 | Final Handoff | Not Started | — |
+| 7 | API/E2E Gate | Pass | 22/22 tests pass; all ACs covered; ctrl_id case-normalization fix applied |
+| 8 | Code Review Gate | Pass | All checks pass; delta assessment recorded (254-line delta justified); code-review.md |
+| 9 | Docs Sync | Pass | `docs/COMPLIANCE_VIOLATION_API.md` updated — direct-ref path documented, test count updated to 22 |
+| 10 | Final Handoff | In Progress | Awaiting explicit user confirmation to archive |
 
 ## Transition Log
 
@@ -37,3 +37,7 @@
 | 5 | 3 | 4 | 2026-03-23 | future-state-runtime-call-stack.md written |
 | 6 | 4 | 5 | 2026-03-23 | Review Round 1 + Round 2: Go Confirmed — no blockers |
 | 7 | 5 | 6 | 2026-03-23 | Code Edit Permission = Unlocked; implementation starting |
+| 8 | 6 | 7 | 2026-04-15 | Stage 6 complete; 22/22 tests pass; advancing to Stage 7 |
+| 9 | 7 | 8 | 2026-04-15 | Stage 7 Pass; Code Edit Permission = Locked; code review starting |
+| 10 | 8 | 9 | 2026-04-15 | Code review Pass; advancing to docs sync |
+| 11 | 9 | 10 | 2026-04-15 | Docs sync Pass — COMPLIANCE_VIOLATION_API.md updated; advancing to handoff |

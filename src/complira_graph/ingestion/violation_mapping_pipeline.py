@@ -115,15 +115,14 @@ class ViolationMappingPipeline:
                     cve_to_findings.setdefault(cve_key, []).append(finding_key)
 
                 # Direct NIST refs (comma-separated string, e.g. "AC-6, IA-2")
-                # oscal_controls uses lowercase control_id (e.g. "ac-6", "ia-2")
                 nist_refs = finding.get("nist_control_refs") or ""
                 for ctrl_id in _parse_control_refs(nist_refs):
-                    direct_refs.append((finding_key, ctrl_id.lower(), "NIST-800-53"))
+                    direct_refs.append((finding_key, ctrl_id, "NIST-800-53"))
 
                 # Direct HIPAA refs
                 hipaa_refs = finding.get("hipaa_refs") or ""
                 for ctrl_id in _parse_control_refs(hipaa_refs):
-                    direct_refs.append((finding_key, ctrl_id.lower(), "HIPAA"))
+                    direct_refs.append((finding_key, ctrl_id, "HIPAA"))
 
         all_edges: list[dict] = []
 

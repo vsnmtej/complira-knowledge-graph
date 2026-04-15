@@ -1,24 +1,34 @@
 # Compliance Violation API Reference
 
 **Status:** Implemented
-**Last Updated:** 2026-03-22
+**Last Updated:** 2026-04-15
 **Base Path:** `/v1/compliance`
 
 ---
 
 ## Overview
 
-The Compliance Violation API exposes per-finding compliance violation data produced by the `ViolationMappingPipeline` post-ingestion stage. For each scan finding with a CVE ID, the pipeline traverses the deterministic reference graph chain (CVE → CWE → CAPEC → ATT&CK → NIST 800-53 Control) and writes `finding_violates_control` edges. These endpoints query those edges to surface compliance violations and coverage summaries per scan run.
+The Compliance Violation API exposes per-finding compliance violation data produced by the `ViolationMappingPipeline` post-ingestion stage. The pipeline supports two finding paths and writes `finding_violates_control` edges for both. These endpoints query those edges to surface compliance violations and coverage summaries per scan run.
 
 All endpoints require authentication (`X-API-Key` or JWT). All results are tenant-scoped via `tenant_id` on `finding_violates_control` edges.
 
-**Graph traversal chain:**
+**Path 1 — CVE graph traversal (SAST/SCA findings with `cve_id`):**
 ```
 CVE → has_weakness → CWE
     ← capec_relates_to_cwe ← CAPEC
     → capec_maps_to_attack → ATT&CK technique
     → technique_mitigated_by_control → NIST 800-53 control (oscal_controls)
 ```
+- `evidence_path`: `[cve_key, cwe_key, capec_key, attack_key, control_key]`
+- `confidence`: `1.0`
+
+**Path 2 — Direct control ref (CSPM/IaC findings with `nist_control_refs` or `hipaa_refs`):**
+- Comma-separated control IDs on the finding (e.g. `"AC-6, IA-2"`) are looked up directly in `oscal_controls`.
+- No graph traversal; tool-provided mapping is used.
+- `framework`: `"NIST-800-53"` for `nist_control_refs`, `"HIPAA"` for `hipaa_refs`
+- `evidence_path`: `[finding_key, control_key]`
+- `confidence`: `1.0`
+- Control IDs not found in `oscal_controls` are silently skipped.
 
 **Edge collection:** `finding_violates_control`
 - `_from`: `scan_findings/<fingerprint_key>`
@@ -143,8 +153,8 @@ Returns a per-framework compliance coverage summary for a scan run.
 | File | Purpose |
 | --- | --- |
 | `src/complira_graph/db.py` | `finding_violates_control` edge collection schema + indexes |
-| `src/complira_graph/ingestion/scan_violation_repository.py` | AQL: control chain traversal + edge upsert |
-| `src/complira_graph/ingestion/violation_mapping_pipeline.py` | Pipeline stage: fetch findings → traverse → build edges → upsert → set status |
+| `src/complira_graph/ingestion/scan_violation_repository.py` | AQL: control chain traversal, direct control lookup by ID, edge upsert |
+| `src/complira_graph/ingestion/violation_mapping_pipeline.py` | Pipeline stage: two-path orchestration (CVE traversal + direct ref) → build edges → upsert → set status |
 | `src/complira_graph/ingestion/pipeline_coordinator.py` | Wires `ViolationMappingPipeline` after `ControlMappingPipeline` (`mapped → violations_mapped`) |
 | `src/api/models/responses/compliance.py` | Response models |
 | `src/api/v1/endpoints/compliance.py` | Endpoint handlers |
@@ -156,7 +166,7 @@ Returns a per-framework compliance coverage summary for a scan run.
 
 | File | Type | Count |
 | --- | --- | --- |
-| `tests/unit/ingestion/test_violation_mapping_pipeline.py` | Unit (mocked repo) | 10 |
+| `tests/unit/ingestion/test_violation_mapping_pipeline.py` | Unit (mocked repo) | 22 |
 | `tests/unit/api/test_compliance_api.py` | Unit (TestClient) | 7 |
 
-**AC Coverage:** 15/15 acceptance criteria (AC-CV-001 – AC-CV-015) closed.
+**AC Coverage:** 15/15 acceptance criteria (AC-CV-001 – AC-CV-015) closed. Direct-ref path adds coverage for Prowler NIST/HIPAA findings (6 additional scenarios).
