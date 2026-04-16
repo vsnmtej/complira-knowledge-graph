@@ -1,0 +1,56 @@
+# Workflow State — cse-engine-accuracy-explainability
+
+## Current Snapshot
+
+| Field | Value |
+|---|---|
+| Current Stage | 3 — Design Basis |
+| Code Edit Permission | Locked |
+| Scope | Large |
+| Branch | codex/cse-engine-accuracy-explainability |
+| Last Updated | 2026-04-16 |
+
+## Stage Gates
+
+| Stage | Name | Status | Evidence |
+|---|---|---|---|
+| 0 | Bootstrap + Draft Requirement | Pass | Ticket folder created; requirements.md written |
+| 1 | Investigation + Triage | Pass | investigation-notes.md written; 25-issue audit complete; scope = Large confirmed |
+| 2 | Requirements Refinement | Pass | requirements.md Design-ready; 9 accuracy ACs + 6 explainability ACs; 20 change items |
+| 3 | Design Basis | Pass | proposed-design.md v1 written; 5 ADs, all 20 change items architecturally covered |
+| 4 | Runtime Modeling | Pending | future-state-runtime-call-stack.md not yet written |
+| 5 | Review Gate | Pending | — |
+| 6 | Source Implementation | Pending | — |
+| 7 | API/E2E Gate | Pending | — |
+| 8 | Code Review Gate | Pending | — |
+| 9 | Docs Sync | Pending | — |
+| 10 | Final Handoff | Pending | — |
+
+## Issue Registry
+
+| ID | Severity | Description | Status |
+|----|----------|-------------|--------|
+| C-1 | Critical | T1190 hardcoded — no technique diversity | Open |
+| C-2 | Critical | Attacker always wins — no probabilistic outcome | Open |
+| C-3 | Critical | LLM failure → silent passive fallback | Open |
+| C-4 | Critical | ArangoDB flush skipped in subprocess | Open |
+| H-1 | High | No action state machine — LATERAL/ESCALATE never used | Open |
+| H-2 | High | Scheduled events built but never executed | Open |
+| H-3 | High | Detection events ignored by attacker | Open |
+| H-4 | High | Defender fallback patches wrong CVEs | Open |
+| H-5 | High | Compliance gap allows empty cve_id | Open |
+| EX-1 | New | No per-chain narrative | Open |
+| EX-2 | New | No decision trace logging | Open |
+| EX-3 | New | No counterfactual analysis | Open |
+| EX-4 | New | CISO view has no threat category explanations | Open |
+| EX-5 | New | Board view has no financial derivation narrative | Open |
+| EX-6 | New | No audit trail document | Open |
+
+## Transition Log
+
+| Transition ID | Date | From Stage | To Stage | Reason |
+|---|---|---|---|---|
+| T-000 | 2026-04-16 | — | 0 | Bootstrap: ticket folder + branch + requirements.md Draft |
+| T-001 | 2026-04-16 | 0 | 1 | Investigation complete: 25-issue audit of all CSE files |
+| T-002 | 2026-04-16 | 1 | 2 | requirements.md Design-ready: 15 ACs, 20 change items |
+| T-003 | 2026-04-16 | 2 | 3 | proposed-design.md v1: 5 ADs, component designs, data flow, 20 test scenarios |
