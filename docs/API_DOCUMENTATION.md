@@ -168,6 +168,70 @@ Returns `BoardSituation` — breach probability, financial exposure range, regul
 
 ---
 
+### `GET /v1/situation/engineering`
+
+Returns the Engineering persona view — a prioritised patch list derived from the latest
+simulation run's attack chain findings, joined with CVSS/EPSS/KEV data.
+
+No CVE IDs are included in the response. Vulnerabilities are referenced by component name
+and urgency tier only.
+
+**Response (200 OK):**
+```json
+{
+  "patch_priority": [
+    {
+      "component": "log4j-core:2.14.0",
+      "urgency": "critical",
+      "composite_score": 0.94,
+      "frameworks_at_risk": ["CRA", "FDA_524B"],
+      "chain_exploited": true
+    }
+  ],
+  "data_staleness_warning": null
+}
+```
+
+Returns `{"patch_priority": [], "data_staleness_warning": "No simulation run found."}` when no
+simulation has run yet — never 404.
+
+---
+
+### `GET /v1/situation/reg_affairs`
+
+Returns the Regulatory Affairs persona view — deadline-sorted compliance gaps recorded by
+the Regulator agent during the latest simulation run.
+
+**Response (200 OK):**
+```json
+{
+  "regulatory_deadlines": [
+    {
+      "framework": "CRA",
+      "requirement_key": "CRA_art_24",
+      "urgency_tier": "overdue",
+      "hours_remaining": -12,
+      "description": "Critical vulnerability in attack chain exceeds CRA 24-hour notification window"
+    },
+    {
+      "framework": "FDA_524B",
+      "requirement_key": "FDA_524B_sec_3",
+      "urgency_tier": "urgent",
+      "hours_remaining": 36,
+      "description": "Exploited medical device CVE requires FDA 524B disclosure"
+    }
+  ]
+}
+```
+
+Returns `{"regulatory_deadlines": []}` when no simulation has run yet — never 404.
+
+**Urgency tiers:** `overdue` (past SLA), `urgent` (< 50% SLA remaining), `standard`, `monitor`.
+
+**Framework SLA hours:** CRA = 72h, FDA_524B = 120h, HIPAA = 1440h, NIST_800_53 = 168h.
+
+---
+
 ## Simulation API
 
 The simulation layer uses the **Complira Simulation Engine (CSE)** — an in-process,
@@ -177,9 +241,32 @@ HTTP client in Phase 5 Web UI. See `src/complira_graph/cse/` for the implementat
 ### `POST /v1/cse/simulations/create`
 
 Prepares and starts a CSE simulation run for the authenticated tenant.
-Reads the tenant's attack surface (CVEs + components) from ArangoDB, generates
-5 agent profiles (Attacker, SOCAnalyst, DevSecOps, CISO, Regulator), writes
-`simulation_config.json`, and launches the simulation subprocess.
+Reads the tenant's attack surface (CVEs + components) from ArangoDB, resolves ATT&CK
+techniques for each CVE via graph path (CVE→CWE→CAPEC→ATT&CK), generates agent profiles
+for all three simulation personas, writes `simulation_config.json`, and launches the
+simulation subprocess.
+
+**Technique resolution:** `TechniqueResolver` queries the graph for CVE→CWE→CAPEC→ATT&CK
+path. Falls back to a CVSS severity bucket if no graph path exists (critical: T1190/T1133/T1078,
+high: T1059/T1047/T1055, etc.). Resolved techniques stored in `entity_techniques` in the
+config and used by the Attacker agent for realistic technique diversity across the simulation.
+
+The simulation runs three concurrent asyncio coroutines in the subprocess:
+- **Attacker** — red team agent; follows a kill-chain phase machine (RECON→EXPLOITATION→LATERAL→ESCALATION→PIVOT); exploits CVEs with probabilistic success model; respects phase gates
+- **Defender** — blue team agent; monitors, detects, deploys controls, escalates to CISO; patches chain CVEs first; aligned heuristic fallback
+- **Regulator** — compliance auditor; audits vulnerabilities, issues compliance findings, files notifications
+
+**Probabilistic exploit model:** success probability = base (0.85 KEV / 0.60 non-KEV) adjusted by:
+monitoring_active (−0.15), detection_event (−0.20), general control deployed (−0.10),
+CVE-specific control (−0.20), no foothold (−0.10), repeated attempts (−0.10×n, capped −0.30).
+
+**Explainability outputs** written to ArangoDB after simulation completes:
+- `chain_narratives` — per-chain: entry point reasoning, technique, defender response, SOC blind spot explanation, single countermeasure
+- `counterfactuals` — what specific intervention would have broken each chain
+- `audit_trail` — chronological regulatory timeline with met/missed obligation status
+
+Compliance gaps recorded by the Regulator are persisted to `compliance_gaps.json` at subprocess
+exit and included in the simulation report (visible via `GET /v1/situation/reg_affairs`).
 
 **Request body:**
 ```json
@@ -204,9 +291,13 @@ Supported `trigger_type` values:
 
 ### `GET /v1/cse/simulations/{sim_id}/status`
 
-Polls live CSE run state for the authenticated tenant.
-Returns ArangoDB writeback data joined with run_state.json for round progress.
-Designed for 3-second polling from `SimulationLivePanel`.
+Polls live CSE run state. **Authentication optional** — the `sim_id` UUID acts as a
+capability token. Returns ArangoDB writeback data joined with `run_state.json` for round
+progress. Designed for 3-second polling from `SimulationLivePanel`.
+
+When the simulation is in-progress (not yet in DB), synthesises a `"status": "running"`
+response from disk if the sim directory exists. Returns `404` if neither DB nor disk has
+the run.
 
 **Response (200 OK):**
 ```json
@@ -231,6 +322,73 @@ Designed for 3-second polling from `SimulationLivePanel`.
 
 **Errors:**
 - `404` — run not found or belongs to a different tenant
+
+---
+
+### `GET /v1/cse/simulations/{sim_id}/stream`
+
+Server-Sent Events (SSE) stream of agent action events for the given simulation run.
+
+While the simulation is running, the endpoint tails `cyber_actions.jsonl` in real time
+(byte-offset polling, 0.5s interval). For already-completed runs it falls back to
+streaming stored `agent_action_logs` from ArangoDB.
+
+**Authentication:** None required — the `sim_id` UUID acts as a capability token.
+EventSource clients cannot set custom headers; the UUID provides sufficient access control.
+
+**Event format:**
+```
+data: {"round_no": 12, "agent_type": "Attacker", "action_type": "EXPLOIT_CVE", "outcome": "CVE exploited", "significance": 0.9, "timestamp": "2026-04-14T10:00:12Z"}
+
+data: {"round_no": 12, "agent_type": "Regulator", "action_type": "ISSUE_COMPLIANCE_FINDING", "outcome": "gap_recorded: CRA CRA_art_24", "significance": 0.8, "timestamp": "2026-04-14T10:00:13Z"}
+
+event: done
+data: {}
+```
+
+The `event: done` signal indicates the simulation has completed or failed. After receiving it,
+clients should fetch the final status from `GET /v1/cse/simulations/{sim_id}/status`.
+
+**Agent types streamed:** `Attacker`, `Defender`, `Regulator`
+
+**Safety timeout:** 300 seconds — stream closes with `event: done` if simulation hangs.
+
+**Errors:**
+- `404` — simulation not found or no stored events for completed run
+
+---
+
+### `GET /v1/cse/simulations/chains`
+
+Returns attack chain findings (with `chain_nodes` and `chain_edges`) from the most recently
+completed simulation run for the authenticated tenant. Used by the Situation Room CISO tab
+to render the D3.js fishbone attack chain visualisation.
+
+Never returns `404` — returns `{"run_id": null, "chains": []}` when no simulation has run.
+
+**Response (200 OK):**
+```json
+{
+  "run_id": "550e8400-e29b-41d4-a716-446655440000",
+  "chains": [
+    {
+      "finding_key": "chain_abc123",
+      "cve_id": "CVE-2021-44228",
+      "confidence": 0.91,
+      "soc_blind_spots": ["T1190"],
+      "chain_nodes": [
+        { "id": "n0", "node_type": "CVE", "label": "CVE-2021-44228", "severity": "critical" },
+        { "id": "n1", "node_type": "Technique", "label": "T1190\nExploit Public-Facing App", "severity": "high" },
+        { "id": "n2", "node_type": "Outcome", "label": "RCE / Initial Access", "severity": "critical" }
+      ],
+      "chain_edges": [
+        { "id": "e0-1", "source": "n0", "target": "n1", "probability": 0.91, "soc_threshold_miss": true },
+        { "id": "e1-2", "source": "n1", "target": "n2", "probability": 0.85, "soc_threshold_miss": false }
+      ]
+    }
+  ]
+}
+```
 
 ---
 

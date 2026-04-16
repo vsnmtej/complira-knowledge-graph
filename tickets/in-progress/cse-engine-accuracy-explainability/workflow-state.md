@@ -23,7 +23,7 @@
 | 6 | Source Implementation | Pending | — |
 | 7 | API/E2E Gate | Pass | 45 new ACs tests + 101 existing = 146 total, 0 failed. All S-A01–S-A20 covered. |
 | 8 | Code Review Gate | Pass | 10 files reviewed: 0 Blockers, 0 Majors, 1 Minor, 2 Nitpicks (both fixed). Gate: PASS |
-| 9 | Docs Sync | Pending | — |
+| 9 | Docs Sync | Pass | API_DOCUMENTATION.md updated: technique resolution, probabilistic model, explainability outputs, auth changes, new /chains endpoint |
 | 10 | Final Handoff | Pending | — |
 
 ## Issue Registry
