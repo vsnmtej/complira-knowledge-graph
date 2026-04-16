@@ -18,8 +18,8 @@
 | 1 | Investigation + Triage | Pass | investigation-notes.md written; 25-issue audit complete; scope = Large confirmed |
 | 2 | Requirements Refinement | Pass | requirements.md Design-ready; 9 accuracy ACs + 6 explainability ACs; 20 change items |
 | 3 | Design Basis | Pass | proposed-design.md v1 written; 5 ADs, all 20 change items architecturally covered |
-| 4 | Runtime Modeling | Pending | future-state-runtime-call-stack.md not yet written |
-| 5 | Review Gate | Pending | — |
+| 4 | Runtime Modeling | Pass | future-state-runtime-call-stack.md v1 written; 16 use cases covering all 20 change items |
+| 5 | Review Gate | In Progress | — |
 | 6 | Source Implementation | Pending | — |
 | 7 | API/E2E Gate | Pending | — |
 | 8 | Code Review Gate | Pending | — |
@@ -54,3 +54,5 @@
 | T-001 | 2026-04-16 | 0 | 1 | Investigation complete: 25-issue audit of all CSE files |
 | T-002 | 2026-04-16 | 1 | 2 | requirements.md Design-ready: 15 ACs, 20 change items |
 | T-003 | 2026-04-16 | 2 | 3 | proposed-design.md v1: 5 ADs, component designs, data flow, 20 test scenarios |
+| T-004 | 2026-04-16 | 3 | 4 | future-state-runtime-call-stack.md v1: 16 UCs, all 20 change items covered, cross-cutting get_state_snapshot() documented |
+| T-005 | 2026-04-16 | 4 | 5 | Advancing to Stage 5 review gate |
