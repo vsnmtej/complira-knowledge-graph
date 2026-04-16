@@ -1,0 +1,2529 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2865
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\froman\fcharset0 Times-Bold;\f1\froman\fcharset0 Times-Roman;\f2\froman\fcharset0 TimesNewRomanPSMT;
+\f3\fmodern\fcharset0 Courier;\f4\fmodern\fcharset0 Courier-Bold;\f5\fnil\fcharset0 Menlo-Regular;
+\f6\fnil\fcharset0 AppleColorEmoji;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;\red109\green109\blue109;}
+{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;\cssrgb\c50196\c50196\c50196;}
+{\*\listtable{\list\listtemplateid1\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid1\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid1}
+{\list\listtemplateid2\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid101\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid2}}
+{\*\listoverridetable{\listoverride\listid1\listoverridecount0\ls1}{\listoverride\listid2\listoverridecount0\ls2}}
+\paperw11900\paperh16840\margl1440\margr1440\vieww34360\viewh21680\viewkind0
+\deftab720
+\pard\pardeftab720\sa321\partightenfactor0
+
+\f0\b\fs48 \cf0 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Complira Knowledge Graph Engine \'97 Implementation Stack\
+\pard\pardeftab720\sa298\partightenfactor0
+
+\fs36 \cf0 Development & Production Stack\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\fs24 \cf0 Local dev:
+\f1\b0  macOS (Apple Silicon) 
+\f2 \uc0\u8594 
+\f1  
+\f0\b Production:
+\f1\b0  Single Linux VPS (Hetzner/OVH) or Docker on cloud\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 1. CORE RUNTIME\
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrt\brdrnil \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth1819\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth2127\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth8054\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+
+\fs24 \cf0 Layer\cell 
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+\cf0 Choice\cell 
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+\cf0 Why\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth1819\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth2127\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth8054\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Language
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Python 3.12+\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Ecosystem fit \'97 every data source has Python parsers, LLM SDKs are Python-first\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth1819\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth2127\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth8054\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 Package manager
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 uv
+\f1\fs24 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 10-100\'d7 faster than pip, built-in venv management, lockfile support, written in Rust\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth1819\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth2127\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth8054\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 Type checking
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Pydantic v2\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Data validation for every ingested record, JSON schema generation, serialization\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrt\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth1819\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth2127\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth8054\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 Async runtime
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 asyncio
+\f1\fs24  + 
+\f3\fs26 httpx
+\f1\fs24 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Concurrent API fetching across sources, httpx supports HTTP/2\cell \lastrow\row
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 Why 
+\f4\fs30\fsmilli15210 uv
+\f0\fs28  over pip/poetry/pdm\
+\pard\pardeftab720\partightenfactor0
+
+\f3\b0\fs26 \cf0 # Install uv\
+curl -LsSf https://astral.sh/uv/install.sh | sh\
+\
+# Initialize project\
+uv init complira-graph\
+cd complira-graph\
+uv add python-arango httpx pydantic tenacity structlog \\\
+       lxml pyyaml openpyxl gitpython pyrate-limiter \\\
+       prefect prometheus-client click rich\
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 uv
+\f1\fs24  resolves and installs the full dependency tree in ~2 seconds vs 30-60s for pip. It also handles Python version management (
+\f3\fs26 uv python install 3.12
+\f1\fs24 ), replacing pyenv.\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 2. DATABASE\
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrt\brdrnil \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth1433\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth3775\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth6293\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+
+\fs24 \cf0 Component\cell 
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+\cf0 Choice\cell 
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+\cf0 Why\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth1433\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth3775\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth6293\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Graph DB
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ArangoDB 3.12 (Community)\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Multi-model (document + graph + search), AQL is powerful, free\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth1433\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth3775\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth6293\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 Local install
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Docker (recommended)\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Clean isolation, matches production exactly\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth1433\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth3775\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth6293\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 Python driver
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 python-arango
+\f1\fs24  8.3+\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Official, maintained, excellent bulk APIs\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrt\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth1433\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth3775\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth6293\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 Backup
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 arangodump
+\f1\fs24  / 
+\f3\fs26 arangorestore
+\f1\fs24 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Built-in, consistent snapshots\cell \lastrow\row
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 Local ArangoDB Setup (Mac)\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\fs24 \cf0 Option A: Docker (recommended)
+\f1\b0 \
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 # docker-compose.yml handles everything \'97 see Section 8 below\
+docker compose up -d arangodb\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f0\b\fs24 \cf0 Option B: Homebrew (native, slightly faster)
+\f1\b0 \
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 brew install arangodb\
+# Config: /opt/homebrew/etc/arangodb3/arangod.conf\
+# Data: /opt/homebrew/var/lib/arangodb3\
+arangodb start\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 ArangoDB Configuration for Mac Development\
+\pard\pardeftab720\partightenfactor0
+
+\f3\b0\fs26 \cf0 # arangodb.conf tuning for 16-32 GB Mac\
+[rocksdb]\
+block-cache-size: 4294967296       # 4 GB \'97 leave room for OS + Python\
+write-buffer-size: 134217728       # 128 MB per buffer\
+max-write-buffer-number: 4\
+total-write-buffer-size: 536870912 # 512 MB total write buffers\
+max-background-jobs: 4             # Match performance cores\
+\
+[cache]\
+size: 1073741824                   # 1 GB for document/edge cache\
+\
+[server]\
+endpoint: tcp://127.0.0.1:8529\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 Production ArangoDB (single server is sufficient for this scale)\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\partightenfactor0
+\ls1\ilvl0
+\fs24 \cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Hetzner AX52
+\f1\b0 : AMD Ryzen 7 7700, 64 GB RAM, 2\'d7 1 TB NVMe \'97 \'8073/month\
+\ls1\ilvl0
+\f0\b \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 OVH Rise-1
+\f1\b0 : Intel i9-13900K, 64 GB RAM, 2\'d7 1 TB NVMe \'97 \'8090/month\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\partightenfactor0
+\ls1\ilvl0\cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Either handles 10M nodes + 28M edges with room to grow to 100M+\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 3. ORCHESTRATION & SCHEDULING\
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrt\brdrnil \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2152\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth3012\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth5958\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+
+\fs24 \cf0 Component\cell 
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+\cf0 Choice\cell 
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+\cf0 Why\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2152\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth3012\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth5958\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Task orchestration
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Prefect 3.x (self-hosted)\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Python-native, cron scheduling, retry logic, free UI dashboard\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2152\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth3012\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth5958\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 Alternative (simpler)
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 APScheduler 3.x + SQLite\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Zero infrastructure, good enough for <20 agents\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrt\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2152\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth3012\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth5958\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 Process manager
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 systemd (prod) / launchd (mac)\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Auto-restart on crash\cell \lastrow\row
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 Why Prefect over Celery/Airflow/Temporal\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\partightenfactor0
+\ls2\ilvl0
+\fs24 \cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 vs Celery
+\f1\b0 : No Redis/RabbitMQ dependency, better observability, native Python async\
+\ls2\ilvl0
+\f0\b \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 vs Airflow
+\f1\b0 : No heavy Java-based scheduler, simpler deployment, faster iteration\
+\ls2\ilvl0
+\f0\b \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 vs Temporal
+\f1\b0 : Overkill for batch ETL, complex Go/Java infrastructure\
+\ls2\ilvl0
+\f0\b \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 vs APScheduler
+\f1\b0 : Prefect adds UI, flow visualization, alerting \'97 worth it at 20+ agents\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 Prefect Architecture\
+\pard\pardeftab720\partightenfactor0
+
+\f5\b0\fs26 \cf0 \uc0\u9484 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9488 
+\f3 \
+
+\f5 \uc0\u9474 
+\f3   Prefect Server (self-hosted, Docker)       
+\f5 \uc0\u9474 
+\f3 \
+
+\f5 \uc0\u9474 
+\f3   
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  API server (FastAPI)                   
+\f5 \uc0\u9474 
+\f3 \
+
+\f5 \uc0\u9474 
+\f3   
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  UI dashboard (React) 
+\f5 \uc0\u8594 
+\f3  localhost:4200  
+\f5 \uc0\u9474 
+\f3 \
+
+\f5 \uc0\u9474 
+\f3   
+\f5 \uc0\u9492 \u9472 \u9472 
+\f3  PostgreSQL (metadata)                  
+\f5 \uc0\u9474 
+\f3 \
+
+\f5 \uc0\u9492 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9516 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9496 
+\f3 \
+               
+\f5 \uc0\u9474 
+\f3 \
+
+\f5 \uc0\u9484 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9660 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9488 
+\f3 \
+
+\f5 \uc0\u9474 
+\f3   Prefect Worker (your Mac / prod server)    
+\f5 \uc0\u9474 
+\f3 \
+
+\f5 \uc0\u9474 
+\f3   
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  NVD Agent         (every 2 hours)      
+\f5 \uc0\u9474 
+\f3 \
+
+\f5 \uc0\u9474 
+\f3   
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  EPSS Agent        (daily 01:00)        
+\f5 \uc0\u9474 
+\f3 \
+
+\f5 \uc0\u9474 
+\f3   
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  KEV Agent         (hourly)             
+\f5 \uc0\u9474 
+\f3 \
+
+\f5 \uc0\u9474 
+\f3   
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  OSV Agent         (daily 02:00)        
+\f5 \uc0\u9474 
+\f3 \
+
+\f5 \uc0\u9474 
+\f3   
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  ATT&CK Agent      (weekly Monday)      
+\f5 \uc0\u9474 
+\f3 \
+
+\f5 \uc0\u9474 
+\f3   
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  CAPEC Agent       (weekly Monday)      
+\f5 \uc0\u9474 
+\f3 \
+
+\f5 \uc0\u9474 
+\f3   
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  CWE Agent         (weekly check)       
+\f5 \uc0\u9474 
+\f3 \
+
+\f5 \uc0\u9474 
+\f3   
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  Nuclei Agent      (daily 03:00)        
+\f5 \uc0\u9474 
+\f3 \
+
+\f5 \uc0\u9474 
+\f3   
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  ExploitDB Agent   (daily 03:30)        
+\f5 \uc0\u9474 
+\f3 \
+
+\f5 \uc0\u9474 
+\f3   
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  Metasploit Agent  (daily 04:00)        
+\f5 \uc0\u9474 
+\f3 \
+
+\f5 \uc0\u9474 
+\f3   
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  OSCAL Agent       (monthly)            
+\f5 \uc0\u9474 
+\f3 \
+
+\f5 \uc0\u9474 
+\f3   
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  SCF Agent         (monthly)            
+\f5 \uc0\u9474 
+\f3 \
+
+\f5 \uc0\u9474 
+\f3   
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  D3FEND Agent      (weekly)             
+\f5 \uc0\u9474 
+\f3 \
+
+\f5 \uc0\u9474 
+\f3   
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  ATLAS Agent       (monthly)            
+\f5 \uc0\u9474 
+\f3 \
+
+\f5 \uc0\u9474 
+\f3   
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  VulnCheck Agent   (daily)              
+\f5 \uc0\u9474 
+\f3 \
+
+\f5 \uc0\u9474 
+\f3   
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  GHSA Agent        (daily)              
+\f5 \uc0\u9474 
+\f3 \
+
+\f5 \uc0\u9474 
+\f3   
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  EPSS History Agent(daily)              
+\f5 \uc0\u9474 
+\f3 \
+
+\f5 \uc0\u9474 
+\f3   
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  EOL Agent         (weekly)             
+\f5 \uc0\u9474 
+\f3 \
+
+\f5 \uc0\u9474 
+\f3   
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  SPDX Agent        (monthly)            
+\f5 \uc0\u9474 
+\f3 \
+
+\f5 \uc0\u9474 
+\f3   
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  PoC-in-GitHub Agent(daily)             
+\f5 \uc0\u9474 
+\f3 \
+
+\f5 \uc0\u9474 
+\f3   
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  OpenCRE Agent     (monthly)            
+\f5 \uc0\u9474 
+\f3 \
+
+\f5 \uc0\u9474 
+\f3   
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  CTID Agent        (quarterly)          
+\f5 \uc0\u9474 
+\f3 \
+
+\f5 \uc0\u9474 
+\f3   
+\f5 \uc0\u9492 \u9472 \u9472 
+\f3  Deps.dev Agent    (weekly)             
+\f5 \uc0\u9474 
+\f3 \
+
+\f5 \uc0\u9474 
+\f3                                               
+\f5 \uc0\u9474 
+\f3 \
+
+\f5 \uc0\u9474 
+\f3   Seed Orchestrator (initial load DAG)        
+\f5 \uc0\u9474 
+\f3 \
+
+\f5 \uc0\u9474 
+\f3   
+\f5 \uc0\u9492 \u9472 \u9472 
+\f3  Runs all agents in dependency order     
+\f5 \uc0\u9474 
+\f3 \
+
+\f5 \uc0\u9492 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9496 
+\f3 \
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 Simpler Alternative: APScheduler (for early development)\
+\pard\pardeftab720\partightenfactor0
+
+\f3\b0\fs26 \cf0 # If you want to start simple and graduate to Prefect later\
+from apscheduler.schedulers.background import BackgroundScheduler\
+from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore\
+\
+scheduler = BackgroundScheduler(\
+    jobstores=\{"default": SQLAlchemyJobStore(url="sqlite:///jobs.db")\},\
+    job_defaults=\{"coalesce": True, "max_instances": 1\},\
+)\
+scheduler.add_job(kev_agent.run, "interval", hours=1, id="kev")\
+scheduler.add_job(epss_agent.run, "cron", hour=1, id="epss")\
+scheduler.add_job(nvd_agent.run, "interval", hours=2, id="nvd")\
+scheduler.start()\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs24 \cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 4. PROJECT STRUCTURE\
+\pard\pardeftab720\partightenfactor0
+
+\f3\b0\fs26 \cf0 complira-graph/\
+
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  pyproject.toml                 # uv project config\
+
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  uv.lock                        # Lockfile\
+
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  docker-compose.yml             # ArangoDB + Prefect + Prometheus + Grafana\
+
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  .env                           # Secrets (NVD_API_KEY, GITHUB_TOKEN, etc.)\
+
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  .env.example                   # Template without secrets\
+
+\f5 \uc0\u9474 
+\f3 \
+
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  src/\
+
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9492 \u9472 \u9472 
+\f3  complira_graph/\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  __init__.py\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  cli.py                 # Click CLI: seed, update, status, validate\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  config.py              # Settings via Pydantic BaseSettings + .env\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  db.py                  # ArangoDB connection, collection setup, bulk ops\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  models/                # Pydantic models matching schema collections\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  __init__.py\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  vulnerability.py   # Vulnerability, EPSSScore, KEVEntry, etc.\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  weakness.py        # Weakness (CWE)\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  component.py       # Component, CPEEntry, License, PackageHealth\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  threat.py          # ATTACKTechnique, CAPEC, ATLAS, D3FEND\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  compliance.py      # RegulatoryRequirement, OSCALControl, SCF\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  exploit.py         # ExploitModule (MSF, EDB, Nuclei, PoC)\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9492 \u9472 \u9472 
+\f3  edges.py           # All edge models with _from/_to validation\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9474 
+\f3 \
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  agents/                # One agent per data source\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  __init__.py\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  base.py            # BaseIngestionAgent ABC\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  nvd.py             # NVD API 2.0\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  osv.py             # OSV.dev (GCS bulk + API)\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  cisa_kev.py        # CISA KEV JSON feed\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  epss.py            # FIRST.org EPSS daily CSV\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  vulncheck.py       # VulnCheck v3 API\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  ghsa.py            # GitHub Advisory Database\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  cwe.py             # CWE XML parser\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  capec.py           # CAPEC XML parser\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  attack.py          # ATT&CK STIX 2.1 parser\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  d3fend.py          # D3FEND REST API\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  atlas.py           # ATLAS YAML parser\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  ctid.py            # CTID ATT&CK
+\f5 \uc0\u8594 
+\f3 800-53 STIX mappings\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  oscal.py           # NIST OSCAL SP 800-53 JSON\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  scf.py             # SCF Excel parser (openpyxl)\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  opencre.py         # OpenCRE REST API\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  nuclei.py          # Nuclei templates YAML (git-based)\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  exploitdb.py       # ExploitDB CSV (git-based)\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  metasploit.py      # Metasploit metadata JSON (git-based)\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  poc_github.py      # PoC-in-GitHub JSON (git-based)\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  eol.py             # endoflife.date API\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  spdx_licenses.py   # SPDX License List JSON\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  osadl.py           # OSADL compatibility matrix\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  deps_dev.py        # deps.dev API\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9492 \u9472 \u9472 
+\f3  redhat.py          # Red Hat Security Data API\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9474 
+\f3 \
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  orchestrator/          # DAG execution engine\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  __init__.py\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  dag.py             # TopologicalSorter wrapper\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  seed.py            # Full initial seed flow\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9492 \u9472 \u9472 
+\f3  schedules.py       # Prefect deployment definitions\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9474 
+\f3 \
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  transforms/            # Data transformation utilities\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  __init__.py\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  keys.py            # Deterministic _key generation\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  stix.py            # STIX 2.1 
+\f5 \uc0\u8594 
+\f3  ArangoDB document converter\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  xml_parser.py      # lxml iterparse helpers\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9492 \u9472 \u9472 
+\f3  normalize.py       # PURL/CPE/CVE normalization\
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9474 
+\f3 \
+
+\f5 \uc0\u9474 
+\f3        
+\f5 \uc0\u9492 \u9472 \u9472 
+\f3  monitoring/            # Observability\
+
+\f5 \uc0\u9474 
+\f3            
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  __init__.py\
+
+\f5 \uc0\u9474 
+\f3            
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  metrics.py         # Prometheus metrics definitions\
+
+\f5 \uc0\u9474 
+\f3            
+\f5 \uc0\u9492 \u9472 \u9472 
+\f3  health.py          # Health check endpoints\
+
+\f5 \uc0\u9474 
+\f3 \
+
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  tests/                         # pytest test suite\
+
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  conftest.py                # Fixtures: test ArangoDB, mock APIs\
+
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  test_agents/               # One test file per agent\
+
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  test_transforms/\
+
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9492 \u9472 \u9472 
+\f3  test_integration/          # End-to-end with real ArangoDB\
+
+\f5 \uc0\u9474 
+\f3 \
+
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  scripts/\
+
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  setup_db.sh                # Create collections, indexes, graphs\
+
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9492 \u9472 \u9472 
+\f3  benchmark.sh               # Load testing\
+
+\f5 \uc0\u9474 
+\f3 \
+
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  config/\
+
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  agents.yaml                # Agent configurations\
+
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  schedules.yaml             # Cron schedules per agent\
+
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  indexes.yaml               # ArangoDB index definitions\
+
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9492 \u9472 \u9472 
+\f3  graphs.yaml                # Named graph definitions\
+
+\f5 \uc0\u9474 
+\f3 \
+
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  data/                          # Local cache (gitignored)\
+
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  git_repos/                 # Cloned repos (nuclei, exploitdb, etc.)\
+
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  downloads/                 # CSV/JSON/XML downloads\
+
+\f5 \uc0\u9474 
+\f3    
+\f5 \uc0\u9492 \u9472 \u9472 
+\f3  checkpoints/               # Last-processed timestamps per agent\
+
+\f5 \uc0\u9474 
+\f3 \
+
+\f5 \uc0\u9492 \u9472 \u9472 
+\f3  docs/\
+    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  ARCHITECTURE.md\
+    
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  ADDING_NEW_AGENT.md\
+    
+\f5 \uc0\u9492 \u9472 \u9472 
+\f3  RUNBOOK.md\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs24 \cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 5. CORE ABSTRACTIONS\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\fs28 \cf0 BaseIngestionAgent\
+\pard\pardeftab720\partightenfactor0
+
+\f3\b0\fs26 \cf0 # src/complira_graph/agents/base.py\
+from abc import ABC, abstractmethod\
+from dataclasses import dataclass, field\
+from datetime import datetime\
+from typing import Any\
+import structlog\
+from tenacity import retry, wait_exponential_jitter, stop_after_attempt\
+from prometheus_client import Counter, Histogram, Gauge\
+\
+logger = structlog.get_logger()\
+\
+@dataclass\
+class IngestionResult:\
+    source: str\
+    documents_upserted: int = 0\
+    edges_upserted: int = 0\
+    documents_skipped: int = 0\
+    errors: int = 0\
+    duration_seconds: float = 0.0\
+    checkpoint: str | None = None  # Last-processed marker\
+    version: str | None = None     # Source data version\
+\
+RECORDS_TOTAL = Counter("ingestion_records_total", "Records processed", ["source", "operation"])\
+DURATION = Histogram("ingestion_duration_seconds", "Ingestion duration", ["source"])\
+ERRORS = Counter("ingestion_errors_total", "Ingestion errors", ["source"])\
+LAST_SUCCESS = Gauge("ingestion_last_success_timestamp", "Last successful ingestion", ["source"])\
+\
+\
+class BaseIngestionAgent(ABC):\
+    """Base class for all data source ingestion agents."""\
+\
+    def __init__(self, db, config: dict):\
+        self.db = db          # ArangoDB database handle\
+        self.config = config  # Agent-specific config from agents.yaml\
+        self.log = logger.bind(agent=self.name)\
+\
+    @property\
+    @abstractmethod\
+    def name(self) -> str:\
+        """Unique agent identifier (e.g., 'nvd', 'epss', 'attack')."""\
+        ...\
+\
+    @property\
+    @abstractmethod\
+    def dependencies(self) -> list[str]:\
+        """Agent names that must complete before this one (for DAG ordering)."""\
+        ...\
+\
+    @abstractmethod\
+    async def check_for_updates(self) -> bool:\
+        """Return True if source has new data since last ingestion."""\
+        ...\
+\
+    @abstractmethod\
+    async def fetch_data(self) -> Any:\
+        """Fetch raw data from source (API, file download, git pull)."""\
+        ...\
+\
+    @abstractmethod\
+    def transform(self, raw_data: Any) -> tuple[list[dict], list[dict]]:\
+        """Transform raw data 
+\f5 \uc0\u8594 
+\f3  (documents, edges) with deterministic _key values."""\
+        ...\
+\
+    def load(self, documents: list[dict], edges: list[dict]) -> IngestionResult:\
+        """Bulk upsert documents and edges into ArangoDB."""\
+        result = IngestionResult(source=self.name)\
+\
+        for collection_name, batch in self._group_by_collection(documents):\
+            coll = self.db.collection(collection_name)\
+            stats = coll.import_bulk(\
+                batch,\
+                on_duplicate="update",\
+                halt_on_error=False,\
+            )\
+            result.documents_upserted += stats.get("created", 0) + stats.get("updated", 0)\
+            result.errors += stats.get("errors", 0)\
+\
+        for collection_name, batch in self._group_by_collection(edges):\
+            coll = self.db.collection(collection_name)\
+            stats = coll.import_bulk(\
+                batch,\
+                on_duplicate="update",\
+                halt_on_error=False,\
+            )\
+            result.edges_upserted += stats.get("created", 0) + stats.get("updated", 0)\
+            result.errors += stats.get("errors", 0)\
+\
+        return result\
+\
+    @retry(\
+        wait=wait_exponential_jitter(initial=1, max=60),\
+        stop=stop_after_attempt(3),\
+        reraise=True,\
+    )\
+    async def run(self) -> IngestionResult:\
+        """Full ingestion cycle: check 
+\f5 \uc0\u8594 
+\f3  fetch 
+\f5 \uc0\u8594 
+\f3  transform 
+\f5 \uc0\u8594 
+\f3  load."""\
+        start = datetime.utcnow()\
+        self.log.info("starting_ingestion")\
+\
+        has_updates = await self.check_for_updates()\
+        if not has_updates:\
+            self.log.info("no_updates_found")\
+            return IngestionResult(source=self.name)\
+\
+        raw_data = await self.fetch_data()\
+        documents, edges = self.transform(raw_data)\
+        result = self.load(documents, edges)\
+\
+        result.duration_seconds = (datetime.utcnow() - start).total_seconds()\
+        self._save_checkpoint(result.checkpoint)\
+        self._emit_metrics(result)\
+        self.log.info("ingestion_complete", **result.__dict__)\
+        return result\
+\
+    def _group_by_collection(self, records: list[dict]):\
+        """Group records by their '_collection' field for batch loading."""\
+        from itertools import groupby\
+        from operator import itemgetter\
+        sorted_records = sorted(records, key=itemgetter("_collection"))\
+        for collection_name, group in groupby(sorted_records, key=itemgetter("_collection")):\
+            batch = [\{k: v for k, v in r.items() if k != "_collection"\} for r in group]\
+            yield collection_name, batch\
+\
+    def _save_checkpoint(self, checkpoint: str | None):\
+        """Persist last-processed marker to disk."""\
+        if checkpoint:\
+            import json\
+            from pathlib import Path\
+            cp_dir = Path("data/checkpoints")\
+            cp_dir.mkdir(parents=True, exist_ok=True)\
+            (cp_dir / f"\{self.name\}.json").write_text(\
+                json.dumps(\{"checkpoint": checkpoint, "timestamp": datetime.utcnow().isoformat()\})\
+            )\
+\
+    def _load_checkpoint(self) -> str | None:\
+        """Load last-processed marker from disk."""\
+        import json\
+        from pathlib import Path\
+        cp_file = Path(f"data/checkpoints/\{self.name\}.json")\
+        if cp_file.exists():\
+            return json.loads(cp_file.read_text()).get("checkpoint")\
+        return None\
+\
+    def _emit_metrics(self, result: IngestionResult):\
+        RECORDS_TOTAL.labels(source=self.name, operation="upsert").inc(\
+            result.documents_upserted + result.edges_upserted\
+        )\
+        ERRORS.labels(source=self.name).inc(result.errors)\
+        DURATION.labels(source=self.name).observe(result.duration_seconds)\
+        LAST_SUCCESS.labels(source=self.name).set_to_current_time()\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 Example Agent: EPSS (simplest \'97 daily CSV bulk replace)\
+\pard\pardeftab720\partightenfactor0
+
+\f3\b0\fs26 \cf0 # src/complira_graph/agents/epss.py\
+import csv\
+import gzip\
+import io\
+from datetime import date, timedelta\
+import httpx\
+from .base import BaseIngestionAgent\
+\
+class EPSSAgent(BaseIngestionAgent):\
+    name = "epss"\
+    dependencies = []  # No dependencies \'97 can run independently\
+\
+    async def check_for_updates(self) -> bool:\
+        """EPSS updates daily \'97 check if today's file exists."""\
+        today = date.today().isoformat()\
+        last = self._load_checkpoint()\
+        return last != today\
+\
+    async def fetch_data(self):\
+        """Download today's EPSS CSV (gzipped, ~6.7 MB)."""\
+        today = date.today().isoformat()\
+        url = f"https://epss.empiricalsecurity.com/epss_scores-\{today\}.csv.gz"\
+        async with httpx.AsyncClient(timeout=60) as client:\
+            resp = await client.get(url)\
+            if resp.status_code == 404:\
+                # Today's file not ready yet \'97 try yesterday\
+                yesterday = (date.today() - timedelta(days=1)).isoformat()\
+                url = f"https://epss.empiricalsecurity.com/epss_scores-\{yesterday\}.csv.gz"\
+                resp = await client.get(url)\
+            resp.raise_for_status()\
+            return gzip.decompress(resp.content).decode("utf-8"), today\
+\
+    def transform(self, raw_data):\
+        csv_text, score_date = raw_data\
+        documents = []\
+        edges = []\
+\
+        reader = csv.DictReader(io.StringIO(csv_text))\
+        for row in reader:\
+            cve_id = row["cve"]\
+            epss = float(row["epss"])\
+            percentile = float(row["percentile"])\
+            cve_key = cve_id.replace("-", "_")\
+\
+            # Update EPSS fields directly on vulnerability node\
+            documents.append(\{\
+                "_collection": "vulnerabilities",\
+                "_key": cve_key,\
+                "epss_score": epss,\
+                "epss_percentile": percentile,\
+                "epss_date": score_date,\
+            \})\
+\
+            # Also store in history for time-series analysis\
+            history_key = f"\{cve_key\}_\{score_date.replace('-', '')\}"\
+            documents.append(\{\
+                "_collection": "epss_history",\
+                "_key": history_key,\
+                "cve_id": cve_id,\
+                "date": score_date,\
+                "epss": epss,\
+                "percentile": percentile,\
+            \})\
+\
+        return documents, edges\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 Example Agent: CWE (XML parsing with lxml iterparse)\
+\pard\pardeftab720\partightenfactor0
+
+\f3\b0\fs26 \cf0 # src/complira_graph/agents/cwe.py\
+import io\
+import zipfile\
+import httpx\
+from lxml import etree\
+from .base import BaseIngestionAgent\
+\
+NS = "http://cwe.mitre.org/cwe-7"\
+\
+class CWEAgent(BaseIngestionAgent):\
+    name = "cwe"\
+    dependencies = []  # CWE is a root dependency \'97 others depend on it\
+\
+    async def check_for_updates(self) -> bool:\
+        """Compare stored version against current CWE XML version."""\
+        async with httpx.AsyncClient(timeout=120) as client:\
+            resp = await client.get("https://cwe.mitre.org/data/xml/cwec_latest.xml.zip")\
+            resp.raise_for_status()\
+            with zipfile.ZipFile(io.BytesIO(resp.content)) as zf:\
+                xml_filename = zf.namelist()[0]\
+                with zf.open(xml_filename) as f:\
+                    # Read just enough to get version from root element\
+                    for event, elem in etree.iterparse(f, events=("start",)):\
+                        version = elem.get("Version")\
+                        self._raw_zip = resp.content  # Cache for fetch\
+                        return version != self._load_checkpoint()\
+\
+    async def fetch_data(self):\
+        """Return cached ZIP content (already downloaded in check)."""\
+        return self._raw_zip\
+\
+    def transform(self, raw_data):\
+        documents = []\
+        edges = []\
+        version = None\
+\
+        with zipfile.ZipFile(io.BytesIO(raw_data)) as zf:\
+            xml_filename = zf.namelist()[0]\
+            with zf.open(xml_filename) as f:\
+                context = etree.iterparse(f, events=("end",), tag=f"\{\{\{NS\}\}\}Weakness")\
+                for event, elem in context:\
+                    if version is None:\
+                        version = elem.getparent().get("Version")\
+\
+                    cwe_id = f"CWE-\{elem.get('ID')\}"\
+                    key = cwe_id.replace("-", "_")\
+\
+                    doc = \{\
+                        "_collection": "weaknesses",\
+                        "_key": key,\
+                        "cwe_id": cwe_id,\
+                        "name": elem.get("Name"),\
+                        "abstraction": elem.get("Abstraction"),\
+                        "status": elem.get("Status"),\
+                        "description": self._get_text(elem, f"\{\{\{NS\}\}\}Description"),\
+                        "likelihood_of_exploit": self._get_text(\
+                            elem, f"\{\{\{NS\}\}\}Likelihood_Of_Exploit"\
+                        ),\
+                    \}\
+\
+                    # Extract IEC 62443 taxonomy mappings\
+                    for mapping in elem.findall(\
+                        f".//\{\{\{NS\}\}\}Taxonomy_Mapping[@Taxonomy_Name='ISA/IEC 62443']"\
+                    ):\
+                        entry_id = self._get_text(mapping, f"\{\{\{NS\}\}\}Entry_ID")\
+                        if entry_id:\
+                            edges.append(\{\
+                                "_collection": "maps_to_requirement",\
+                                "_key": f"\{key\}_iec62443_\{entry_id.replace('.', '_')\}",\
+                                "_from": f"weaknesses/\{key\}",\
+                                "_to": f"regulatory_requirements/IEC_62443_\{entry_id.replace('.', '_')\}",\
+                                "source": "cwe_taxonomy",\
+                            \})\
+\
+                    # Parent CWE edges (ChildOf relationships)\
+                    for rel in elem.findall(\
+                        f".//\{\{\{NS\}\}\}Related_Weakness[@Nature='ChildOf']"\
+                    ):\
+                        parent_id = rel.get("CWE_ID")\
+                        parent_key = f"CWE_\{parent_id\}"\
+                        edges.append(\{\
+                            "_collection": "has_weakness",\
+                            "_key": f"\{key\}_child_of_\{parent_key\}",\
+                            "_from": f"weaknesses/\{key\}",\
+                            "_to": f"weaknesses/\{parent_key\}",\
+                            "type": "ChildOf",\
+                            "source": "cwe",\
+                        \})\
+\
+                    documents.append(doc)\
+\
+                    # Memory management: clear processed element\
+                    elem.clear()\
+                    while elem.getprevious() is not None:\
+                        del elem.getparent()[0]\
+\
+        return documents, edges\
+\
+    def _get_text(self, elem, tag):\
+        child = elem.find(tag)\
+        return child.text if child is not None else None\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 Example Agent: ATT&CK STIX (git-based with diff detection)\
+\pard\pardeftab720\partightenfactor0
+
+\f3\b0\fs26 \cf0 # src/complira_graph/agents/attack.py\
+import json\
+from pathlib import Path\
+import httpx\
+from .base import BaseIngestionAgent\
+\
+STIX_URL = (\
+    "https://raw.githubusercontent.com/mitre-attack/attack-stix-data"\
+    "/master/enterprise-attack/enterprise-attack.json"\
+)\
+\
+class ATTACKAgent(BaseIngestionAgent):\
+    name = "attack"\
+    dependencies = []  # ATT&CK is root \'97 CAPEC and D3FEND depend on it\
+\
+    async def check_for_updates(self) -> bool:\
+        """Check ATT&CK version via STIX bundle x-mitre-collection."""\
+        async with httpx.AsyncClient(timeout=120) as client:\
+            # Just fetch the index to check version without downloading full bundle\
+            resp = await client.get(\
+                "https://raw.githubusercontent.com/mitre-attack/attack-stix-data"\
+                "/master/index.json"\
+            )\
+            resp.raise_for_status()\
+            index = resp.json()\
+            # Latest enterprise version\
+            latest = index["collections"][0]["versions"][-1]["version"]\
+            return latest != self._load_checkpoint()\
+\
+    async def fetch_data(self):\
+        """Download full STIX 2.1 bundle (~25 MB)."""\
+        async with httpx.AsyncClient(timeout=180) as client:\
+            resp = await client.get(STIX_URL)\
+            resp.raise_for_status()\
+            return resp.json()\
+\
+    def transform(self, bundle: dict):\
+        documents = []\
+        edges = []\
+        version = None\
+\
+        for obj in bundle.get("objects", []):\
+            obj_type = obj.get("type")\
+\
+            if obj_type == "x-mitre-collection":\
+                version = obj.get("x_mitre_version")\
+\
+            elif obj_type == "attack-pattern":\
+                # Techniques and sub-techniques\
+                ext = obj.get("external_references", [])\
+                tech_ref = next((r for r in ext if r.get("source_name") == "mitre-attack"), None)\
+                if not tech_ref:\
+                    continue\
+\
+                tech_id = tech_ref["external_id"]\
+                key = tech_id.replace(".", "_")\
+                is_sub = obj.get("x_mitre_is_subtechnique", False)\
+\
+                # Extract tactic names from kill_chain_phases\
+                tactics = [\
+                    p["phase_name"] for p in obj.get("kill_chain_phases", [])\
+                    if p.get("kill_chain_name") == "mitre-attack"\
+                ]\
+\
+                documents.append(\{\
+                    "_collection": "attack_techniques",\
+                    "_key": key,\
+                    "technique_id": tech_id,\
+                    "name": obj.get("name"),\
+                    "description": obj.get("description", ""),\
+                    "is_subtechnique": is_sub,\
+                    "tactic_names": tactics,\
+                    "platforms": obj.get("x_mitre_platforms", []),\
+                    "deprecated": obj.get("x_mitre_deprecated", False),\
+                    "stix_id": obj["id"],\
+                    "mitre_version": version,\
+                    "domain": "enterprise-attack",\
+                \})\
+\
+            elif obj_type == "relationship":\
+                src_ref = obj.get("source_ref", "")\
+                tgt_ref = obj.get("target_ref", "")\
+                rel_type = obj.get("relationship_type", "")\
+\
+                # We'll resolve STIX IDs to _keys in a post-processing step\
+                # Store raw relationships for now\
+                edges.append(\{\
+                    "_collection": "_stix_relationships",  # Temporary staging\
+                    "source_stix_id": src_ref,\
+                    "target_stix_id": tgt_ref,\
+                    "relationship_type": rel_type,\
+                    "description": obj.get("description", ""),\
+                \})\
+\
+            elif obj_type == "intrusion-set":\
+                ext = obj.get("external_references", [])\
+                group_ref = next((r for r in ext if r.get("source_name") == "mitre-attack"), None)\
+                if not group_ref:\
+                    continue\
+\
+                group_id = group_ref["external_id"]\
+                documents.append(\{\
+                    "_collection": "threat_groups",\
+                    "_key": group_id,\
+                    "group_id": group_id,\
+                    "name": obj.get("name"),\
+                    "aliases": obj.get("aliases", []),\
+                    "description": obj.get("description", ""),\
+                \})\
+\
+        return documents, edges\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 Deterministic Key Generation\
+\pard\pardeftab720\partightenfactor0
+
+\f3\b0\fs26 \cf0 # src/complira_graph/transforms/keys.py\
+import re\
+\
+def cve_key(cve_id: str) -> str:\
+    """CVE-2024-1234 
+\f5 \uc0\u8594 
+\f3  CVE_2024_1234"""\
+    return cve_id.replace("-", "_")\
+\
+def cwe_key(cwe_id: str) -> str:\
+    """CWE-79 
+\f5 \uc0\u8594 
+\f3  CWE_79"""\
+    return cwe_id.replace("-", "_")\
+\
+def purl_key(purl: str) -> str:\
+    """pkg:pypi/requests@2.31.0 
+\f5 \uc0\u8594 
+\f3  pkg_pypi_requests_2_31_0"""\
+    return re.sub(r"[^a-zA-Z0-9]", "_", purl).strip("_")\
+\
+def attack_key(technique_id: str) -> str:\
+    """T1059.001 
+\f5 \uc0\u8594 
+\f3  T1059_001"""\
+    return technique_id.replace(".", "_")\
+\
+def capec_key(capec_id: str) -> str:\
+    """CAPEC-66 
+\f5 \uc0\u8594 
+\f3  CAPEC_66"""\
+    return capec_id.replace("-", "_")\
+\
+def edge_key(from_key: str, rel: str, to_key: str) -> str:\
+    """Deterministic edge key from components."""\
+    return f"\{from_key\}_\{rel\}_\{to_key\}"\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs24 \cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 6. DATABASE SETUP\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\fs28 \cf0 Collection & Index Creation Script\
+\pard\pardeftab720\partightenfactor0
+
+\f3\b0\fs26 \cf0 # src/complira_graph/db.py\
+from python_arango import ArangoClient\
+import yaml\
+\
+def setup_database(config):\
+    """Create all collections, indexes, and named graphs."""\
+    client = ArangoClient(hosts=config.arango_url)\
+    sys_db = client.db("_system", username=config.arango_user, password=config.arango_pass)\
+\
+    if not sys_db.has_database("complira"):\
+        sys_db.create_database("complira")\
+\
+    db = client.db("complira", username=config.arango_user, password=config.arango_pass)\
+\
+    # Document collections\
+    DOC_COLLECTIONS = [\
+        "vulnerabilities", "weaknesses", "kev_entries", "vulncheck_kev_entries",\
+        "exploit_modules", "epss_history", "attack_techniques", "attack_patterns",\
+        "atlas_techniques", "d3fend_techniques", "threat_groups",\
+        "regulatory_requirements", "oscal_controls", "scf_controls", "opencre_nodes",\
+        "components", "cpe_entries", "scorecard_results", "licenses", "package_health",\
+        "tool_runs", "binary_hardening_profiles", "sbom_artifacts", "code_metrics",\
+        "sast_findings", "dast_findings", "secret_findings", "license_findings",\
+        "remediation_tickets", "code_changes", "scan_results", "compliance_events",\
+        "generated_documents", "document_claims", "evidence_chains", "llm_enrichments",\
+    ]\
+\
+    EDGE_COLLECTIONS = [\
+        "has_weakness", "exploited_in_wild", "has_exploit", "aliases", "affects",\
+        "has_epss_history", "technique_exploits_weakness", "capec_relates_to_cwe",\
+        "capec_maps_to_attack", "technique_mitigated_by_control",\
+        "atlas_maps_to_attack", "d3fend_counters_technique",\
+        "maps_to_requirement", "cross_framework_mapping", "opencre_links",\
+        "depends_on", "matched_by_cpe", "same_as", "scored_by", "licensed_under",\
+        "generated_by_tool", "has_hardening_profile", "sbom_contains",\
+        "found_in_component", "classified_as_weakness", "has_code_metrics",\
+        "triggers_classification", "vuln_assertion", "known_vulnerable_at_build",\
+        "violates_requirement", "tracked_by", "resolved_by", "verified_by",\
+        "modifies_component", "reviewed_by", "triggered_compliance_event",\
+        "supported_by", "contains_claim", "evidence_chain_link", "enriched_by_llm",\
+    ]\
+\
+    for name in DOC_COLLECTIONS:\
+        if not db.has_collection(name):\
+            db.create_collection(name)\
+\
+    for name in EDGE_COLLECTIONS:\
+        if not db.has_collection(name):\
+            db.create_collection(name, edge=True)\
+\
+    # Create indexes (persistent only \'97 hash/skiplist are aliases in 3.10+)\
+    # High-cardinality lookup fields\
+    _ensure_index(db, "vulnerabilities", ["cve_id"], unique=True, cache=True)\
+    _ensure_index(db, "vulnerabilities", ["epss_score"])\
+    _ensure_index(db, "weaknesses", ["cwe_id"], unique=True, cache=True)\
+    _ensure_index(db, "components", ["purl"], unique=True, cache=True)\
+    _ensure_index(db, "components", ["ecosystem", "name"])\
+    _ensure_index(db, "cpe_entries", ["vendor", "product"])\
+    _ensure_index(db, "attack_techniques", ["technique_id"], unique=True, cache=True)\
+    _ensure_index(db, "attack_patterns", ["capec_id"], unique=True, cache=True)\
+    _ensure_index(db, "oscal_controls", ["control_id"], unique=True, cache=True)\
+    _ensure_index(db, "scf_controls", ["scf_id"], unique=True, cache=True)\
+    _ensure_index(db, "epss_history", ["cve_id", "date"])\
+    _ensure_index(db, "exploit_modules", ["cve_ids[*]"])  # Array index\
+    _ensure_index(db, "sast_findings", ["file_path", "rule_id"])\
+    _ensure_index(db, "remediation_tickets", ["status", "sla_met"])\
+\
+    # Tenant isolation indexes (for customer-specific data)\
+    for coll in ["tool_runs", "sast_findings", "dast_findings", "secret_findings",\
+                  "code_metrics", "remediation_tickets", "sbom_artifacts"]:\
+        _ensure_index(db, coll, ["tenant_id"])\
+\
+    return db\
+\
+\
+def _ensure_index(db, collection, fields, unique=False, cache=False):\
+    """Create persistent index if it doesn't exist."""\
+    db.collection(collection).add_persistent_index(\
+        fields=fields,\
+        unique=unique,\
+        cache_enabled=cache,\
+    )\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs24 \cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 7. DAG ORCHESTRATOR\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\fs28 \cf0 Seed Flow with Dependency Resolution\
+\pard\pardeftab720\partightenfactor0
+
+\f3\b0\fs26 \cf0 # src/complira_graph/orchestrator/dag.py\
+from graphlib import TopologicalSorter\
+import asyncio\
+import structlog\
+\
+logger = structlog.get_logger()\
+\
+# Agent dependency graph\
+AGENT_DEPENDENCIES = \{\
+    # Tier 0: Root sources (no dependencies)\
+    "cwe":              [],\
+    "attack":           [],\
+    "oscal":            [],\
+    "spdx_licenses":    [],\
+    "epss":             [],\
+    "cisa_kev":         [],\
+    "eol":              [],\
+\
+    # Tier 1: Depends on root sources\
+    "nvd":              ["cwe"],               # CVEs reference CWE IDs\
+    "capec":            ["cwe", "attack"],      # Maps CWE 
+\f5 \uc0\u8596 
+\f3  ATT&CK\
+    "d3fend":           ["attack"],             # Counters ATT&CK techniques\
+    "atlas":            ["attack"],             # Cross-refs ATT&CK techniques\
+    "ctid":             ["attack", "oscal"],    # Maps ATT&CK 
+\f5 \uc0\u8594 
+\f3  800-53\
+    "scf":              ["oscal"],              # Maps SCF 
+\f5 \uc0\u8594 
+\f3  800-53 + others\
+    "osadl":            ["spdx_licenses"],      # License compatibility\
+\
+    # Tier 2: Depends on Tier 1\
+    "osv":              ["cwe"],               # Advisories reference CWE\
+    "vulncheck":        ["cwe"],\
+    "ghsa":             ["cwe"],\
+    "nuclei":           ["cwe"],               # Templates have CWE classification\
+    "exploitdb":        [],                    # CVE-keyed, no graph deps\
+    "metasploit":       [],\
+    "poc_github":       [],\
+    "opencre":          ["oscal", "cwe"],      # Links standards + CWEs\
+    "deps_dev":         [],\
+    "redhat":           ["cwe"],\
+\
+    # Tier 3: Depends on Tier 2\
+    # (future: LLM enrichment agents depend on base data)\
+\}\
+\
+\
+async def run_seed(agents: dict, max_concurrent: int = 4):\
+    """Execute full seed in dependency order with bounded concurrency."""\
+    sorter = TopologicalSorter(AGENT_DEPENDENCIES)\
+    sorter.prepare()\
+    semaphore = asyncio.Semaphore(max_concurrent)\
+    results = \{\}\
+\
+    async def run_agent(name: str):\
+        async with semaphore:\
+            logger.info("agent_starting", agent=name)\
+            try:\
+                result = await agents[name].run()\
+                results[name] = result\
+                logger.info("agent_complete", agent=name,\
+                           docs=result.documents_upserted,\
+                           edges=result.edges_upserted,\
+                           duration=f"\{result.duration_seconds:.1f\}s")\
+            except Exception as e:\
+                logger.error("agent_failed", agent=name, error=str(e))\
+                results[name] = None\
+            finally:\
+                sorter.done(name)\
+\
+    # Process agents in topological order with concurrency\
+    while sorter.is_active():\
+        ready = sorter.get_ready()\
+        if not ready:\
+            await asyncio.sleep(0.1)\
+            continue\
+\
+        tasks = [asyncio.create_task(run_agent(name)) for name in ready]\
+        # Don't await all \'97 let them complete individually and trigger next tier\
+        await asyncio.gather(*tasks, return_exceptions=True)\
+\
+    return results\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 Prefect Deployment\
+\pard\pardeftab720\partightenfactor0
+
+\f3\b0\fs26 \cf0 # src/complira_graph/orchestrator/schedules.py\
+from prefect import flow, task\
+from prefect.tasks import task_input_hash\
+from datetime import timedelta\
+\
+@task(retries=3, retry_delay_seconds=[10, 60, 300],\
+      cache_key_fn=task_input_hash, cache_expiration=timedelta(hours=1))\
+async def run_agent_task(agent_name: str):\
+    """Prefect task wrapper for a single agent."""\
+    from complira_graph.config import get_config\
+    from complira_graph.db import setup_database\
+    from complira_graph.agents import get_agent\
+\
+    config = get_config()\
+    db = setup_database(config)\
+    agent = get_agent(agent_name, db, config)\
+    return await agent.run()\
+\
+\
+@flow(name="complira-full-seed", log_prints=True)\
+async def full_seed_flow():\
+    """Initial full seed \'97 runs all agents in dependency order."""\
+    from complira_graph.orchestrator.dag import run_seed, AGENT_DEPENDENCIES\
+    from complira_graph.config import get_config\
+    from complira_graph.db import setup_database\
+    from complira_graph.agents import get_all_agents\
+\
+    config = get_config()\
+    db = setup_database(config)\
+    agents = get_all_agents(db, config)\
+    results = await run_seed(agents, max_concurrent=4)\
+    print(f"Seed complete: \{sum(1 for r in results.values() if r)\} agents succeeded")\
+\
+\
+@flow(name="complira-hourly")\
+async def hourly_flow():\
+    """Hourly: KEV + EPSS scores + NVD delta."""\
+    await run_agent_task("cisa_kev")\
+    await run_agent_task("epss")\
+    await run_agent_task("nvd")\
+\
+\
+@flow(name="complira-daily")\
+async def daily_flow():\
+    """Daily: OSV, VulnCheck, GHSA, exploit sources."""\
+    await run_agent_task("osv")\
+    await run_agent_task("vulncheck")\
+    await run_agent_task("ghsa")\
+    await run_agent_task("nuclei")\
+    await run_agent_task("exploitdb")\
+    await run_agent_task("metasploit")\
+    await run_agent_task("poc_github")\
+\
+\
+@flow(name="complira-weekly")\
+async def weekly_flow():\
+    """Weekly: ATT&CK, D3FEND, deps.dev, EOL, distro data."""\
+    await run_agent_task("attack")\
+    await run_agent_task("d3fend")\
+    await run_agent_task("atlas")\
+    await run_agent_task("capec")\
+    await run_agent_task("deps_dev")\
+    await run_agent_task("eol")\
+    await run_agent_task("redhat")\
+    await run_agent_task("opencre")\
+\
+\
+@flow(name="complira-monthly")\
+async def monthly_flow():\
+    """Monthly: Compliance frameworks, licenses."""\
+    await run_agent_task("cwe")\
+    await run_agent_task("oscal")\
+    await run_agent_task("scf")\
+    await run_agent_task("ctid")\
+    await run_agent_task("spdx_licenses")\
+    await run_agent_task("osadl")\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs24 \cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 8. DOCKER COMPOSE (DEV + PROD)\
+\pard\pardeftab720\partightenfactor0
+
+\f3\b0\fs26 \cf0 # docker-compose.yml\
+services:\
+  arangodb:\
+    image: arangodb:3.12\
+    environment:\
+      ARANGO_ROOT_PASSWORD: $\{ARANGO_ROOT_PASSWORD:-complira_dev\}\
+    ports:\
+      - "8529:8529"\
+    volumes:\
+      - arango_data:/var/lib/arangodb3\
+      - arango_apps:/var/lib/arangodb3-apps\
+    deploy:\
+      resources:\
+        limits:\
+          memory: 8G\
+    healthcheck:\
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8529/_api/version"]\
+      interval: 10s\
+      timeout: 5s\
+      retries: 5\
+\
+  # Prefect server (optional \'97 only needed for UI + scheduling)\
+  prefect-server:\
+    image: prefecthq/prefect:3-latest\
+    command: prefect server start --host 0.0.0.0\
+    ports:\
+      - "4200:4200"\
+    environment:\
+      PREFECT_SERVER_DATABASE_CONNECTION_URL: sqlite+aiosqlite:///prefect.db\
+    volumes:\
+      - prefect_data:/root/.prefect\
+    profiles: ["full"]  # Only start with: docker compose --profile full up\
+\
+  # The ingestion engine itself\
+  ingestion-engine:\
+    build:\
+      context: .\
+      dockerfile: Dockerfile\
+    env_file: .env\
+    environment:\
+      ARANGO_URL: http://arangodb:8529\
+      PREFECT_API_URL: http://prefect-server:4200/api\
+    volumes:\
+      - ./data:/app/data          # Git repos, downloads, checkpoints\
+      - ./config:/app/config      # Agent configs\
+    depends_on:\
+      arangodb:\
+        condition: service_healthy\
+\
+  # Monitoring\
+  prometheus:\
+    image: prom/prometheus:latest\
+    ports:\
+      - "9090:9090"\
+    volumes:\
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml\
+    profiles: ["monitoring"]\
+\
+  grafana:\
+    image: grafana/grafana:latest\
+    ports:\
+      - "3000:3000"\
+    environment:\
+      GF_SECURITY_ADMIN_PASSWORD: $\{GRAFANA_PASSWORD:-admin\}\
+    volumes:\
+      - grafana_data:/var/lib/grafana\
+    profiles: ["monitoring"]\
+\
+volumes:\
+  arango_data:\
+  arango_apps:\
+  prefect_data:\
+  grafana_data:\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 Dockerfile\
+\pard\pardeftab720\partightenfactor0
+
+\f3\b0\fs26 \cf0 # Dockerfile\
+FROM python:3.12-slim AS base\
+\
+# Install system deps for lxml, git\
+RUN apt-get update && apt-get install -y --no-install-recommends \\\
+    git libxml2-dev libxslt1-dev gcc \\\
+    && rm -rf /var/lib/apt/lists/*\
+\
+# Install uv\
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv\
+\
+WORKDIR /app\
+\
+# Install Python deps (cached layer)\
+COPY pyproject.toml uv.lock ./\
+RUN uv sync --frozen --no-dev\
+\
+# Copy source\
+COPY src/ src/\
+COPY config/ config/\
+\
+# Non-root user\
+RUN useradd -m complira && chown -R complira:complira /app\
+USER complira\
+\
+# Default: run the CLI\
+ENTRYPOINT ["uv", "run", "python", "-m", "complira_graph.cli"]\
+CMD ["serve"]  # Starts scheduler + metrics endpoint\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs24 \cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 9. CLI INTERFACE\
+\pard\pardeftab720\partightenfactor0
+
+\f3\b0\fs26 \cf0 # src/complira_graph/cli.py\
+import asyncio\
+import click\
+from rich.console import Console\
+from rich.table import Table\
+\
+console = Console()\
+\
+@click.group()\
+def cli():\
+    """Complira Knowledge Graph Engine."""\
+    pass\
+\
+@cli.command()\
+def seed():\
+    """Run full initial seed (all agents in dependency order)."""\
+    from complira_graph.orchestrator.schedules import full_seed_flow\
+    asyncio.run(full_seed_flow())\
+\
+@cli.command()\
+@click.argument("agent_name")\
+def run(agent_name):\
+    """Run a single agent by name."""\
+    from complira_graph.orchestrator.schedules import run_agent_task\
+    asyncio.run(run_agent_task(agent_name))\
+\
+@cli.command()\
+def status():\
+    """Show status of all agents (last run, checkpoint, record counts)."""\
+    import json\
+    from pathlib import Path\
+    from complira_graph.orchestrator.dag import AGENT_DEPENDENCIES\
+\
+    table = Table(title="Agent Status")\
+    table.add_column("Agent", style="cyan")\
+    table.add_column("Last Run", style="green")\
+    table.add_column("Checkpoint", style="yellow")\
+    table.add_column("Dependencies", style="dim")\
+\
+    for name in sorted(AGENT_DEPENDENCIES.keys()):\
+        cp_file = Path(f"data/checkpoints/\{name\}.json")\
+        if cp_file.exists():\
+            cp = json.loads(cp_file.read_text())\
+            table.add_row(name, cp["timestamp"][:19], str(cp["checkpoint"])[:30],\
+                         ", ".join(AGENT_DEPENDENCIES[name]) or "\'97")\
+        else:\
+            table.add_row(name, "never", "\'97",\
+                         ", ".join(AGENT_DEPENDENCIES[name]) or "\'97")\
+\
+    console.print(table)\
+\
+@cli.command()\
+def serve():\
+    """Start scheduled ingestion engine with metrics endpoint."""\
+    from prometheus_client import start_http_server\
+    start_http_server(8000)  # Metrics at :8000/metrics\
+    console.print("[green]Metrics server started on :8000[/green]")\
+\
+    # Start Prefect worker or APScheduler\
+    from complira_graph.orchestrator.schedules import start_scheduler\
+    start_scheduler()  # Blocks forever\
+\
+@cli.command()\
+def validate():\
+    """Validate graph integrity \'97 check for broken edges, orphaned nodes."""\
+    from complira_graph.config import get_config\
+    from complira_graph.db import setup_database\
+\
+    config = get_config()\
+    db = setup_database(config)\
+\
+    # Check for edges pointing to non-existent documents\
+    checks = [\
+        ("has_weakness", "vulnerabilities", "weaknesses"),\
+        ("affects", "vulnerabilities", "components"),\
+        ("exploited_in_wild", "vulnerabilities", "kev_entries"),\
+        ("technique_exploits_weakness", "attack_techniques", "weaknesses"),\
+        ("maps_to_requirement", "weaknesses", "regulatory_requirements"),\
+    ]\
+\
+    for edge_coll, from_coll, to_coll in checks:\
+        query = f"""\
+        FOR e IN \{edge_coll\}\
+            LET from_exists = DOCUMENT(e._from) != null\
+            LET to_exists = DOCUMENT(e._to) != null\
+            FILTER !from_exists OR !to_exists\
+            COLLECT WITH COUNT INTO broken\
+            RETURN broken\
+        """\
+        cursor = db.aql.execute(query)\
+        broken = next(cursor)\
+        status = "
+\f6 \uc0\u9989 
+\f3 " if broken == 0 else f"
+\f6 \uc0\u10060 
+\f3  \{broken\} broken"\
+        console.print(f"  \{edge_coll\}: \{status\}")\
+\
+if __name__ == "__main__":\
+    cli()\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs24 \cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 10. DEVELOPMENT WORKFLOW ON MAC\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\fs28 \cf0 First-time setup\
+\pard\pardeftab720\partightenfactor0
+
+\f3\b0\fs26 \cf0 # 1. Install prerequisites\
+brew install --cask docker          # Docker Desktop for Mac\
+curl -LsSf https://astral.sh/uv/install.sh | sh  # uv\
+\
+# 2. Clone and setup project\
+git clone https://github.com/complira/complira-graph.git\
+cd complira-graph\
+uv sync                             # Install all deps in ~2 seconds\
+\
+# 3. Configure secrets\
+cp .env.example .env\
+# Edit .env: set NVD_API_KEY, GITHUB_TOKEN, VULNCHECK_API_KEY, ARANGO_ROOT_PASSWORD\
+\
+# 4. Start ArangoDB\
+docker compose up -d arangodb\
+# Wait for healthy: docker compose ps\
+\
+# 5. Initialize database schema\
+uv run python -m complira_graph.cli setup-db\
+\
+# 6. Run full seed (2-4 hours first time)\
+uv run python -m complira_graph.cli seed\
+\
+# 7. Check status\
+uv run python -m complira_graph.cli status\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 Daily development\
+\pard\pardeftab720\partightenfactor0
+
+\f3\b0\fs26 \cf0 # Run a single agent for testing\
+uv run python -m complira_graph.cli run epss\
+uv run python -m complira_graph.cli run cwe\
+uv run python -m complira_graph.cli run attack\
+\
+# Validate graph integrity\
+uv run python -m complira_graph.cli validate\
+\
+# Run tests\
+uv run pytest tests/ -v\
+\
+# Open ArangoDB UI (graph visualization, AQL queries)\
+open http://localhost:8529\
+# Login: root / <ARANGO_ROOT_PASSWORD>\
+# Select database: complira\
+\
+# Start full scheduled engine (background)\
+uv run python -m complira_graph.cli serve\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 Useful AQL queries for development\
+\pard\pardeftab720\partightenfactor0
+
+\f3\b0\fs26 \cf0 -- Count all collections\
+FOR c IN _collections()\
+    FILTER LEFT(c.name, 1) != "_"\
+    RETURN \{name: c.name, count: LENGTH(c.name)\}\
+\
+-- Compliance Passport traversal (SBOM 
+\f5 \uc0\u8594 
+\f3  frameworks breached)\
+FOR comp IN components\
+    FILTER comp.purl == "pkg:pypi/requests@2.31.0"\
+    FOR vuln, e IN 1..1 INBOUND comp affects\
+        FOR cwe, e2 IN 1..1 OUTBOUND vuln has_weakness\
+            FOR req, e3 IN 1..1 OUTBOUND cwe maps_to_requirement\
+                RETURN DISTINCT \{\
+                    cve: vuln.cve_id,\
+                    cwe: cwe.cwe_id,\
+                    framework: req.framework,\
+                    requirement: req.requirement_id,\
+                    epss: vuln.epss_score\
+                \}\
+\
+-- Regulatory Blast Radius for a new CVE\
+LET target_cve = "CVE-2024-8966"\
+FOR vuln IN vulnerabilities FILTER vuln.cve_id == target_cve\
+    LET is_kev = LENGTH(FOR k IN kev_entries FILTER k._key == vuln._key RETURN 1) > 0\
+    LET epss = vuln.epss_score\
+    FOR comp, e IN 1..1 INBOUND vuln affects\
+        FOR cwe, e2 IN 1..1 OUTBOUND vuln has_weakness\
+            FOR req, e3 IN 1..1 OUTBOUND cwe maps_to_requirement\
+                COLLECT framework = req.framework WITH COUNT INTO req_count\
+                RETURN \{framework, requirements_breached: req_count, is_kev, epss\}\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs24 \cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 11. REQUIRED API KEYS & ACCOUNTS\
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrt\brdrnil \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth1380\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth1295\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth6681\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth466\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+
+\fs24 \cf0 Service\cell 
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+\cf0 Key Type\cell 
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+\cf0 How to Get\cell 
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+\cf0 Cost\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth1380\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth1295\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth6681\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth466\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 NVD
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 API Key\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 https://nvd.nist.gov/developers/request-an-api-key\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Free\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth1380\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth1295\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth6681\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth466\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 GitHub
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 PAT (classic)\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Settings 
+\f2 \uc0\u8594 
+\f1  Developer settings 
+\f2 \uc0\u8594 
+\f1  PAT 
+\f2 \uc0\u8594 
+\f1  
+\f3\fs26 read:packages
+\f1\fs24  scope\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Free\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth1380\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth1295\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth6681\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth466\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 VulnCheck
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Bearer Token\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 https://vulncheck.com/register 
+\f2 \uc0\u8594 
+\f1  Community tier\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Free\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth1380\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth1295\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth6681\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth466\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 EPSS
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 None needed\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 \'97\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Free\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth1380\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth1295\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth6681\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth466\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 CISA KEV
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 None needed\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 \'97\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Free\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth1380\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth1295\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth6681\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth466\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 OSV
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 None needed\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 \'97\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Free\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth1380\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth1295\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth6681\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth466\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 deps.dev
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 None needed\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 \'97\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Free\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth1380\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth1295\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth6681\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth466\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 D3FEND
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 None needed\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 \'97\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Free\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth1380\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth1295\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth6681\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth466\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 OpenCRE
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 None needed\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 \'97\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Free\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth1380\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth1295\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth6681\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth466\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 endoflife.date
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 None needed\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 \'97\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Free\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrt\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth1380\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth1295\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth6681\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth466\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 Red Hat
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 None needed\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 \'97\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Free\cell \lastrow\row
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 .env.example\
+\pard\pardeftab720\partightenfactor0
+
+\f3\b0\fs26 \cf0 # ArangoDB\
+ARANGO_URL=http://localhost:8529\
+ARANGO_USER=root\
+ARANGO_PASSWORD=complira_dev\
+ARANGO_DATABASE=complira\
+\
+# API Keys (only 3 needed!)\
+NVD_API_KEY=your-nvd-api-key-here\
+GITHUB_TOKEN=ghp_your_github_pat_here\
+VULNCHECK_API_KEY=your-vulncheck-token-here\
+\
+# Optional\
+GRAFANA_PASSWORD=admin\
+LOG_LEVEL=INFO\
+MAX_CONCURRENT_AGENTS=4\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs24 \cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 12. ESTIMATED SEED TIMELINE (Mac M2 Pro, 32 GB)\
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrt\brdrnil \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2657\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth1013\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth11730\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+
+\fs24 \cf0 Phase\cell 
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+\cf0 Duration\cell 
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+\cf0 What happens\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2657\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth1013\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth11730\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Phase 1: Root sources
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~5 min\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 CWE (930 nodes), ATT&CK (750 nodes), OSCAL (1K nodes), SPDX (600 nodes), EPSS (250K nodes), KEV (1.5K nodes)\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2657\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth1013\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth11730\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 Phase 2: Core vuln data
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~2-3 hours\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 NVD (250K+ CVEs, rate-limited), OSV (200K advisories via GCS bulk), CAPEC (559 nodes)\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2657\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth1013\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth11730\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 Phase 3: Exploit intel
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~30 min\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Nuclei (9K templates), ExploitDB (50K entries), Metasploit (4K modules), PoC-in-GitHub (20K entries)\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2657\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth1013\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth11730\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 Phase 4: Compliance fabric
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~15 min\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 SCF (1.3K controls \'d7 100 framework columns), CTID (6.3K mappings), D3FEND (267 techniques), OpenCRE (500 nodes), OLIR\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2657\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth1013\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth11730\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 Phase 5: Package ecosystem
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~45 min\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 deps.dev (500K packages), VulnCheck (enrichment), GHSA (23K reviewed), endoflife.date (432 products)\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2657\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth1013\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth11730\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 Phase 6: Edge resolution
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~20 min\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Cross-reference all collected data, build edge collections, validate graph integrity\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrt\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2657\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth1013\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth11730\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 TOTAL
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 ~4-5 hours
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 ~10M nodes, ~28M edges, ~20 GB on disk
+\f1\b0 \cell \lastrow\row
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 After initial seed, incremental updates process in 
+\f0\b 2-5 minutes per cycle
+\f1\b0  for hourly sources and 
+\f0\b 10-30 minutes
+\f1\b0  for the daily batch.\
+}

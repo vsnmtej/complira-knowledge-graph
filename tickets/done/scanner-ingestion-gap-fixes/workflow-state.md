@@ -4,7 +4,7 @@
 
 - Ticket: `scanner-ingestion-gap-fixes`
 - Current Stage: `10`
-- Next Stage: `Done ✅`
+- Next Stage: `Archived`
 - Code Edit Permission: `Locked` 🔒
 - Active Re-Entry: `No`
 - Re-Entry Classification: `N/A`

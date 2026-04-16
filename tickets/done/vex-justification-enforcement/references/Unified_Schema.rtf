@@ -1,0 +1,2898 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2865
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\froman\fcharset0 Times-Bold;\f1\froman\fcharset0 Times-Roman;\f2\fmodern\fcharset0 Courier-Bold;
+\f3\fmodern\fcharset0 Courier;\f4\froman\fcharset0 TimesNewRomanPSMT;\f5\fnil\fcharset0 Menlo-Regular;
+\f6\froman\fcharset0 TimesNewRomanPS-BoldMT;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;\red109\green109\blue109;}
+{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;\cssrgb\c50196\c50196\c50196;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww34360\viewh20960\viewkind0
+\deftab720
+\pard\pardeftab720\sa321\partightenfactor0
+
+\f0\b\fs48 \cf0 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Complira Unified Knowledge Graph Schema\
+\pard\pardeftab720\sa298\partightenfactor0
+
+\fs36 \cf0 ArangoDB \'97 Complete Collection & Edge Definitions\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\fs24 \cf0 Version:
+\f1\b0  2.0 | 
+\f0\b Date:
+\f1\b0  February 28, 2026 
+\f0\b Scope:
+\f1\b0  Open data seed layer + 8-layer scanner evidence + external intelligence + process evidence + document provenance\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 Schema Summary\
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrt\brdrnil \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth3382\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth2246\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth1713\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+
+\fs24 \cf0 \strokec2 Category\cell 
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+\cf0 Document Collections\cell 
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+\cf0 Edge Collections\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth3382\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth2246\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth1713\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Core vulnerability intelligence
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 6\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 7\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth3382\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth2246\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth1713\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 Threat & attack frameworks
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 5\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 6\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth3382\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth2246\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth1713\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 Compliance & regulatory
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 4\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 3\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth3382\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth2246\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth1713\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 Software identity & supply chain
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 5\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 5\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth3382\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth2246\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth1713\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 Scanner evidence (Layers 0\'964)
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 8\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 10\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth3382\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth2246\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth1713\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 Process evidence (Layer 5)
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 4\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 6\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth3382\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth2246\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth1713\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 Document provenance (Layer 6)
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 3\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 3\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth3382\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth2246\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth1713\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 LLM enrichment infrastructure
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 1\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 1\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrt\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth3382\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth2246\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth1713\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 TOTALS
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 36
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 41
+\f1\b0 \cell \lastrow\row
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f0\b \cf0 \strokec2 Named Graphs:
+\f1\b0  7\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 1. CORE VULNERABILITY INTELLIGENCE\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\fs28 \cf0 Document Collections\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\fs26 \cf0 \strokec2 vulnerabilities
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 CVE records unified from NVD, OSV, GHSA, VulnCheck, vendor advisories.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _key:                 string    # CVE_2024_8966 (normalized)\
+cve_id:               string    # CVE-2024-8966\
+osv_id:               string    # PYSEC-2024-XXX (if OSV-sourced)\
+ghsa_id:              string    # GHSA-xxxx-xxxx-xxxx\
+description:          string    # English description\
+published:            datetime\
+modified:             datetime\
+withdrawn:            datetime  # null if active\
+cvss_v31:             object    # \{baseScore, baseSeverity, vectorString\}\
+cvss_v40:             object    # \{baseScore, baseSeverity, vectorString\}\
+epss_score:           float     # 0.0\'961.0, daily update\
+epss_percentile:      float     # 0.0\'961.0\
+epss_date:            date      # Score date\
+status:               string    # Analyzed|Modified|Received|Rejected\
+source:               string    # nvd|osv|ghsa|vulncheck\
+ecosystem:            string    # PyPI|npm|Go|etc (if OSV-sourced)\
+severity:             object    # extracted severity info\
+raw:                  object    # Full original record (stored as document)\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 weaknesses
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 CWE records including hierarchy, detection methods, mitigations.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _key:                 string    # CWE_787\
+cwe_id:               string    # CWE-787\
+name:                 string    # Out-of-bounds Write\
+abstraction:          string    # Pillar|Class|Base|Variant\
+status:               string    # Stable|Incomplete|Draft|Deprecated\
+type:                 string    # weakness|category|view\
+description:          string\
+extended_description: string\
+likelihood_of_exploit:string    # High|Medium|Low\
+common_consequences:  array     # [\{scope, impact, note\}]\
+detection_methods:    array     # [\{method, effectiveness, description\}]\
+mitigations:          array     # [\{phase, strategy, description\}]\
+taxonomy_mappings:    object    # \{iec_62443: [...], owasp: [...], cert: [...]\}\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 kev_entries
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 CISA Known Exploited Vulnerabilities catalog entries.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _key:                 string    # CVE_2024_8966\
+cve_id:               string\
+vendor:               string\
+product:              string\
+name:                 string    # Vulnerability name\
+date_added:           date\
+due_date:             date\
+ransomware_use:       string    # Known|Unknown\
+required_action:      string\
+cwes:                 array\
+source:               string    # cisa_kev\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 vulncheck_kev_entries
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 VulnCheck extended KEV data (broader coverage than CISA).\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _key:                 string    # CVE_2024_8966\
+cve_id:               string\
+date_added:           date\
+exploit_type:         string    # poc|weaponized|in_the_wild\
+exploit_sources:      array     # [\{url, type, date\}]\
+threat_actors:        array     # Associated threat groups\
+ransomware_families:  array\
+botnet_families:      array\
+evidence_urls:        array     # Exploitation evidence citations\
+source:               string    # vulncheck_kev\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 exploit_modules
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 Weaponized exploits from Metasploit, ExploitDB, Nuclei, PoC-in-GitHub.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _key:                 string    # msf_exploit_multi_http_xxxx | edb_12345 | nuclei_CVE_2024_xxxx\
+module_id:            string    # Original identifier\
+name:                 string\
+type:                 string    # exploit|auxiliary|post|dos|webapps|local|remote\
+source:               string    # metasploit|exploitdb|nuclei|poc_in_github\
+platform:             array     # [linux, windows, ...]\
+rank:                 string    # Metasploit rank: excellent|great|good|normal|average|low|manual\
+cve_ids:              array     # Mapped CVE IDs\
+cwe_ids:              array     # Mapped CWE IDs (Nuclei has these)\
+cvss_score:           float     # If available (Nuclei provides this)\
+disclosure_date:      date\
+description:          string\
+file_path:            string    # Module path in source repo\
+tags:                 array     # [kev, rce, sqli, ...]\
+github_stars:         int       # For PoC-in-GitHub entries\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 epss_history
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 Time-series EPSS scores for temporal analysis and trending.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _key:                 string    # CVE_2024_8966_20260228\
+cve_id:               string\
+date:                 date\
+epss:                 float     # 0.0\'961.0\
+percentile:           float     # 0.0\'961.0\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 Edge Collections\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\fs26 \cf0 \strokec2 has_weakness
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 Vulnerability 
+\f4 \uc0\u8594 
+\f1  CWE classification.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _from:  vulnerabilities/\{key\}\
+_to:    weaknesses/\{key\}\
+source: string    # nvd|llm_classifier|osv\
+type:   string    # Primary|Secondary\
+confidence: float # 0.0\'961.0 (for LLM-generated)\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 exploited_in_wild
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 Vulnerability 
+\f4 \uc0\u8594 
+\f1  KEV entry (CISA or VulnCheck).\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _from:  vulnerabilities/\{key\}\
+_to:    kev_entries/\{key\} | vulncheck_kev_entries/\{key\}\
+date_added:     date\
+ransomware:     boolean\
+exploit_type:   string  # poc|weaponized|in_the_wild\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 has_exploit
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 Vulnerability 
+\f4 \uc0\u8594 
+\f1  exploit module/PoC.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _from:  vulnerabilities/\{key\}\
+_to:    exploit_modules/\{key\}\
+source:     string    # metasploit|exploitdb|nuclei|poc_in_github\
+weaponized: boolean   # true = reliable exploit exists\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 aliases
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 Vulnerability ID equivalence (CVE 
+\f4 \uc0\u8596 
+\f1  GHSA 
+\f4 \uc0\u8596 
+\f1  OSV 
+\f4 \uc0\u8596 
+\f1  PYSEC).\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _from:  vulnerabilities/\{key\}\
+_to:    vulnerabilities/\{key\}\
+type:   string    # alias\
+source: string    # osv|ghsa|nvd\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 affects
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 Vulnerability 
+\f4 \uc0\u8594 
+\f1  component (with version range constraints).\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _from:  vulnerabilities/\{key\}\
+_to:    components/\{key\} | cpe_entries/\{key\}\
+purl:               string    # if component target\
+vulnerable:         boolean\
+version_introduced: string\
+version_fixed:      string\
+version_start:      string    # versionStartIncluding (CPE)\
+version_end:        string    # versionEndExcluding (CPE)\
+match_criteria_id:  string    # NVD match criteria\
+ecosystem:          string\
+source:             string    # nvd|osv|ghsa\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 has_epss_history
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 Vulnerability 
+\f4 \uc0\u8594 
+\f1  historical EPSS score entry.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _from:  vulnerabilities/\{key\}\
+_to:    epss_history/\{key\}\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 has_epss
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 Lightweight edge for current EPSS (alternative: store on vuln node directly).\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _from:  vulnerabilities/\{key\}\
+_to:    epss_history/\{key\}    # latest only\
+current: boolean\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs24 \cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 2. THREAT & ATTACK FRAMEWORKS\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\fs28 \cf0 Document Collections\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\fs26 \cf0 \strokec2 attack_techniques
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 MITRE ATT&CK Enterprise techniques and sub-techniques.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _key:             string    # T1059 or T1059_001\
+technique_id:     string    # T1059 or T1059.001\
+name:             string    # Command and Scripting Interpreter\
+tactic_ids:       array     # [TA0002] (execution)\
+tactic_names:     array     # [Execution]\
+is_subtechnique:  boolean\
+parent_technique: string    # T1059 (for sub-techniques)\
+platforms:        array     # [Windows, Linux, macOS]\
+data_sources:     array     # Detection data sources\
+detection:        string    # Detection guidance\
+description:      string\
+url:              string    # https://attack.mitre.org/techniques/T1059/\
+mitre_version:    string    # 18.0\
+stix_id:          string    # attack-pattern--xxxxx\
+domain:           string    # enterprise-attack|ics-attack|mobile-attack\
+deprecated:       boolean\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 attack_patterns
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 CAPEC attack patterns (bridges ATT&CK 
+\f4 \uc0\u8594 
+\f1  CWE).\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _key:             string    # CAPEC_66\
+capec_id:         string    # CAPEC-66\
+name:             string    # SQL Injection\
+abstraction:      string    # Meta|Standard|Detailed\
+status:           string    # Stable|Draft|Deprecated\
+description:      string\
+likelihood:       string    # High|Medium|Low\
+severity:         string    # High|Medium|Low\
+prerequisites:    array\
+mitigations:      array\
+related_cwes:     array     # [\{cwe_id, nature\}] \'97 parsed from XML\
+attack_technique_ids: array # [T1190] \'97 from Taxonomy_Mappings\
+execution_flow:   array     # Attack steps\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 atlas_techniques
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 MITRE ATLAS adversarial ML/AI techniques.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _key:             string    # AML_T0043\
+technique_id:     string    # AML.T0043\
+name:             string\
+tactic_id:        string\
+tactic_name:      string\
+description:      string\
+attack_reference: string    # Corresponding ATT&CK technique ID if any\
+case_studies:     array     # [\{id, name, summary\}]\
+mitigations:      array\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 d3fend_techniques
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 MITRE D3FEND defensive countermeasure techniques.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _key:             string    # D3_PCA_0001\
+d3fend_id:        string    # D3-PCA\
+name:             string    # Process Code-segment Analysis\
+definition:       string\
+digital_artifacts:array     # [\{artifact_id, artifact_name\}]\
+related_attack_techniques: array  # ATT&CK technique IDs countered\
+kb_articles:      array\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 threat_groups
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 ATT&CK threat actor groups (for attribution context).\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _key:             string    # G0016\
+group_id:         string    # G0016\
+name:             string    # APT29\
+aliases:          array     # [Cozy Bear, The Dukes, ...]\
+description:      string\
+techniques_used:  array     # [\{technique_id, use_description\}]\
+software_used:    array     # [\{software_id, name\}]\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 Edge Collections\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\fs26 \cf0 \strokec2 technique_exploits_weakness
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 ATT&CK technique 
+\f4 \uc0\u8594 
+\f1  CWE (via CAPEC bridge).\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _from:  attack_techniques/\{key\}\
+_to:    weaknesses/\{key\}\
+via_capec:  string    # CAPEC-66 (bridging pattern)\
+source:     string    # capec_mapping|ctid_mappings\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 capec_relates_to_cwe
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 CAPEC attack pattern 
+\f4 \uc0\u8594 
+\f1  CWE weakness (direct from CAPEC XML).\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _from:  attack_patterns/\{key\}\
+_to:    weaknesses/\{key\}\
+nature: string    # ChildOf|CanPrecede|CanAlsoBe|PeerOf\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 capec_maps_to_attack
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 CAPEC attack pattern 
+\f4 \uc0\u8594 
+\f1  ATT&CK technique.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _from:  attack_patterns/\{key\}\
+_to:    attack_techniques/\{key\}\
+source: string    # capec_view_658\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 technique_mitigated_by_control
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 ATT&CK technique 
+\f4 \uc0\u8594 
+\f1  NIST 800-53 control (from CTID Mappings Explorer).\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _from:  attack_techniques/\{key\}\
+_to:    oscal_controls/\{key\}\
+mapping_type:     string    # mitigates|detects\
+mapping_version:  string    # ATT&CK v16.1 
+\f5 \uc0\u8594 
+\f3  800-53 Rev5\
+source:           string    # ctid_mappings_explorer\
+stix_relationship_id: string\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 atlas_maps_to_attack
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 ATLAS AI technique 
+\f4 \uc0\u8594 
+\f1  ATT&CK technique (cross-reference).\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _from:  atlas_techniques/\{key\}\
+_to:    attack_techniques/\{key\}\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 d3fend_counters_technique
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 D3FEND defensive technique 
+\f4 \uc0\u8594 
+\f1  ATT&CK offensive technique.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _from:  d3fend_techniques/\{key\}\
+_to:    attack_techniques/\{key\}\
+via_artifact: string    # Digital artifact linking them\
+source:       string    # d3fend_ontology\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs24 \cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 3. COMPLIANCE & REGULATORY FRAMEWORKS\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\fs28 \cf0 Document Collections\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\fs26 \cf0 \strokec2 regulatory_requirements
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 Regulatory requirements from CRA, FDA 524B, IEC 62304, ISO 14971, ISO 21434, NIST SSDF.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _key:             string    # CRA_I_1 | FDA_524B_V_A_1 | IEC_62304_5_5_3\
+framework:        string    # CRA|FDA_524B|IEC_62304|ISO_14971|ISO_21434|NIST_SSDF\
+requirement_id:   string    # Original requirement ID\
+title:            string\
+text:             string    # Full requirement text\
+section:          string    # Section/clause number\
+evidence_types:   array     # [SAST, SCA, DAST, SBOM, threat_model, ...]\
+deadline:         date      # Compliance deadline if applicable (e.g., CRA Sept 2026)\
+source:           string    # curated|llm_reg_mapper|oscal\
+version:          string\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 oscal_controls
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 NIST SP 800-53 Rev 5 controls from OSCAL catalog (canonical control backbone).\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _key:             string    # AC_1 | AC_2_1 (family_number_enhancement)\
+control_id:       string    # AC-1 or AC-2(1) for enhancements\
+family:           string    # AC|AT|AU|CA|CM|CP|IA|IR|MA|...\
+title:            string    # Access Control Policy and Procedures\
+class:            string    # SP800-53\
+statement:        string    # Full control statement text\
+guidance:         string    # Supplemental guidance\
+parameters:       array     # [\{id, label, guidelines\}]\
+baseline_impact:  object    # \{low: bool, moderate: bool, high: bool, privacy: bool\}\
+related_controls: array     # [AC-2, AC-3, ...]\
+assessment:       string    # SP 800-53A assessment procedure text\
+source:           string    # oscal_catalog\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 scf_controls
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 Secure Controls Framework controls (meta-framework mapping 100+ regulations).\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _key:             string    # SCF_GOV_01\
+scf_id:           string    # GOV-01\
+domain:           string    # Governance & Oversight\
+title:            string\
+description:      string\
+weight:           int       # 1\'9610 relative importance\
+mapped_frameworks:object    # \{nist_csf: "GV.OC-01", iso_27001: "4.1", ...\}\
+                            # Each key is a framework, value is control ID(s)\
+version:          string    # SCF 2025.4\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 opencre_nodes
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 OWASP OpenCRE Common Requirement Enumeration nodes.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _key:             string    # CRE_028_030\
+cre_id:           string    # 028-030\
+name:             string    # Input Validation\
+description:      string\
+linked_standards: array     # [\{standard, section, name\}]\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 Edge Collections\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\fs26 \cf0 \strokec2 maps_to_requirement
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 CWE weakness 
+\f4 \uc0\u8594 
+\f1  regulatory requirement (core compliance bridge).\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _from:  weaknesses/\{key\}\
+_to:    regulatory_requirements/\{key\}\
+evidence_query:     string    # AQL or description of evidence needed\
+remediation_class:  string    # code_fix|config_change|architecture_change\
+source:             string    # curated|llm_reg_mapper\
+confidence:         float     # For LLM-generated\
+version:            string    # Mapping version\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 cross_framework_mapping
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 Control/requirement equivalence across frameworks.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _from:  regulatory_requirements/\{key\} | oscal_controls/\{key\} | scf_controls/\{key\}\
+_to:    regulatory_requirements/\{key\} | oscal_controls/\{key\} | scf_controls/\{key\}\
+mapping_strength:   string    # exact|partial|related|subset|superset|intersect\
+source:             string    # scf|olir|opencre|llm_reg_mapper|ctid\
+notes:              string\
+version:            string\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 opencre_links
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 OpenCRE node 
+\f4 \uc0\u8594 
+\f1  any standard/requirement node.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _from:  opencre_nodes/\{key\}\
+_to:    oscal_controls/\{key\} | regulatory_requirements/\{key\} | weaknesses/\{key\}\
+standard_name:  string    # OWASP ASVS|NIST 800-53|ISO 27001|...\
+section:        string\
+link_type:      string    # Contains|LinkedTo|Is Part Of\
+source:         string    # opencre\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs24 \cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 4. SOFTWARE IDENTITY & SUPPLY CHAIN\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\fs28 \cf0 Document Collections\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\fs26 \cf0 \strokec2 components
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 Software packages/libraries keyed by PURL.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _key:               string    # pkg_pypi_requests_2_31_0 (normalized PURL)\
+purl:               string    # pkg:pypi/requests@2.31.0\
+name:               string\
+version:            string\
+ecosystem:          string    # pypi|npm|golang|cargo|maven|...\
+namespace:          string    # @scope for npm, org for maven\
+licenses:           array     # SPDX identifiers [MIT, Apache-2.0]\
+source_repo:        string    # github.com/owner/repo\
+scorecard_score:    float     # OpenSSF Scorecard overall\
+description:        string\
+homepage:           string\
+maintainer_count:   int\
+last_commit_date:   date\
+eol_date:           date      # From endoflife.date\
+eol_lts:            boolean\
+latest_version:     string\
+advisory_keys:      array\
+source:             string    # deps_dev|sbom_upload|osv\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 cpe_entries
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 NVD CPE dictionary entries.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _key:               string    # Normalized CPE key\
+cpe23:              string    # cpe:2.3:a:vendor:product:version:...\
+vendor:             string\
+product:            string\
+version:            string\
+part:               string    # a(pplication)|o(s)|h(ardware)\
+titles:             array     # English titles\
+deprecated:         boolean\
+refs:               array     # Reference URLs\
+last_modified:      datetime\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 scorecard_results
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 OpenSSF Scorecard results per repository.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _key:               string    # github_com_owner_repo (normalized)\
+repo:               string    # github.com/owner/repo\
+overall_score:      float     # 0.0\'9610.0\
+date:               date\
+checks:             object    # \{Maintained: \{score, reason\}, Code-Review: \{...\}, ...\}\
+source:             string    # openssf_scorecard\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 licenses
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 SPDX license definitions with compliance metadata.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _key:               string    # MIT | Apache_2_0 | GPL_3_0_only\
+spdx_id:            string    # MIT\
+name:               string    # MIT License\
+is_osi_approved:    boolean\
+is_fsf_libre:       boolean\
+is_copyleft:        boolean   # Derived: strong/weak/none\
+copyleft_type:      string    # strong|weak|permissive|proprietary|public_domain\
+is_deprecated:      boolean\
+source:             string    # spdx_license_list\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 package_health
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 Aggregated package ecosystem health metrics beyond Scorecard.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _key:               string    # Same as component key\
+purl:               string\
+last_commit_date:   date\
+open_issue_count:   int\
+open_pr_count:      int\
+contributor_count:  int       # "bus factor" proxy\
+funding_status:     string    # funded|unfunded|unknown\
+has_security_policy:boolean\
+has_funding_file:   boolean\
+dependent_count:    int       # How many packages depend on this\
+download_count_30d: int\
+source:             string    # ecosystems|libraries_io|deps_dev\
+last_updated:       datetime\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 Edge Collections\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\fs26 \cf0 \strokec2 depends_on
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 Component 
+\f4 \uc0\u8594 
+\f1  component (dependency DAG).\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _from:  components/\{key\}\
+_to:    components/\{key\}\
+relation:       string    # DIRECT|INDIRECT|DEV|OPTIONAL\
+requirement:    string    # Version constraint expression\
+scope:          string    # runtime|compile|test|dev\
+source:         string    # deps_dev|sbom_upload\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 matched_by_cpe
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 Component (PURL) 
+\f4 \uc0\u8594 
+\f1  CPE entry (identity resolution).\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _from:  components/\{key\}\
+_to:    cpe_entries/\{key\}\
+confidence:     float     # 0.0\'961.0\
+source:         string    # scanoss_purl2cpe|vulnerablecode|heuristic|llm_cpe_resolver\
+reasoning:      string    # For LLM-resolved\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 same_as
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 Component identity equivalence across ecosystems.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _from:  components/\{key\}\
+_to:    components/\{key\}\
+confidence:     float\
+source:         string    # llm_identity_agent|source_repo_match\
+reasoning:      string\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 scored_by
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 Component source repo 
+\f4 \uc0\u8594 
+\f1  Scorecard result.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _from:  components/\{key\}\
+_to:    scorecard_results/\{key\}\
+repo:   string    # github.com/owner/repo\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 licensed_under
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 Component 
+\f4 \uc0\u8594 
+\f1  license (from ScanCode, deps.dev, or SBOM).\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _from:  components/\{key\}\
+_to:    licenses/\{key\}\
+source:         string    # scancode|deps_dev|sbom_declared\
+confidence:     float     # ScanCode detection confidence\
+file_path:      string    # Where license was detected\
+spdx_expression:string    # Full SPDX expression if compound (MIT AND Apache-2.0)\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs24 \cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 5. SCANNER EVIDENCE (Layers 0\'964)\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\fs28 \cf0 Document Collections\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\fs26 \cf0 \strokec2 tool_runs
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 Every scanner/tool execution with full provenance.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _key:               string    # UUID\
+tool_name:          string    # trivy|grype|semgrep|bandit|checksec|emba|lizard|zap|trufflehog\
+tool_version:       string\
+run_timestamp:      datetime\
+run_duration_sec:   float\
+target:             string    # What was scanned (image, repo, binary, URL)\
+target_type:        string    # container_image|source_repo|binary|firmware|url\
+configuration:      object    # Tool config/flags used\
+finding_count:      int\
+exit_code:          int\
+tenant_id:          string    # Customer isolation\
+product_id:         string\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 binary_hardening_profiles
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 \strokec2 [Layer 0+1]
+\f1\b0  Binary security hardening analysis results (Checksec, BinSkim).\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _key:               string    # hash of binary path + tool_run\
+binary_path:        string    # /usr/bin/myapp\
+binary_hash:        string    # SHA-256\
+pie:                boolean   # Position Independent Executable\
+relro:              string    # Full|Partial|None\
+stack_canary:       boolean\
+nx:                 boolean   # No-Execute (DEP)\
+fortify_source:     boolean\
+control_flow_guard: boolean   # CFG / CET\
+aslr:               boolean\
+spectre_mitigations:boolean\
+rpath:              string    # RPATH/RUNPATH\
+stripped:           boolean\
+architecture:       string    # x86_64|arm64|...\
+tool_run_id:        string    # FK to tool_runs\
+tenant_id:          string\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 sbom_artifacts
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 \strokec2 [Layer 0+1]
+\f1\b0  SBOM documents with generation provenance.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _key:               string    # UUID\
+format:             string    # cyclonedx|spdx\
+spec_version:       string    # 1.6|2.3\
+generation_method:  string    # firmware_extraction|build_time|post_build|container_scan\
+tool_name:          string    # syft|emba|cyclonedx_cli\
+tool_version:       string\
+component_count:    int\
+creation_timestamp: datetime\
+serial_number:      string    # SBOM serial\
+document_hash:      string    # SHA-256 of SBOM file\
+product_id:         string\
+tenant_id:          string\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 code_metrics
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 \strokec2 [Layer 2]
+\f1\b0  Code quality metrics per function/module (Lizard, Radon).\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _key:               string    # hash of file_path + function_name + tool_run\
+file_path:          string    # src/auth/handler.py\
+function_name:      string    # validate_token\
+module_name:        string    # auth.handler\
+language:           string    # python|c|cpp|java|...\
+cyclomatic_complexity: int\
+nloc:               int       # Lines of code (non-blank/non-comment)\
+token_count:        int\
+parameter_count:    int\
+maintainability_index: float  # Radon MI (A\'96F)\
+halstead_volume:    float\
+risk_classification:string    # iec_62304: A|B|C (derived from complexity)\
+tool_name:          string    # lizard|radon\
+tool_run_id:        string\
+tenant_id:          string\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 sast_findings
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 \strokec2 [Layer 2]
+\f1\b0  Static analysis findings with file:line attribution (Semgrep, Bandit, Flawfinder).\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _key:               string    # hash of rule_id + file_path + line\
+rule_id:            string    # semgrep rule or Bandit test ID\
+rule_name:          string\
+severity:           string    # critical|high|medium|low|info\
+confidence:         string    # high|medium|low\
+file_path:          string    # src/auth/handler.py\
+start_line:         int\
+end_line:           int\
+code_snippet:       string    # Relevant code (truncated)\
+message:            string    # Finding description\
+cwe_ids:            array     # [CWE-89, CWE-79]\
+owasp_ids:          array     # [A03:2021]\
+fix_guidance:       string\
+sarif_level:        string    # error|warning|note\
+tool_name:          string    # semgrep|bandit|flawfinder\
+tool_run_id:        string\
+tenant_id:          string\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 dast_findings
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 \strokec2 [Layer 4]
+\f1\b0  Dynamic analysis findings from runtime scanning (OWASP ZAP, Nuclei).\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _key:               string    # hash of url + alert_ref + tool_run\
+url:                string    # https://target.com/api/login\
+method:             string    # GET|POST|PUT|...\
+alert_ref:          string    # ZAP alert reference\
+name:               string    # SQL Injection\
+severity:           string    # critical|high|medium|low|info\
+confidence:         string    # confirmed|firm|tentative\
+description:        string\
+solution:           string\
+cwe_ids:            array     # [CWE-89]\
+evidence:           string    # Response snippet showing vuln\
+request:            string    # Triggering request (sanitized)\
+tool_name:          string    # zap|nuclei\
+tool_run_id:        string\
+tenant_id:          string\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 secret_findings
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 \strokec2 [Layer 4]
+\f1\b0  Detected secrets with verification status (TruffleHog, Gitleaks).\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _key:               string    # hash of detector + file_path + line\
+detector_type:      string    # AWS|GitHub|Slack|GenericHighEntropy|...\
+detector_name:      string\
+verified:           boolean   # TruffleHog active verification result\
+active:             boolean   # Is the secret still valid/active?\
+file_path:          string    # src/config.py\
+start_line:         int\
+end_line:           int\
+commit_sha:         string    # Git commit where found\
+commit_date:        datetime\
+author_email:       string    # (anonymizable)\
+redacted_value:     string    # Partially masked secret\
+severity:           string    # critical|high|medium|low\
+tool_name:          string    # trufflehog|gitleaks\
+tool_run_id:        string\
+tenant_id:          string\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 license_findings
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 \strokec2 [Layer 3]
+\f1\b0  License detection results from ScanCode Toolkit.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _key:               string    # hash of file_path + spdx_id + tool_run\
+spdx_license_id:    string    # MIT|Apache-2.0|GPL-3.0-only\
+license_expression: string    # MIT AND Apache-2.0\
+file_path:          string    # Where detected\
+match_coverage:     float     # 0.0\'96100.0 ScanCode match score\
+matched_rule:       string    # ScanCode rule that matched\
+is_notice:          boolean   # Is this a NOTICE file vs source header?\
+category:           string    # Permissive|Copyleft|Proprietary|...\
+tool_name:          string    # scancode\
+tool_run_id:        string\
+tenant_id:          string\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 Edge Collections\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\fs26 \cf0 \strokec2 generated_by_tool
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 SBOM / finding / profile 
+\f4 \uc0\u8594 
+\f1  tool execution that produced it.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _from:  sbom_artifacts/\{key\} | sast_findings/\{key\} | dast_findings/\{key\} | \
+        secret_findings/\{key\} | binary_hardening_profiles/\{key\} | \
+        code_metrics/\{key\} | license_findings/\{key\}\
+_to:    tool_runs/\{key\}\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 has_hardening_profile
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 Component 
+\f4 \uc0\u8594 
+\f1  binary hardening profile.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _from:  components/\{key\}\
+_to:    binary_hardening_profiles/\{key\}\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 sbom_contains
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 SBOM artifact 
+\f4 \uc0\u8594 
+\f1  component (SBOM membership).\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _from:  sbom_artifacts/\{key\}\
+_to:    components/\{key\}\
+relationship_type: string   # DESCRIBES|DEPENDS_ON|CONTAINS|DEV_DEPENDENCY\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 found_in_component
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 SAST/DAST/secret finding 
+\f4 \uc0\u8594 
+\f1  component where found.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _from:  sast_findings/\{key\} | dast_findings/\{key\} | secret_findings/\{key\}\
+_to:    components/\{key\}\
+file_path:  string    # Attribution\
+line:       int\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 classified_as_weakness
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 SAST/DAST finding 
+\f4 \uc0\u8594 
+\f1  CWE weakness classification.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _from:  sast_findings/\{key\} | dast_findings/\{key\}\
+_to:    weaknesses/\{key\}\
+source:     string    # tool_native|llm_classifier\
+confidence: float\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 has_code_metrics
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 Component 
+\f4 \uc0\u8594 
+\f1  code quality metrics.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _from:  components/\{key\}\
+_to:    code_metrics/\{key\}\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 triggers_classification
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 Code metrics 
+\f4 \uc0\u8594 
+\f1  IEC 62304 software safety class (derived).\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _from:  code_metrics/\{key\}\
+_to:    regulatory_requirements/\{key\}    # IEC_62304_CLASS_C\
+classification:     string    # A|B|C\
+reason:             string    # cyclomatic_complexity > 50 
+\f5 \uc0\u8594 
+\f3  Class C\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 vuln_assertion
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 \strokec2 [Layer 3]
+\f1\b0  Multi-source vulnerability consensus edge.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _from:  vulnerabilities/\{key\}\
+_to:    components/\{key\}\
+source:             string    # grype|trivy|osv_scanner|pip_audit|npm_audit|safety\
+detected:           boolean   # true = scanner says vulnerable, false = not detected\
+detection_method:   string    # version_match|binary_analysis|advisory_lookup\
+version_matched:    string    # Version the scanner tested against\
+scanner_confidence: string    # high|medium|low\
+backport_status:    string    # patched_by_backport|not_patched|unknown\
+tool_run_id:        string\
+timestamp:          datetime\
+tenant_id:          string\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 known_vulnerable_at_build
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 \strokec2 [Layer 0+1]
+\f1\b0  Component 
+\f4 \uc0\u8594 
+\f1  vulnerability: was CVE known at build time?\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _from:  components/\{key\}\
+_to:    vulnerabilities/\{key\}\
+build_date:         date\
+cve_published_date: date\
+kev_date:           date      # null if not in KEV at build time\
+was_known:          boolean   # cve_published < build_date\
+was_in_kev:         boolean   # kev_date < build_date (CRA \'a72 violation flag)\
+yocto_cve_status:   string    # Patched|Unpatched|Ignored\
+source:             string    # yocto_cve_check|build_manifest\
+tenant_id:          string\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 violates_requirement
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 Any finding 
+\f4 \uc0\u8594 
+\f1  regulatory requirement it violates.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _from:  sast_findings/\{key\} | dast_findings/\{key\} | secret_findings/\{key\} |\
+        binary_hardening_profiles/\{key\}\
+_to:    regulatory_requirements/\{key\}\
+violation_type:     string    # direct|inferred\
+reasoning:          string\
+source:             string    # rule_engine|llm\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs24 \cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 6. PROCESS EVIDENCE (Layer 5)\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\fs28 \cf0 Document Collections\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\fs26 \cf0 \strokec2 remediation_tickets
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 JIRA/GitHub issue tracking for vulnerability remediation.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _key:               string    # JIRA_PROJ_1234\
+ticket_id:          string    # PROJ-1234\
+tracker:            string    # jira|github_issues|linear|azure_devops\
+status:             string    # open|in_progress|in_review|resolved|closed|wont_fix\
+priority:           string    # critical|high|medium|low\
+assignee_hash:      string    # Anonymized developer ID\
+created_at:         datetime\
+resolved_at:        datetime\
+sla_target_date:    datetime\
+sla_met:            boolean\
+time_to_triage_hrs: float     # Discovery 
+\f5 \uc0\u8594 
+\f3  triage\
+time_to_fix_hrs:    float     # Triage 
+\f5 \uc0\u8594 
+\f3  fix merged\
+time_to_verify_hrs: float     # Fix merged 
+\f5 \uc0\u8594 
+\f3  re-scan clean\
+resolution:         string    # fixed|mitigated|accepted_risk|false_positive\
+tenant_id:          string\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 code_changes
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 Pull requests / commits that modify components.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _key:               string    # PR_12345 or commit SHA\
+change_type:        string    # pull_request|commit|merge_request\
+change_id:          string    # PR number or commit SHA\
+repository:         string    # github.com/owner/repo\
+branch:             string\
+title:              string\
+description:        string\
+author_hash:        string    # Anonymized\
+merged_at:          datetime\
+files_changed:      int\
+lines_added:        int\
+lines_deleted:      int\
+review_count:       int       # Number of approving reviews\
+all_reviews:        array     # [\{reviewer_hash, decision, timestamp\}]\
+ci_passed:          boolean\
+tenant_id:          string\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 scan_results
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 Re-scan verification results after remediation.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _key:               string    # UUID\
+scan_type:          string    # sast|sca|dast|secret|full\
+tool_name:          string\
+tool_run_id:        string    # FK to tool_runs\
+finding_status:     string    # resolved|still_present|new_finding\
+scanned_at:         datetime\
+target_component:   string    # PURL\
+target_vuln:        string    # CVE ID being verified\
+tenant_id:          string\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 compliance_events
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 Timestamped regulatory compliance events (CRA Article 14 notifications, FDA submissions, etc.).\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _key:               string    # UUID\
+event_type:         string    # cra_early_warning|cra_full_notification|fda_submission|audit_finding\
+framework:          string    # CRA|FDA_524B|IEC_62304\
+cve_id:             string    # If triggered by CVE\
+product_id:         string\
+deadline:           datetime\
+completed_at:       datetime\
+sla_met:            boolean\
+notification_body:  string    # Template/actual notification content\
+recipient:          string    # ENISA|FDA|internal\
+tenant_id:          string\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 Edge Collections\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\fs26 \cf0 \strokec2 tracked_by
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 Vulnerability 
+\f4 \uc0\u8594 
+\f1  remediation ticket.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _from:  vulnerabilities/\{key\}\
+_to:    remediation_tickets/\{key\}\
+priority_override:  string    # If manually re-prioritized\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 resolved_by
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 Remediation ticket 
+\f4 \uc0\u8594 
+\f1  code change that fixed it.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _from:  remediation_tickets/\{key\}\
+_to:    code_changes/\{key\}\
+resolution_type:    string    # patch|upgrade|config_change|workaround\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 verified_by
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 Code change 
+\f4 \uc0\u8594 
+\f1  scan result confirming the fix.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _from:  code_changes/\{key\}\
+_to:    scan_results/\{key\}\
+verification_status: string   # confirmed_fixed|still_present\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 modifies_component
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 Code change 
+\f4 \uc0\u8594 
+\f1  component it modifies.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _from:  code_changes/\{key\}\
+_to:    components/\{key\}\
+files_touched:      array     # Relevant file paths\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 reviewed_by
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 Code change 
+\f4 \uc0\u8594 
+\f1  reviewer (for IEC 62304 Clause 5.5.3 compliance).\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _from:  code_changes/\{key\}\
+_to:    code_changes/\{key\}    # Self-referential with reviewer metadata\
+reviewer_hash:      string    # Anonymized reviewer ID\
+author_hash:        string    # Anonymized author ID\
+is_independent:     boolean   # reviewer != author (IEC 62304 requirement)\
+decision:           string    # approved|changes_requested|commented\
+timestamp:          datetime\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 triggered_compliance_event
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 Vulnerability or KEV entry 
+\f4 \uc0\u8594 
+\f1  compliance event it triggered.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _from:  vulnerabilities/\{key\} | kev_entries/\{key\}\
+_to:    compliance_events/\{key\}\
+trigger_type:       string    # kev_addition|cvss_critical|epss_threshold\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs24 \cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 7. DOCUMENT PROVENANCE (Layer 6)\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\fs28 \cf0 Document Collections\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\fs26 \cf0 \strokec2 generated_documents
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 FDA/CRA compliance documents produced by Complira.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _key:               string    # UUID\
+document_type:      string    # threat_model|sbom|vex|vuln_assessment|security_arch|\
+                              #  risk_analysis|update_mechanism|secure_dev_attestation\
+framework:          string    # FDA_524B|CRA|IEC_62304\
+title:              string\
+version:            string    # Document version\
+generated_at:       datetime\
+model_used:         string    # claude-sonnet-4-5|claude-opus-4-6\
+prompt_hash:        string    # SHA-256 of generation prompt\
+product_id:         string\
+tenant_id:          string\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 document_claims
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 Individual claims/assertions within generated documents.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _key:               string    # UUID\
+claim_text:         string    # "The system uses TLS 1.3 for all external communications"\
+section:            string    # Document section (e.g., "4.2.1 Encryption")\
+claim_type:         string    # factual|analytical|conclusion|recommendation\
+confidence:         float     # LLM confidence in claim\
+validated:          boolean   # Evidence chain verified\
+human_reviewed:     boolean\
+document_id:        string    # FK to generated_documents\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 evidence_chains
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 Links between document claims and their supporting root evidence.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _key:               string    # UUID\
+chain_type:         string    # direct|inferred|aggregated\
+chain_depth:        int       # How many hops from claim to root evidence\
+complete:           boolean   # All links in chain verified\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 Edge Collections\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\fs26 \cf0 \strokec2 supported_by
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 Document claim 
+\f4 \uc0\u8594 
+\f1  evidence node (any scanner finding, tool run, or graph node).\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _from:  document_claims/\{key\}\
+_to:    sast_findings/\{key\} | dast_findings/\{key\} | secret_findings/\{key\} |\
+        vulnerabilities/\{key\} | components/\{key\} | tool_runs/\{key\} |\
+        remediation_tickets/\{key\} | code_changes/\{key\} | scan_results/\{key\} |\
+        binary_hardening_profiles/\{key\} | code_metrics/\{key\}\
+evidence_type:      string    # scanner_finding|tool_run|graph_traversal|jira_ticket\
+relevance:          string    # primary|supporting|contextual\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 contains_claim
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 Generated document 
+\f4 \uc0\u8594 
+\f1  document claim.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _from:  generated_documents/\{key\}\
+_to:    document_claims/\{key\}\
+section:    string\
+position:   int       # Ordering within section\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\b \cf0 \strokec2 evidence_chain_link
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 Evidence chain 
+\f4 \uc0\u8594 
+\f1  evidence chain or root evidence (DAG structure).\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _from:  evidence_chains/\{key\}\
+_to:    evidence_chains/\{key\} | sast_findings/\{key\} | tool_runs/\{key\} | \
+        vulnerabilities/\{key\} | remediation_tickets/\{key\}\
+hop_number:     int\
+link_type:      string    # derived_from|aggregates|cites\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs24 \cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 8. LLM ENRICHMENT INFRASTRUCTURE\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\fs28 \cf0 Document Collections\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\fs26 \cf0 \strokec2 llm_enrichments
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 All LLM-generated enrichments with full provenance.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _key:               string    # agent_name + hash + timestamp\
+agent:              string    # cpe_resolver|cwe_classifier|vex_synthesizer|\
+                              #  reg_mapper|vuln_extractor|identity_agent\
+model:              string    # claude-sonnet-4-5-20250929|claude-opus-4-6\
+confidence:         float     # 0.0\'961.0\
+timestamp:          datetime\
+input_context_hash: string    # SHA-256 of input prompt\
+output:             object    # Structured agent output\
+validated:          boolean   # Auto-applied (confidence >= 0.85)\
+human_reviewed:     boolean\
+review_decision:    string    # accepted|rejected|modified (if human_reviewed)\
+cost_usd:           float     # LLM API cost for this enrichment\
+input_tokens:       int\
+output_tokens:      int\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 Edge Collections\
+\pard\pardeftab720\sa319\partightenfactor0
+
+\f2\fs26 \cf0 \strokec2 enriched_by_llm
+\f0\fs24 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0 \cf0 \strokec2 Any graph node 
+\f4 \uc0\u8594 
+\f1  LLM enrichment that modified/created it.\
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs26 \cf0 _from:  vulnerabilities/\{key\} | components/\{key\} | weaknesses/\{key\} |\
+        regulatory_requirements/\{key\} | document_claims/\{key\}\
+_to:    llm_enrichments/\{key\}\
+agent:          string\
+confidence:     float\
+applied:        boolean    # Was enrichment applied to the node?\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs24 \cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 9. NAMED GRAPHS\
+\pard\pardeftab720\partightenfactor0
+
+\f3\b0\fs26 \cf0 vulnerability_graph\
+
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  Vertices: vulnerabilities, weaknesses, components, cpe_entries, \
+
+\f5 \uc0\u9474 
+\f3              kev_entries, vulncheck_kev_entries, exploit_modules,\
+
+\f5 \uc0\u9474 
+\f3              epss_history\
+
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  Edges:    has_weakness, affects, exploited_in_wild, has_exploit,\
+
+\f5 \uc0\u9474 
+\f3              aliases, has_epss_history\
+
+\f5 \uc0\u9474 
+\f3 \
+supply_chain_graph\
+
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  Vertices: components, cpe_entries, scorecard_results, licenses,\
+
+\f5 \uc0\u9474 
+\f3              package_health, sbom_artifacts\
+
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  Edges:    depends_on, matched_by_cpe, same_as, scored_by,\
+
+\f5 \uc0\u9474 
+\f3              licensed_under, sbom_contains\
+
+\f5 \uc0\u9474 
+\f3 \
+threat_intelligence_graph\
+
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  Vertices: attack_techniques, attack_patterns, atlas_techniques,\
+
+\f5 \uc0\u9474 
+\f3              d3fend_techniques, threat_groups, weaknesses,\
+
+\f5 \uc0\u9474 
+\f3              oscal_controls\
+
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  Edges:    technique_exploits_weakness, capec_relates_to_cwe,\
+
+\f5 \uc0\u9474 
+\f3              capec_maps_to_attack, technique_mitigated_by_control,\
+
+\f5 \uc0\u9474 
+\f3              atlas_maps_to_attack, d3fend_counters_technique\
+
+\f5 \uc0\u9474 
+\f3 \
+regulatory_graph\
+
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  Vertices: weaknesses, regulatory_requirements, oscal_controls,\
+
+\f5 \uc0\u9474 
+\f3              scf_controls, opencre_nodes\
+
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  Edges:    maps_to_requirement, cross_framework_mapping,\
+
+\f5 \uc0\u9474 
+\f3              opencre_links\
+
+\f5 \uc0\u9474 
+\f3 \
+scanner_evidence_graph\
+
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  Vertices: tool_runs, binary_hardening_profiles, sast_findings,\
+
+\f5 \uc0\u9474 
+\f3              dast_findings, secret_findings, code_metrics,\
+
+\f5 \uc0\u9474 
+\f3              license_findings, sbom_artifacts\
+
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  Edges:    generated_by_tool, has_hardening_profile,\
+
+\f5 \uc0\u9474 
+\f3              found_in_component, classified_as_weakness,\
+
+\f5 \uc0\u9474 
+\f3              has_code_metrics, triggers_classification,\
+
+\f5 \uc0\u9474 
+\f3              vuln_assertion, known_vulnerable_at_build,\
+
+\f5 \uc0\u9474 
+\f3              violates_requirement\
+
+\f5 \uc0\u9474 
+\f3 \
+process_evidence_graph\
+
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  Vertices: remediation_tickets, code_changes, scan_results,\
+
+\f5 \uc0\u9474 
+\f3              compliance_events\
+
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  Edges:    tracked_by, resolved_by, verified_by,\
+
+\f5 \uc0\u9474 
+\f3              modifies_component, reviewed_by,\
+
+\f5 \uc0\u9474 
+\f3              triggered_compliance_event\
+
+\f5 \uc0\u9474 
+\f3 \
+document_provenance_graph\
+
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  Vertices: generated_documents, document_claims, evidence_chains,\
+
+\f5 \uc0\u9474 
+\f3              llm_enrichments\
+
+\f5 \uc0\u9500 \u9472 \u9472 
+\f3  Edges:    supported_by, contains_claim, evidence_chain_link,\
+
+\f5 \uc0\u9474 
+\f3              enriched_by_llm\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs24 \cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 10. KEY GRAPH TRAVERSAL PATTERNS ENABLED\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\fs28 \cf0 Compliance Passport (60-second cross-framework posture)\
+\pard\pardeftab720\partightenfactor0
+
+\f3\b0\fs26 \cf0 SBOM upload 
+\f5 \uc0\u8594 
+\f3  components 
+\f5 \uc0\u8594 
+\f3  (depends_on)* 
+\f5 \uc0\u8594 
+\f3  vulnerabilities 
+\f5 \uc0\u8594 
+\f3  \
+    has_weakness 
+\f5 \uc0\u8594 
+\f3  weaknesses 
+\f5 \uc0\u8594 
+\f3  maps_to_requirement 
+\f5 \uc0\u8594 
+\f3  regulatory_requirements 
+\f5 \uc0\u8594 
+\f3 \
+    cross_framework_mapping 
+\f5 \uc0\u8594 
+\f3  [CRA|FDA|IEC_62304|ISO_21434|...]\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 Regulatory Blast Radius (CVE 
+\f6 \uc0\u8594 
+\f0  frameworks breached)\
+\pard\pardeftab720\partightenfactor0
+
+\f3\b0\fs26 \cf0 New CVE 
+\f5 \uc0\u8594 
+\f3  affects 
+\f5 \uc0\u8594 
+\f3  components 
+\f5 \uc0\u8594 
+\f3  (depends_on INBOUND)* 
+\f5 \uc0\u8594 
+\f3 \
+    [all dependent products] 
+\f5 \uc0\u8594 
+\f3 \
+    has_weakness 
+\f5 \uc0\u8594 
+\f3  weaknesses 
+\f5 \uc0\u8594 
+\f3  maps_to_requirement 
+\f5 \uc0\u8594 
+\f3  [which CRA/FDA reqs breached] 
+\f5 \uc0\u8594 
+\f3 \
+    exploited_in_wild 
+\f5 \uc0\u8594 
+\f3  [is KEV?] 
+\f5 \uc0\u8594 
+\f3  triggered_compliance_event 
+\f5 \uc0\u8594 
+\f3  [24h deadline]\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 Autonomous VEX Generation\
+\pard\pardeftab720\partightenfactor0
+
+\f3\b0\fs26 \cf0 CVE + Component 
+\f5 \uc0\u8594 
+\f3 \
+    vuln_assertion (multi-source consensus) 
+\f5 \uc0\u8594 
+\f3 \
+    binary_hardening_profiles (exploitability) 
+\f5 \uc0\u8594 
+\f3 \
+    sast_findings + dast_findings (code-level evidence) 
+\f5 \uc0\u8594 
+\f3 \
+    depends_on path (reachability) 
+\f5 \uc0\u8594 
+\f3 \
+    LLM Agent 3 
+\f5 \uc0\u8594 
+\f3  VEX justification with evidence_chain\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 IEC 62304 Class C Verification\
+\pard\pardeftab720\partightenfactor0
+
+\f3\b0\fs26 \cf0 component 
+\f5 \uc0\u8594 
+\f3  has_code_metrics 
+\f5 \uc0\u8594 
+\f3  code_metrics 
+\f5 \uc0\u8594 
+\f3 \
+    triggers_classification 
+\f5 \uc0\u8594 
+\f3  IEC_62304_CLASS_C 
+\f5 \uc0\u8594 
+\f3 \
+    code_changes (for that component) 
+\f5 \uc0\u8594 
+\f3  reviewed_by 
+\f5 \uc0\u8594 
+\f3 \
+    [verify: reviewer != author for every change]\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 Closed-Loop Remediation Proof\
+\pard\pardeftab720\partightenfactor0
+
+\f3\b0\fs26 \cf0 vulnerability 
+\f5 \uc0\u8594 
+\f3  tracked_by 
+\f5 \uc0\u8594 
+\f3  remediation_ticket 
+\f5 \uc0\u8594 
+\f3 \
+    resolved_by 
+\f5 \uc0\u8594 
+\f3  code_change 
+\f5 \uc0\u8594 
+\f3 \
+    verified_by 
+\f5 \uc0\u8594 
+\f3  scan_result (finding_status: resolved) 
+\f5 \uc0\u8594 
+\f3 \
+    modifies_component 
+\f5 \uc0\u8594 
+\f3  component\
+Timeline: created_at 
+\f5 \uc0\u8594 
+\f3  merged_at 
+\f5 \uc0\u8594 
+\f3  scanned_at (SLA computation)\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 Threat-Informed Compliance\
+\pard\pardeftab720\partightenfactor0
+
+\f3\b0\fs26 \cf0 vulnerability 
+\f5 \uc0\u8594 
+\f3  has_weakness 
+\f5 \uc0\u8594 
+\f3  CWE 
+\f5 \uc0\u8594 
+\f3 \
+    capec_relates_to_cwe 
+\f5 \uc0\u8592 
+\f3  attack_pattern 
+\f5 \uc0\u8594 
+\f3 \
+    capec_maps_to_attack 
+\f5 \uc0\u8594 
+\f3  attack_technique 
+\f5 \uc0\u8594 
+\f3 \
+    technique_mitigated_by_control 
+\f5 \uc0\u8594 
+\f3  oscal_control 
+\f5 \uc0\u8594 
+\f3 \
+    cross_framework_mapping 
+\f5 \uc0\u8594 
+\f3  [CRA|ISO_27001|PCI_DSS|...]\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 Document Audit Trail\
+\pard\pardeftab720\partightenfactor0
+
+\f3\b0\fs26 \cf0 FDA reviewer points at claim in threat model 
+\f5 \uc0\u8594 
+\f3 \
+    generated_documents 
+\f5 \uc0\u8594 
+\f3  contains_claim 
+\f5 \uc0\u8594 
+\f3  document_claim 
+\f5 \uc0\u8594 
+\f3 \
+    supported_by 
+\f5 \uc0\u8594 
+\f3  sast_finding 
+\f5 \uc0\u8594 
+\f3 \
+    generated_by_tool 
+\f5 \uc0\u8594 
+\f3  tool_run (timestamp, version) 
+\f5 \uc0\u8594 
+\f3 \
+    found_in_component 
+\f5 \uc0\u8594 
+\f3  component (file:line)\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs24 \cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 11. COLLECTION COUNTS SUMMARY\
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrt\brdrnil \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth240\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth2532\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1000\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth4546\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+
+\fs24 \cf0 \strokec2 #\cell 
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+\cf0 Collection\cell 
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+\cf0 Type\cell 
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+\cf0 Source\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth240\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth2532\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1000\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth4546\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f1\b0 \cf0 1\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 vulnerabilities\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Document\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 NVD, OSV, GHSA, VulnCheck\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth240\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth2532\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1000\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth4546\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 2\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 weaknesses\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Document\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 CWE XML\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth240\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth2532\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1000\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth4546\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 3\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 kev_entries\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Document\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 CISA KEV\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth240\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth2532\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1000\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth4546\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 4\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 vulncheck_kev_entries\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Document\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 VulnCheck API\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth240\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth2532\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1000\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth4546\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 5\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 exploit_modules\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Document\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Metasploit, ExploitDB, Nuclei, PoC-in-GitHub\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth240\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth2532\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1000\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth4546\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 6\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 epss_history\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Document\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 FIRST.org EPSS\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth240\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth2532\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1000\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth4546\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 7\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 attack_techniques\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Document\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 MITRE ATT&CK STIX\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth240\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth2532\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1000\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth4546\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 8\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 attack_patterns\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Document\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 MITRE CAPEC XML\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth240\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth2532\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1000\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth4546\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 9\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 atlas_techniques\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Document\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 MITRE ATLAS YAML\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth240\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth2532\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1000\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth4546\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 10\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 d3fend_techniques\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Document\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 MITRE D3FEND ontology\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth240\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth2532\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1000\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth4546\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 11\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 threat_groups\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Document\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ATT&CK STIX\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth240\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth2532\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1000\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth4546\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 12\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 regulatory_requirements\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Document\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Curated + LLM Agent 4\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth240\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth2532\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1000\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth4546\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 13\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 oscal_controls\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Document\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 NIST OSCAL catalog\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth240\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth2532\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1000\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth4546\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 14\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 scf_controls\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Document\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 SCF Excel\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth240\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth2532\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1000\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth4546\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 15\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 opencre_nodes\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Document\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 OWASP OpenCRE\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth240\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth2532\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1000\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth4546\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 16\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 components\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Document\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 deps.dev, SBOMs, OSV\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth240\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth2532\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1000\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth4546\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 17\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 cpe_entries\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Document\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 NVD CPE Dictionary\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth240\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth2532\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1000\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth4546\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 18\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 scorecard_results\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Document\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 OpenSSF Scorecard\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth240\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth2532\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1000\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth4546\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 19\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 licenses\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Document\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 SPDX License List\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth240\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth2532\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1000\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth4546\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 20\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 package_health\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Document\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Ecosyste.ms, Libraries.io\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth240\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth2532\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1000\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth4546\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 21\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 tool_runs\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Document\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 All scanner executions\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth240\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth2532\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1000\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth4546\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 22\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 binary_hardening_profiles\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Document\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Checksec, BinSkim\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth240\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth2532\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1000\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth4546\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 23\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 sbom_artifacts\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Document\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Syft, EMBA, CycloneDX\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth240\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth2532\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1000\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth4546\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 24\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 code_metrics\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Document\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Lizard, Radon\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth240\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth2532\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1000\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth4546\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 25\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 sast_findings\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Document\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Semgrep, Bandit, Flawfinder\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth240\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth2532\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1000\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth4546\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 26\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 dast_findings\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Document\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ZAP, Nuclei\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth240\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth2532\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1000\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth4546\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 27\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 secret_findings\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Document\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 TruffleHog, Gitleaks\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth240\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth2532\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1000\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth4546\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 28\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 license_findings\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Document\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ScanCode Toolkit\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth240\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth2532\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1000\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth4546\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 29\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 remediation_tickets\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Document\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Jira, GitHub Issues\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth240\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth2532\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1000\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth4546\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 30\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 code_changes\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Document\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 GitHub/GitLab PRs\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth240\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth2532\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1000\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth4546\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 31\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 scan_results\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Document\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Re-scan verification\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth240\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth2532\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1000\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth4546\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 32\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 compliance_events\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Document\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 CRA/FDA event log\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth240\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth2532\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1000\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth4546\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 33\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 generated_documents\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Document\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Complira doc gen\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth240\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth2532\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1000\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth4546\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 34\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 document_claims\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Document\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Claims within docs\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth240\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth2532\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1000\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth4546\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 35\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 evidence_chains\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Document\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Provenance DAG\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrt\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth240\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth2532\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1000\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth4546\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 36\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 llm_enrichments\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Document\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 All 6 LLM agents\cell \lastrow\row
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f0\b \cf0 \strokec2 36 document collections + 41 edge collections + 7 named graphs
+\f1\b0 \
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 12. ESTIMATED GRAPH SIZE AT MATURITY\
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrt\brdrnil \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2980\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth1218\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1438\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth2955\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+
+\fs24 \cf0 \strokec2 Data layer\cell 
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+\cf0 Nodes\cell 
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+\cf0 Edges\cell 
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+\cf0 Source\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2980\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth1218\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1438\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth2955\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f1\b0 \cf0 NVD CVEs + CPE\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~2.0M\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~8M\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 NVD API\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2980\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth1218\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1438\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth2955\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 CWE hierarchy\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~1.4K\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~3.5K\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 CWE XML\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2980\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth1218\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1438\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth2955\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 OSV vulnerabilities\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~300K\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~1.5M\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 OSV.dev\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2980\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth1218\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1438\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth2955\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 CISA KEV\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~1.5K\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~1.5K\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 CISA JSON\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2980\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth1218\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1438\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth2955\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 VulnCheck KEV\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~2.5K\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~2.5K\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 VulnCheck API\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2980\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth1218\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1438\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth2955\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 EPSS (current + 30d history)\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~7.2M\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~7.2M\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 FIRST.org\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2980\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth1218\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1438\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth2955\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Exploit modules\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~50K\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~50K\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 MSF+EDB+Nuclei+PoC\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2980\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth1218\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1438\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth2955\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 deps.dev components\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~500K\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~2M\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 deps.dev\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2980\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth1218\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1438\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth2955\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Scorecard results\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~50K\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~50K\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 OpenSSF\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2980\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth1218\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1438\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth2955\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ATT&CK techniques\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~750\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~3K\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 STIX bundles\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2980\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth1218\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1438\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth2955\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 CAPEC patterns\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~560\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~2K\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 CAPEC XML\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2980\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth1218\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1438\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth2955\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ATLAS techniques\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~150\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~200\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ATLAS YAML\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2980\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth1218\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1438\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth2955\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 D3FEND techniques\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~400\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~1.5K\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 D3FEND ontology\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2980\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth1218\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1438\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth2955\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ATT&CK
+\f4 \uc0\u8594 
+\f1 800-53 mappings\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 \'97\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~6.3K\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 CTID Mappings Explorer\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2980\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth1218\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1438\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth2955\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 OSCAL controls\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~1K\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~5K\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 OSCAL JSON\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2980\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth1218\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1438\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth2955\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 SCF controls\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~1.3K\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~130K\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 SCF Excel (100+ frameworks)\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2980\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth1218\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1438\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth2955\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 OpenCRE nodes\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~500\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~3K\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 OpenCRE API\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2980\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth1218\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1438\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth2955\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Licenses (SPDX)\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~600\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~10K\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 SPDX + OSADL matrix\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2980\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth1218\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1438\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth2955\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Regulatory requirements\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~500\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~5K\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Curated + LLM\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2980\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth1218\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1438\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth2955\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 Open data subtotal
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 ~10.3M
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 ~28.4M
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 \cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2980\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth1218\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1438\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth2955\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Per-customer scanner evidence\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~50K\'96500K\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~200K\'962M\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Varies by product\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2980\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth1218\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1438\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth2955\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Per-customer process evidence\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~5K\'9650K\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~20K\'96200K\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Varies by org\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2980\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth1218\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1438\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth2955\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Per-customer doc provenance\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~1K\'9610K\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 ~5K\'9650K\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Varies\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrt\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2980\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth1218\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth1438\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth2955\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 Per-tenant subtotal
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 ~56K\'96560K
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 ~225K\'962.25M
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 \cell \lastrow\row
+}
