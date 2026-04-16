@@ -15,9 +15,11 @@ No CVE IDs in board_narrative or top_3_actions (SituationAbstractionLayer constr
 
 from __future__ import annotations
 
+import asyncio
 import json
-import logging
+import structlog
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import anthropic
@@ -27,7 +29,7 @@ from complira_graph.config import get_settings
 if TYPE_CHECKING:
     from arango.database import StandardDatabase
 
-log = logging.getLogger(__name__)
+log = structlog.get_logger(__name__)
 
 MAX_REACT_ITERATIONS = 5
 
@@ -115,8 +117,18 @@ class CyberReportAgent:
         self._model = settings.ANTHROPIC_MODEL_SONNET
         self._timeout = settings.ANTHROPIC_TIMEOUT
 
-    def run(self, db: "StandardDatabase", sim_id: str, tenant_id: str) -> dict[str, Any]:
-        """Execute ReACT loop and return report dict."""
+    def run(
+        self,
+        db: "StandardDatabase",
+        sim_id: str,
+        tenant_id: str,
+        sim_dir: Path | None = None,
+    ) -> dict[str, Any]:
+        """
+        Execute ReACT loop and return report dict.
+        C-13/14/15: Also generates chain narratives, counterfactuals, audit trail in parallel.
+        sim_dir: when provided, compliance_gaps.json and cyber_actions.jsonl are read.
+        """
         messages = [
             {
                 "role": "user",
@@ -154,7 +166,24 @@ class CyberReportAgent:
                 # Extract final text response
                 for block in response.content:
                     if hasattr(block, "text"):
-                        return _parse_report(block.text, sim_id)
+                        report = _parse_report(block.text, sim_id)
+                        report["compliance_gaps"] = _read_compliance_gaps(sim_dir)
+                        # C-13/14/15: generate explainability fields in parallel (F-005 fix)
+                        try:
+                            narratives, counterfactuals, audit_trail = asyncio.run(
+                                _generate_explainability_parallel(
+                                    self._client, self._model, sim_id, report, sim_dir,
+                                )
+                            )
+                            report["chain_narratives"] = narratives
+                            report["counterfactuals"]  = counterfactuals
+                            report["audit_trail"]      = audit_trail
+                        except Exception as exc:
+                            log.warning("cse_report_explainability_error", sim_id=sim_id, error=str(exc))
+                            report["chain_narratives"] = []
+                            report["counterfactuals"]  = []
+                            report["audit_trail"]      = []
+                        return report
                 break
 
             if response.stop_reason == "tool_use":
@@ -174,7 +203,12 @@ class CyberReportAgent:
 
             break
 
-        return _fallback_report(sim_id)
+        report = _fallback_report(sim_id)
+        report["compliance_gaps"] = _read_compliance_gaps(sim_dir)
+        report["chain_narratives"]  = []
+        report["counterfactuals"]   = []
+        report["audit_trail"]       = []
+        return report
 
     def _dispatch_tool(self, db: "StandardDatabase", tool_name: str, inputs: dict) -> Any:
         sim_id = inputs.get("sim_id", "")
@@ -196,18 +230,32 @@ class CyberReportAgent:
 
 
 def _parse_report(raw: str, sim_id: str) -> dict[str, Any]:
+    import re as _re
     raw = raw.strip()
+    # Strip markdown code fence
     if raw.startswith("```"):
         lines = raw.split("\n")
         raw = "\n".join(lines[1:-1] if lines[-1].strip() == "```" else lines[1:])
+    # Try direct parse
     try:
         report = json.loads(raw)
         report.setdefault("sim_id", sim_id)
         report.setdefault("completed_at", _now())
         return report
     except json.JSONDecodeError:
-        log.warning("cse_report_parse_fallback", sim_id=sim_id)
-        return _fallback_report(sim_id)
+        pass
+    # Try to find JSON object embedded in text
+    match = _re.search(r'\{.*\}', raw, _re.DOTALL)
+    if match:
+        try:
+            report = json.loads(match.group())
+            report.setdefault("sim_id", sim_id)
+            report.setdefault("completed_at", _now())
+            return report
+        except json.JSONDecodeError:
+            pass
+    log.warning("cse_report_parse_fallback", sim_id=sim_id, raw_preview=raw[:200])
+    return _fallback_report(sim_id)
 
 
 def _fallback_report(sim_id: str) -> dict[str, Any]:
@@ -222,5 +270,208 @@ def _fallback_report(sim_id: str) -> dict[str, Any]:
     }
 
 
+def _read_compliance_gaps(sim_dir: Path | None) -> list[dict]:
+    """Read compliance_gaps.json written by the Regulator agent in the subprocess."""
+    if sim_dir is None:
+        return []
+    gaps_path = sim_dir / "compliance_gaps.json"
+    if not gaps_path.exists():
+        return []
+    try:
+        return json.loads(gaps_path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        log.warning("cse_report_compliance_gaps_read_error", error=str(exc))
+        return []
+
+
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+# ---------------------------------------------------------------------------
+# C-13, C-14, C-15: Explainability generation (parallel LLM calls — AD-06)
+# ---------------------------------------------------------------------------
+
+async def _generate_explainability_parallel(
+    client: anthropic.Anthropic,
+    model: str,
+    sim_id: str,
+    report: dict[str, Any],
+    sim_dir: Path | None,
+) -> tuple[list, list, list]:
+    """
+    Run chain narrative, counterfactual, and audit trail generation in parallel.
+    F-005: wall-clock ≈ slowest single call (~5s) vs ~15s sequential.
+    """
+    action_log = _read_action_log_summary(sim_dir)
+    chain_data = {
+        "board_narrative":    report.get("board_narrative", ""),
+        "chain_probability":  report.get("chain_probability"),
+        "soc_miss_prob":      report.get("soc_miss_probability"),
+        "tef_estimate":       report.get("tef_estimate"),
+        "compliance_gaps":    report.get("compliance_gaps", []),
+        "top_3_actions":      report.get("top_3_actions", []),
+    }
+
+    narratives_coro     = _gen_chain_narratives(client, model, sim_id, chain_data, action_log)
+    counterfactuals_coro = _gen_counterfactuals(client, model, sim_id, chain_data, action_log)
+    audit_trail_coro    = _gen_audit_trail(client, model, sim_id, chain_data, action_log)
+
+    results = await asyncio.gather(
+        narratives_coro, counterfactuals_coro, audit_trail_coro,
+        return_exceptions=True,
+    )
+
+    def _safe(r: Any, default: list) -> list:
+        return r if isinstance(r, list) else default
+
+    return _safe(results[0], []), _safe(results[1], []), _safe(results[2], [])
+
+
+async def _gen_chain_narratives(
+    client: anthropic.Anthropic,
+    model: str,
+    sim_id: str,
+    chain_data: dict[str, Any],
+    action_log: list[dict],
+) -> list[dict]:
+    """C-13: Per-chain narrative — entry point, technique, defender response, countermeasure."""
+    attacker_actions = [e for e in action_log if e.get("agent_type") == "Attacker"]
+    defender_actions = [e for e in action_log if e.get("agent_type") in ("SOCAnalyst", "DevSecOps", "CISO")]
+
+    prompt = (
+        "You are a cybersecurity analyst writing chain explanations for a CISO simulation report. "
+        "No CVE IDs in output — use ATT&CK technique names and tactic names only.\n\n"
+        f"Attack summary: {json.dumps(chain_data)}\n"
+        f"Key attacker actions (last 10): {json.dumps(attacker_actions[-10:])}\n"
+        f"Key defender actions (last 10): {json.dumps(defender_actions[-10:])}\n\n"
+        "Generate a JSON array of chain narrative objects. Each object:\n"
+        "- chain_id: string (e.g. 'chain_0')\n"
+        "- technique_id: ATT&CK technique observed\n"
+        "- entry_point_reasoning: why attacker chose this vector (1-2 sentences, no CVE IDs)\n"
+        "- success_reasoning: why exploit succeeded given defender posture (1-2 sentences)\n"
+        "- defender_response: what defender did in response (1 sentence)\n"
+        "- soc_blind_spot_explanation: what detection would have caught this, or null\n"
+        "- single_countermeasure: one specific action that would have stopped this chain\n\n"
+        "Return only the JSON array. If data is insufficient, return []."
+    )
+    return await _llm_json_list(client, model, prompt, sim_id, "chain_narratives")
+
+
+async def _gen_counterfactuals(
+    client: anthropic.Anthropic,
+    model: str,
+    sim_id: str,
+    chain_data: dict[str, Any],
+    action_log: list[dict],
+) -> list[dict]:
+    """C-14: Counterfactual analysis — what would have broken each chain."""
+    patch_events = [e for e in action_log if e.get("action_type") == "PATCH"]
+    cra_events   = [e for e in action_log if e.get("action_type") == "FILE_CRA_NOTIFICATION"]
+
+    prompt = (
+        "You are a cybersecurity risk analyst generating counterfactual analysis. "
+        "No CVE IDs in output.\n\n"
+        f"Simulation summary: {json.dumps(chain_data)}\n"
+        f"Patch actions taken: {json.dumps(patch_events[:5])}\n"
+        f"Regulatory notifications: {json.dumps(cra_events[:3])}\n\n"
+        "Generate a JSON array of counterfactual objects. Each object:\n"
+        "- chain_id: string\n"
+        "- intervention_type: 'patch' | 'monitoring' | 'control' | 'notification'\n"
+        "- intervention_description: specific action in plain English (no CVE IDs)\n"
+        "- current_state: what actually happened with timing\n"
+        "- impact_if_applied: what outcome would change and by how much\n"
+        "- rounds_available: how many rounds were available to act before the breach\n\n"
+        "Return only the JSON array. If data is insufficient, return []."
+    )
+    return await _llm_json_list(client, model, prompt, sim_id, "counterfactuals")
+
+
+async def _gen_audit_trail(
+    client: anthropic.Anthropic,
+    model: str,
+    sim_id: str,
+    chain_data: dict[str, Any],
+    action_log: list[dict],
+) -> list[dict]:
+    """C-15: Ordered regulatory timeline — which obligations were met or missed."""
+    significant = [
+        e for e in action_log
+        if e.get("significance", 0) >= 0.7 or e.get("action_type") in (
+            "FILE_CRA_NOTIFICATION", "NOTIFY_BOARD", "ESCALATE_TO_CISO",
+            "FILE_INCIDENT_REPORT", "NOTIFY_REGULATOR",
+        )
+    ]
+
+    prompt = (
+        "You are a compliance officer generating an audit trail for a cybersecurity simulation. "
+        "No CVE IDs in output.\n\n"
+        f"Simulation summary: {json.dumps(chain_data)}\n"
+        f"Significant events: {json.dumps(significant[:20])}\n\n"
+        "Generate a chronological JSON array of audit events. Each object:\n"
+        "- round_no: integer\n"
+        "- event_type: 'exploit' | 'detection' | 'patch' | 'deadline' | 'notification' | 'escalation'\n"
+        "- description: plain English (no CVE IDs, use tactic names)\n"
+        "- regulatory_obligation: framework + article number, or null\n"
+        "- outcome: 'met' | 'missed' | 'not_applicable'\n\n"
+        "Return only the JSON array sorted by round_no. If data is insufficient, return []."
+    )
+    return await _llm_json_list(client, model, prompt, sim_id, "audit_trail")
+
+
+async def _llm_json_list(
+    client: anthropic.Anthropic,
+    model: str,
+    prompt: str,
+    sim_id: str,
+    field: str,
+) -> list:
+    """Helper: call LLM and parse JSON list response."""
+    try:
+        response = await asyncio.to_thread(
+            client.messages.create,
+            model=model,
+            max_tokens=1024,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        raw = response.content[0].text.strip().strip("`").strip()
+        if raw.startswith("```"):
+            raw = "\n".join(raw.split("\n")[1:-1])
+        result = json.loads(raw)
+        if isinstance(result, list):
+            return result
+    except Exception as exc:
+        log.warning(f"cse_report_{field}_error", sim_id=sim_id, error=str(exc))
+    return []
+
+
+def _read_action_log_summary(sim_dir: Path | None) -> list[dict]:
+    """Read significant actions from cyber_actions.jsonl for explainability context."""
+    if sim_dir is None:
+        return []
+    jsonl_path = sim_dir / "cyber_actions.jsonl"
+    if not jsonl_path.exists():
+        return []
+    entries = []
+    try:
+        for line in jsonl_path.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                entry = json.loads(line)
+                if entry.get("type") == "action" and entry.get("significance", 0) >= 0.6:
+                    entries.append({
+                        "round_no":        entry.get("round_no"),
+                        "agent_type":      entry.get("agent_type"),
+                        "action_type":     entry.get("action_type"),
+                        "outcome":         entry.get("outcome", "")[:120],
+                        "significance":    entry.get("significance"),
+                        "decision_source": entry.get("decision_source", "llm"),
+                        "technique_id":    entry.get("technique_id"),
+                    })
+            except Exception:
+                continue
+    except Exception as exc:
+        log.warning("cse_report_action_log_read_error", error=str(exc))
+    return entries

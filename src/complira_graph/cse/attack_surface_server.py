@@ -12,8 +12,10 @@ No I/O, no logging, no LLM calls. Pure state transitions.
 
 from __future__ import annotations
 
+import random
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from enum import Enum
 from typing import Any
 
 # ---------------------------------------------------------------------------
@@ -32,15 +34,32 @@ ESCALATE_TO_CISO      = "ESCALATE_TO_CISO"
 PATCH                 = "PATCH"
 DEPLOY_CONTROL        = "DEPLOY_CONTROL"
 ROTATE_CREDENTIAL     = "ROTATE_CREDENTIAL"
-FILE_CRA_NOTIFICATION = "FILE_CRA_NOTIFICATION"
-NOTIFY_BOARD          = "NOTIFY_BOARD"
-ACKNOWLEDGE           = "ACKNOWLEDGE"
+FILE_CRA_NOTIFICATION    = "FILE_CRA_NOTIFICATION"
+NOTIFY_BOARD             = "NOTIFY_BOARD"
+ACKNOWLEDGE              = "ACKNOWLEDGE"
+
+# Regulator actions
+AUDIT_VULNERABILITY      = "AUDIT_VULNERABILITY"
+ISSUE_COMPLIANCE_FINDING = "ISSUE_COMPLIANCE_FINDING"
+FILE_INCIDENT_REPORT     = "FILE_INCIDENT_REPORT"
+NOTIFY_REGULATOR         = "NOTIFY_REGULATOR"
+APPROVE_EXCEPTION        = "APPROVE_EXCEPTION"
 
 ALL_ACTIONS: frozenset[str] = frozenset({
     SCAN_SURFACE, EXPLOIT_CVE, LATERAL_MOVE, ESCALATE_PRIVILEGES, PIVOT_TARGET,
     MONITOR, DETECT, INVESTIGATE, ESCALATE_TO_CISO, PATCH, DEPLOY_CONTROL,
     ROTATE_CREDENTIAL, FILE_CRA_NOTIFICATION, NOTIFY_BOARD, ACKNOWLEDGE,
+    AUDIT_VULNERABILITY, ISSUE_COMPLIANCE_FINDING, FILE_INCIDENT_REPORT,
+    NOTIFY_REGULATOR, APPROVE_EXCEPTION,
 })
+
+
+class AttackerPhase(str, Enum):
+    RECON        = "recon"          # Must SCAN before exploiting
+    EXPLOITATION = "exploitation"   # First successful scan unlocks this
+    LATERAL      = "lateral"        # First exploit unlocks this
+    ESCALATION   = "escalation"     # First lateral move unlocks this
+    PIVOT        = "pivot"          # First privilege escalation unlocks this
 
 
 @dataclass
@@ -108,6 +127,20 @@ class AttackSurfaceServer:
         self.cra_notification_round: int | None = None
         self.credential_rotated: bool = False
 
+        # Attacker phase state machine (C-04)
+        self.attacker_phase: AttackerPhase = AttackerPhase.RECON
+        self.exploit_attempts: dict[str, int] = {}   # cve_id → attempt count (C-03)
+
+        # LLM health tracking (C-05)
+        self.llm_failure_count: int = 0
+        self.simulation_degraded: bool = False
+
+        # Regulator state
+        self.compliance_gaps: list[dict[str, Any]] = []
+        self.incident_report_filed: bool = False
+        self.regulator_notified: bool = False
+        self.exceptions_approved: list[str] = []  # cve_ids with approved exception
+
     # ------------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------------
@@ -124,19 +157,45 @@ class AttackSurfaceServer:
     def get_chain_steps(self) -> list[ChainStep]:
         return list(self.chain_steps)
 
+    def get_available_attacker_actions(self) -> list[str]:
+        """Return actions available given the current attacker phase (C-04)."""
+        phase = self.attacker_phase
+        if phase == AttackerPhase.RECON:
+            return [SCAN_SURFACE]
+        if phase == AttackerPhase.EXPLOITATION:
+            return [SCAN_SURFACE, EXPLOIT_CVE]
+        if phase == AttackerPhase.LATERAL:
+            return [SCAN_SURFACE, EXPLOIT_CVE, LATERAL_MOVE]
+        if phase == AttackerPhase.ESCALATION:
+            return [SCAN_SURFACE, EXPLOIT_CVE, LATERAL_MOVE, ESCALATE_PRIVILEGES]
+        return [SCAN_SURFACE, EXPLOIT_CVE, LATERAL_MOVE, ESCALATE_PRIVILEGES, PIVOT_TARGET]
+
     def get_state_snapshot(self) -> dict[str, Any]:
+        detected_cve_ids = [e["cve_id"] for e in self.detection_events if e.get("cve_id")]
         return {
-            "exploitable_cves": list(self.exploitable_cves - self.patched_cves),
-            "patched_cves": list(self.patched_cves),
-            "chain_step_count": len(self.chain_steps),
-            "reached_components": list(self.reached_components),
-            "controls_deployed": list(self.controls_deployed),
-            "privilege_level": self.privilege_level,
-            "monitoring_active": self.monitoring_active,
-            "ciso_alerted": self.ciso_alerted,
-            "board_notified": self.board_notified,
-            "cra_notified": self.cra_notified,
-            "credential_rotated": self.credential_rotated,
+            "exploitable_cves":    list(self.exploitable_cves - self.patched_cves),
+            "patched_cves":        list(self.patched_cves),
+            "detected_cves":       detected_cve_ids,                     # C-11
+            "undetected_exploitable": [
+                c for c in self.get_exploitable_cves()
+                if c not in detected_cve_ids
+            ],
+            "chain_step_count":    len(self.chain_steps),
+            "reached_components":  list(self.reached_components),
+            "controls_deployed":   list(self.controls_deployed),
+            "privilege_level":     self.privilege_level,
+            "monitoring_active":   self.monitoring_active,
+            "ciso_alerted":        self.ciso_alerted,
+            "board_notified":      self.board_notified,
+            "cra_notified":        self.cra_notified,
+            "credential_rotated":  self.credential_rotated,
+            "compliance_gap_count": len(self.compliance_gaps),
+            "incident_report_filed": self.incident_report_filed,
+            "regulator_notified":  self.regulator_notified,
+            "exceptions_approved": list(self.exceptions_approved),
+            "attacker_phase":      self.attacker_phase.value,            # C-04
+            "llm_failure_count":   self.llm_failure_count,
+            "simulation_degraded": self.simulation_degraded,
         }
 
 
@@ -146,12 +205,63 @@ class AttackSurfaceServer:
 
 def _action_scan_surface(server: AttackSurfaceServer, payload: dict, round_no: int) -> ActionResult:
     visible = server.get_exploitable_cves()
+    # C-04: RECON → EXPLOITATION after round 2 and at least 1 CVE found (F-003 fix)
+    if (
+        server.attacker_phase == AttackerPhase.RECON
+        and round_no >= 2
+        and len(visible) > 0
+    ):
+        server.attacker_phase = AttackerPhase.EXPLOITATION
     return ActionResult(
         SCAN_SURFACE,
         f"scan_complete: {len(visible)} exploitable CVEs visible",
         {"visible_cve_count": len(visible)},
         significance=0.3,
     )
+
+
+def _compute_exploit_probability(
+    server: AttackSurfaceServer,
+    cve_id: str,
+) -> tuple[float, list[str]]:
+    """
+    Probabilistic exploit success model (C-02).
+    Returns (probability, modifier_reasons).
+    """
+    is_kev = cve_id in server.kev_cves
+    base = 0.85 if is_kev else 0.60
+    reasons = [f"base={'0.85 (KEV)' if is_kev else '0.60 (non-KEV)'}"]
+    modifiers = 0.0
+
+    if server.monitoring_active:
+        modifiers -= 0.15
+        reasons.append("monitoring_active: -0.15")
+
+    detected_ids = {e["cve_id"] for e in server.detection_events if e.get("cve_id")}
+    if cve_id in detected_ids:
+        modifiers -= 0.20
+        reasons.append("detection_event_exists: -0.20")
+
+    if server.controls_deployed:
+        modifiers -= 0.10                    # F-002: general deterrent
+        reasons.append("controls_deployed_general: -0.10")
+        cve_display = cve_id.replace("_", "-").lower()
+        if any(cve_display in c.lower() for c in server.controls_deployed):
+            modifiers -= 0.20                # F-002: CVE-specific control
+            reasons.append("control_targets_cve: -0.20")
+
+    if server.privilege_level == 0:
+        modifiers -= 0.10
+        reasons.append("no_foothold: -0.10")
+
+    prior = server.exploit_attempts.get(cve_id, 0)
+    if prior > 0:
+        penalty = min(prior * 0.10, 0.30)
+        modifiers -= penalty
+        reasons.append(f"repeated_attempt×{prior}: -{penalty:.2f}")
+
+    prob = max(0.05, min(0.95, base + modifiers))
+    return prob, reasons
 
 
 def _action_exploit_cve(server: AttackSurfaceServer, payload: dict, round_no: int) -> ActionResult:
@@ -162,13 +272,51 @@ def _action_exploit_cve(server: AttackSurfaceServer, payload: dict, round_no: in
     if cve_id not in server.get_exploitable_cves():
         return ActionResult(EXPLOIT_CVE, f"cve_not_exploitable: {cve_id}", {}, significance=0.2)
 
+    # Track attempt regardless of outcome (C-03)
+    server.exploit_attempts[cve_id] = server.exploit_attempts.get(cve_id, 0) + 1
+
+    # Probabilistic outcome (C-02)
+    prob, reasons = _compute_exploit_probability(server, cve_id)
+    roll = random.random()
+
+    if roll > prob:
+        # Failure — classify reason
+        detected_ids = {e["cve_id"] for e in server.detection_events if e.get("cve_id")}
+        if cve_id in detected_ids:
+            outcome = f"exploit_blocked_by_detection: {cve_id}"
+        elif server.controls_deployed:
+            outcome = f"exploit_blocked_by_control: {cve_id}"
+        else:
+            outcome = f"exploit_failed_probabilistic: {cve_id} (p={prob:.2f}, roll={roll:.2f})"
+        return ActionResult(
+            EXPLOIT_CVE, outcome,
+            {"cve_id": cve_id, "exploit_probability": prob, "probability_reasons": reasons},
+            significance=0.20,
+        )
+
+    # Success
     step = ChainStep(cve_id=cve_id, technique=technique, attacker_id=attacker_id, round_no=round_no)
     server.chain_steps.append(step)
+
+    # C-04: phase transitions on successful exploit
+    if server.attacker_phase == AttackerPhase.EXPLOITATION:
+        server.attacker_phase = AttackerPhase.LATERAL
+
+    # SOC blind spot: success when detection event exists
+    detected_ids = {e["cve_id"] for e in server.detection_events if e.get("cve_id")}
+    is_blind_spot = cve_id not in detected_ids
+
     sig = 0.9 if cve_id in server.kev_cves else 0.75
     return ActionResult(
         EXPLOIT_CVE,
         f"exploit_success: {cve_id} via {technique}",
-        {"chain_step_added": True, "cve_id": cve_id},
+        {
+            "chain_step_added": True,
+            "cve_id": cve_id,
+            "soc_blind_spot": is_blind_spot,
+            "exploit_probability": prob,
+            "probability_reasons": reasons,
+        },
         significance=sig,
     )
 
@@ -179,6 +327,9 @@ def _action_lateral_move(server: AttackSurfaceServer, payload: dict, round_no: i
         return ActionResult(LATERAL_MOVE, "lateral_blocked_credential_rotated", {}, significance=0.4)
     if target_component:
         server.reached_components.add(target_component)
+    # C-04: LATERAL → ESCALATION phase transition
+    if server.attacker_phase == AttackerPhase.LATERAL:
+        server.attacker_phase = AttackerPhase.ESCALATION
     return ActionResult(
         LATERAL_MOVE,
         f"lateral_move: reached {target_component}",
@@ -189,6 +340,9 @@ def _action_lateral_move(server: AttackSurfaceServer, payload: dict, round_no: i
 
 def _action_escalate_privileges(server: AttackSurfaceServer, payload: dict, round_no: int) -> ActionResult:
     server.privilege_level = min(server.privilege_level + 1, 2)
+    # C-04: ESCALATION → PIVOT phase transition
+    if server.attacker_phase == AttackerPhase.ESCALATION:
+        server.attacker_phase = AttackerPhase.PIVOT
     return ActionResult(
         ESCALATE_PRIVILEGES,
         f"privilege_level_now: {server.privilege_level}",
@@ -278,20 +432,75 @@ def _action_acknowledge(server: AttackSurfaceServer, payload: dict, round_no: in
     return ActionResult(ACKNOWLEDGE, f"acknowledged: {cve_id}", {"acknowledged_cve": cve_id}, significance=0.4)
 
 
+def _action_audit_vulnerability(server: AttackSurfaceServer, payload: dict, round_no: int) -> ActionResult:
+    cve_id = payload.get("cve_id", "")
+    exploited_cves = {step.cve_id for step in server.chain_steps}
+    is_exploited = cve_id in exploited_cves
+    outcome = f"audit_complete: {cve_id} {'exploited_in_chain' if is_exploited else 'clean'}"
+    return ActionResult(AUDIT_VULNERABILITY, outcome, {"cve_id": cve_id, "exploited": is_exploited}, significance=0.6)
+
+
+def _action_issue_compliance_finding(server: AttackSurfaceServer, payload: dict, round_no: int) -> ActionResult:
+    # C-12 / F-006: validate required fields
+    from complira_graph.cse.constants import VALID_FRAMEWORKS, VALID_SEVERITIES
+    cve_id = payload.get("cve_id", "")
+    if not cve_id:
+        raise ValueError("ISSUE_COMPLIANCE_FINDING requires non-empty cve_id")
+    framework = payload.get("framework", "CRA")
+    if framework not in VALID_FRAMEWORKS:
+        raise ValueError(f"ISSUE_COMPLIANCE_FINDING unknown framework: {framework!r}")
+    severity = payload.get("severity", "medium")
+    if severity not in VALID_SEVERITIES:
+        severity = "medium"
+
+    gap: dict[str, Any] = {
+        "requirement_key": payload.get("requirement_key", "unknown"),
+        "framework": framework,
+        "description": payload.get("description", ""),
+        "severity": severity,
+        "round_no": round_no,
+        "cve_id": cve_id,
+    }
+    server.compliance_gaps.append(gap)
+    outcome = f"gap_recorded: {gap['framework']} {gap['requirement_key']}"
+    return ActionResult(ISSUE_COMPLIANCE_FINDING, outcome, {"gap": gap}, significance=0.8)
+
+
+def _action_file_incident_report(server: AttackSurfaceServer, payload: dict, round_no: int) -> ActionResult:
+    server.incident_report_filed = True
+    return ActionResult(FILE_INCIDENT_REPORT, "incident_report_filed", {"incident_report_filed": True}, significance=0.9)
+
+
+def _action_notify_regulator(server: AttackSurfaceServer, payload: dict, round_no: int) -> ActionResult:
+    server.regulator_notified = True
+    return ActionResult(NOTIFY_REGULATOR, "regulator_notified", {"regulator_notified": True}, significance=0.9)
+
+
+def _action_approve_exception(server: AttackSurfaceServer, payload: dict, round_no: int) -> ActionResult:
+    cve_id = payload.get("cve_id", "")
+    server.exceptions_approved.append(cve_id)
+    return ActionResult(APPROVE_EXCEPTION, f"exception_approved: {cve_id}", {"cve_id": cve_id}, significance=0.5)
+
+
 _ACTION_HANDLERS: dict[str, Any] = {
-    SCAN_SURFACE:          _action_scan_surface,
-    EXPLOIT_CVE:           _action_exploit_cve,
-    LATERAL_MOVE:          _action_lateral_move,
-    ESCALATE_PRIVILEGES:   _action_escalate_privileges,
-    PIVOT_TARGET:          _action_pivot_target,
-    MONITOR:               _action_monitor,
-    DETECT:                _action_detect,
-    INVESTIGATE:           _action_investigate,
-    ESCALATE_TO_CISO:      _action_escalate_to_ciso,
-    PATCH:                 _action_patch,
-    DEPLOY_CONTROL:        _action_deploy_control,
-    ROTATE_CREDENTIAL:     _action_rotate_credential,
-    FILE_CRA_NOTIFICATION: _action_file_cra,
-    NOTIFY_BOARD:          _action_notify_board,
-    ACKNOWLEDGE:           _action_acknowledge,
+    SCAN_SURFACE:             _action_scan_surface,
+    EXPLOIT_CVE:              _action_exploit_cve,
+    LATERAL_MOVE:             _action_lateral_move,
+    ESCALATE_PRIVILEGES:      _action_escalate_privileges,
+    PIVOT_TARGET:             _action_pivot_target,
+    MONITOR:                  _action_monitor,
+    DETECT:                   _action_detect,
+    INVESTIGATE:              _action_investigate,
+    ESCALATE_TO_CISO:         _action_escalate_to_ciso,
+    PATCH:                    _action_patch,
+    DEPLOY_CONTROL:           _action_deploy_control,
+    ROTATE_CREDENTIAL:        _action_rotate_credential,
+    FILE_CRA_NOTIFICATION:    _action_file_cra,
+    NOTIFY_BOARD:             _action_notify_board,
+    ACKNOWLEDGE:              _action_acknowledge,
+    AUDIT_VULNERABILITY:      _action_audit_vulnerability,
+    ISSUE_COMPLIANCE_FINDING: _action_issue_compliance_finding,
+    FILE_INCIDENT_REPORT:     _action_file_incident_report,
+    NOTIFY_REGULATOR:         _action_notify_regulator,
+    APPROVE_EXCEPTION:        _action_approve_exception,
 }

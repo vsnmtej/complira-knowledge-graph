@@ -35,12 +35,14 @@ class CyberSimConfigGenerator:
         entities: list[CyberEntityNode],
         sim_dir: str | Path,
         narrative_provider: str = "claude",
+        total_rounds_override: int | None = None,
+        entity_techniques: dict[str, list[str]] | None = None,  # C-01
     ) -> dict[str, Any]:
         """
         Build simulation_config.json and write it to sim_dir.
         Returns the config dict.
         """
-        total_rounds = ROUND_COUNT.get(trigger_type, ROUND_COUNT["kev_triggered"])
+        total_rounds = total_rounds_override or ROUND_COUNT.get(trigger_type, ROUND_COUNT["kev_triggered"])
         scheduled_events = _build_scheduled_events(entities, total_rounds)
 
         config: dict[str, Any] = {
@@ -54,6 +56,7 @@ class CyberSimConfigGenerator:
             "agent_profiles": profiles,
             "scheduled_events": scheduled_events,
             "entities": [_entity_to_dict(e) for e in entities],
+            "entity_techniques": entity_techniques or {},  # C-01: CVE → technique list
         }
 
         config_path = Path(sim_dir) / "simulation_config.json"
@@ -67,9 +70,10 @@ def _build_scheduled_events(entities: list[CyberEntityNode], total_rounds: int) 
     kev_cves = [e for e in entities if e.entity_type == "cve" and e.is_kev]
     for i, cve in enumerate(kev_cves[:5]):
         events.append({
-            "round": max(1, i * 3 + 1),
+            "round":      max(1, i * 3 + 1),
+            "action":     "EXPLOIT_CVE",          # C-10: attacker reads this field
             "event_type": "kev_exploit_attempt",
-            "cve_id": cve.entity_id,
+            "cve_id":     cve.entity_id,
             "description": f"Scheduled KEV exploit attempt: {cve.entity_id}",
         })
     return events

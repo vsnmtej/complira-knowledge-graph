@@ -25,6 +25,7 @@ from complira_graph.config import get_settings
 from complira_graph.cse.config_generator import CyberSimConfigGenerator
 from complira_graph.cse.graph_reader import CompliraGraphReader
 from complira_graph.cse.profile_generator import CyberAgentProfileGenerator
+from complira_graph.cse.technique_resolver import TechniqueResolver
 from complira_graph.cse.report_agent import CyberReportAgent
 from complira_graph.cse.runner import CyberRunnerStatus, CyberSimulationRunner
 from complira_graph.simulation.writeback_service import SimulationWritebackService
@@ -77,10 +78,14 @@ class CyberSimulationManager:
         profile_gen = CyberAgentProfileGenerator()
         profiles = await profile_gen.generate_all(entities)
 
+        # Technique resolution (C-01): resolve CVE → ATT&CK techniques once at prepare time
+        entity_techniques = TechniqueResolver(db).resolve_all(entities)
+
         # Config synthesis
         config_gen = CyberSimConfigGenerator()
         config_gen.generate(sim_id, tenant_id, trigger_type, profiles, entities, sim_dir,
-                           total_rounds_override=total_rounds)
+                           total_rounds_override=total_rounds,
+                           entity_techniques=entity_techniques)
 
         # Upsert simulation_runs in ArangoDB
         self._upsert_simulation_run(db, sim_id, tenant_id, trigger_type, "ready")
@@ -171,7 +176,12 @@ class CyberSimulationManager:
           agent_id: @agent_id, agent_type: @agent_type,
           action_type: @action_type, outcome: @outcome,
           round_no: @round_no, significance: @significance,
-          episode_text: @episode_text, timestamp: @timestamp
+          episode_text: @episode_text, timestamp: @timestamp,
+          decision_source: @decision_source,
+          decision_reasoning: @decision_reasoning,
+          game_state_snapshot: @game_state_snapshot,
+          technique_id: @technique_id,
+          technique_source: @technique_source
         }
         UPDATE {}
         IN agent_action_logs
@@ -188,18 +198,25 @@ class CyberSimulationManager:
             if entry.get("type") != "action":
                 continue
             try:
+                # F-004: key uses line index (i) to prevent collision on multi-action rounds
                 db.aql.execute(_AQL, bind_vars={
-                    "key":         f"{sim_id}_{i}",
-                    "sim_id":      sim_id,
-                    "tenant_id":   tenant_id,
-                    "agent_id":    entry.get("agent_id", ""),
-                    "agent_type":  entry.get("agent_type", ""),
-                    "action_type": entry.get("action_type", ""),
-                    "outcome":     entry.get("outcome", ""),
-                    "round_no":    entry.get("round_no", 0),
-                    "significance": entry.get("significance", 0.0),
-                    "episode_text": entry.get("episode_text", ""),
-                    "timestamp":   entry.get("timestamp", ""),
+                    "key":               f"{sim_id}_{i:06d}",
+                    "sim_id":            sim_id,
+                    "tenant_id":         tenant_id,
+                    "agent_id":          entry.get("agent_id", ""),
+                    "agent_type":        entry.get("agent_type", ""),
+                    "action_type":       entry.get("action_type", ""),
+                    "outcome":           entry.get("outcome", ""),
+                    "round_no":          entry.get("round_no", 0),
+                    "significance":      entry.get("significance", 0.0),
+                    "episode_text":      entry.get("episode_text", ""),
+                    "timestamp":         entry.get("timestamp", ""),
+                    # C-09 / C-16: explainability fields
+                    "decision_source":   entry.get("decision_source", "llm"),
+                    "decision_reasoning": entry.get("decision_reasoning", ""),
+                    "game_state_snapshot": entry.get("game_state_snapshot", {}),
+                    "technique_id":      entry.get("technique_id"),
+                    "technique_source":  entry.get("technique_source"),
                 })
                 written += 1
             except Exception as exc:

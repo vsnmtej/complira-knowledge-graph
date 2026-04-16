@@ -42,7 +42,10 @@ def app_client():
     # get_reference_db is called directly (not via Depends) in background tasks,
     # so we patch at the module level instead of using dependency_overrides.
     with patch("api.v1.endpoints.cse.get_reference_db", return_value=mock_db):
-        app.dependency_overrides[get_current_customer] = lambda: mock_customer
+        # Override both the full auth dep and the optional wrapper used by status/stream/create
+        from api.v1.endpoints.cse import _get_customer_optional
+        app.dependency_overrides[get_current_customer]  = lambda: mock_customer
+        app.dependency_overrides[_get_customer_optional] = lambda: mock_customer
 
         with TestClient(app, raise_server_exceptions=False) as client:
             yield client, mock_db
@@ -145,7 +148,7 @@ class TestCreateEndpoint:
 
         captured_args = {}
 
-        async def mock_prepare(db, tenant_id, trigger_type="kev_triggered"):
+        async def mock_prepare(db, tenant_id, trigger_type="kev_triggered", total_rounds=None):
             captured_args["trigger_type"] = trigger_type
             return fake_sim_id, mock_runner
 
@@ -207,3 +210,64 @@ class TestStatusEndpoint:
         data = resp.json()
         assert data["sim_id"] == "sim-known"
         assert data["status"] == "running"
+
+
+# ---------------------------------------------------------------------------
+# AC-004 / AC-014: GET stream endpoint emits SSE events (T-12)
+# ---------------------------------------------------------------------------
+
+class TestStreamEndpoint:
+    def test_stream_falls_back_to_arango_for_completed_run(self, app_client) -> None:
+        """AC-004: GET /stream for a completed run streams events from ArangoDB."""
+        client, mock_db = app_client
+
+        stored_events = [
+            {
+                "round_no": 1,
+                "agent_type": "Attacker",
+                "action_type": "EXPLOIT_CVE",
+                "outcome": "success",
+                "significance": 0.9,
+                "timestamp": "2026-04-14T10:01:00Z",
+            }
+        ]
+
+        mock_db.aql.execute = MagicMock(return_value=iter(stored_events))
+
+        # sim_id not in _SIM_REGISTRY → falls back to ArangoDB stream
+        resp = client.get("/v1/cse/simulations/completed-sim/stream")
+        assert resp.status_code == 200
+        assert "text/event-stream" in resp.headers.get("content-type", "")
+        body = resp.text
+        # At least one data: line and a done event
+        assert "data:" in body
+        assert "event: done" in body
+
+    def test_stream_contains_action_payload(self, app_client) -> None:
+        """AC-004: Streamed event payload includes round_no, agent_type, action_type."""
+        client, mock_db = app_client
+
+        event = {
+            "round_no": 2,
+            "agent_type": "Regulator",
+            "action_type": "ISSUE_COMPLIANCE_FINDING",
+            "outcome": "gap_recorded: CRA CRA_art_24",
+            "significance": 0.8,
+            "timestamp": "2026-04-14T10:02:00Z",
+        }
+        mock_db.aql.execute = MagicMock(return_value=iter([event]))
+
+        resp = client.get("/v1/cse/simulations/reg-sim/stream")
+        assert resp.status_code == 200
+        body = resp.text
+        assert "ISSUE_COMPLIANCE_FINDING" in body
+        assert "Regulator" in body
+
+    def test_stream_returns_404_when_no_events_in_arango(self, app_client) -> None:
+        """AC-004: GET /stream returns 404 when run has no stored events."""
+        client, mock_db = app_client
+
+        mock_db.aql.execute = MagicMock(return_value=iter([]))
+
+        resp = client.get("/v1/cse/simulations/missing-sim/stream")
+        assert resp.status_code == 404

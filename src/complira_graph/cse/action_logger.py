@@ -15,12 +15,12 @@ Thread-safety: all writes happen from the subprocess main thread only.
 from __future__ import annotations
 
 import json
-import logging
+import structlog
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-log = logging.getLogger(__name__)
+log = structlog.get_logger(__name__)
 
 
 class CyberActionLogger:
@@ -64,20 +64,40 @@ class CyberActionLogger:
         outcome: str,
         round_no: int,
         significance: float = 0.5,
+        # C-16: explainability fields
+        decision_source: str = "llm",           # "llm" | "heuristic" | "scheduled"
+        decision_reasoning: str = "",
+        game_state_snapshot: dict[str, Any] | None = None,
+        technique_id: str | None = None,
+        technique_source: str | None = None,
     ) -> None:
-        self._write(
-            {
-                "type": "action",
-                "action_type": action_type,
-                "agent_id": agent_id,
-                "agent_type": agent_type,
-                "payload": payload,
-                "outcome": outcome,
-                "round_no": round_no,
-                "significance": significance,
-                "timestamp": _now(),
+        record: dict[str, Any] = {
+            "type":              "action",
+            "action_type":       action_type,
+            "agent_id":          agent_id,
+            "agent_type":        agent_type,
+            "payload":           payload,
+            "outcome":           outcome,
+            "round_no":          round_no,
+            "significance":      significance,
+            "timestamp":         _now(),
+            "decision_source":   decision_source,
+            "decision_reasoning": decision_reasoning,
+        }
+        if game_state_snapshot is not None:
+            # Compact snapshot — only key fields to keep JSONL size manageable
+            record["game_state_snapshot"] = {
+                "exploitable_count": len(game_state_snapshot.get("exploitable_cves", [])),
+                "patched_count":     len(game_state_snapshot.get("patched_cves", [])),
+                "chain_steps":       game_state_snapshot.get("chain_step_count", 0),
+                "monitoring":        game_state_snapshot.get("monitoring_active", False),
+                "privilege_level":   game_state_snapshot.get("privilege_level", 0),
+                "attacker_phase":    game_state_snapshot.get("attacker_phase", ""),
             }
-        )
+        if technique_id:
+            record["technique_id"]     = technique_id
+            record["technique_source"] = technique_source
+        self._write(record)
 
     def close(self) -> None:
         try:

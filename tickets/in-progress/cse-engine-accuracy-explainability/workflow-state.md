@@ -4,8 +4,8 @@
 
 | Field | Value |
 |---|---|
-| Current Stage | 3 — Design Basis |
-| Code Edit Permission | Locked |
+| Current Stage | 6 — Source Implementation |
+| Code Edit Permission | Unlocked |
 | Scope | Large |
 | Branch | codex/cse-engine-accuracy-explainability |
 | Last Updated | 2026-04-16 |

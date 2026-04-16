@@ -220,6 +220,11 @@ async def get_cse_simulation_status(
     if rows and rows[0] is not None:
         result: dict[str, Any] = rows[0]
     else:
+        # Sim not in DB yet (in-progress) — synthesise only if sim_dir exists on disk
+        settings = get_settings()
+        disk_matches = list(Path(settings.CSE_DATA_DIR).glob(f"*/{sim_id}"))
+        if not disk_matches:
+            raise HTTPException(status_code=404, detail=f"Simulation run '{sim_id}' not found")
         result = {"sim_id": sim_id, "tenant_id": tenant_id, "status": "running",
                   "trigger_type": None, "started_at": None, "agent_count": None,
                   "chain_probability": None, "board_narrative": None, "top_3_actions": []}
@@ -318,10 +323,26 @@ async def stream_cse_simulation(
             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
         )
 
-    # 3. Fallback: completed run — stream events from ArangoDB (no tenant filter needed)
+    # 3. Fallback: completed run — pre-fetch events to avoid 404 inside StreamingResponse
+    # (HTTPException raised inside an async generator doesn't propagate as HTTP 404)
     db = get_reference_db()
+    _AQL_ALL = """
+    FOR e IN agent_action_logs
+      FILTER e.sim_id == @sim_id
+      SORT e.round_no ASC, e._key ASC
+      RETURN {round_no: e.round_no, agent_type: e.agent_type,
+              action_type: e.action_type, outcome: e.outcome,
+              significance: e.significance, timestamp: e.timestamp}
+    """
+    try:
+        events = list(db.aql.execute(_AQL_ALL, bind_vars={"sim_id": sim_id}))
+    except Exception as exc:
+        log.error("cse_stream_arango_prefetch_error", sim_id=sim_id, error=str(exc))
+        events = []
+    if not events:
+        raise HTTPException(status_code=404, detail=f"Simulation '{sim_id}' not found")
     return StreamingResponse(
-        _stream_from_arango(sim_id, sim_id, db),  # sim_id used as lookup key
+        _stream_events_list(events),
         media_type="text/event-stream",
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
@@ -385,6 +406,13 @@ async def _stream_from_jsonl(
             return
 
         await asyncio.sleep(_SSE_POLL_INTERVAL)
+
+
+async def _stream_events_list(events: list[dict]) -> AsyncGenerator[str, None]:
+    """Emit pre-fetched event list as SSE, then done. Used by the fallback stream path."""
+    for event in events:
+        yield f"data: {json.dumps(event)}\n\n"
+    yield "event: done\ndata: {}\n\n"
 
 
 async def _stream_from_arango(
