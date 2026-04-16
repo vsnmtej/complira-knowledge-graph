@@ -1,0 +1,59 @@
+# Workflow State — cse-situation-explainability
+
+## Current Snapshot
+
+| Field | Value |
+|---|---|
+| Current Stage | 2 — Requirements Refinement |
+| Code Edit Permission | Locked |
+| Scope | Small |
+| Branch | codex/cse-situation-explainability |
+| Last Updated | 2026-04-16 |
+
+## Stage Gates
+
+| Stage | Name | Status | Evidence |
+|---|---|---|---|
+| 0 | Bootstrap + Draft Requirement | Pass | Ticket folder created; requirements.md written |
+| 1 | Investigation + Triage | Pass | Parent ticket cse-engine-accuracy-explainability reviewed; scope = Small confirmed |
+| 2 | Requirements Refinement | Pass | requirements.md Design-ready: 12 ACs, 10 change items |
+| 3 | Design Basis | Pending | — |
+| 4 | Runtime Modeling | Pending | — |
+| 5 | Review Gate | Pending | — |
+| 6 | Source Implementation | Pending | — |
+| 7 | API/E2E Gate | Pending | — |
+| 8 | Code Review Gate | Pending | — |
+| 9 | Docs Sync | Pending | — |
+| 10 | Final Handoff | Pending | — |
+
+## Context from Parent Ticket
+
+Data already written to ArangoDB by `cse-engine-accuracy-explainability`:
+- `attack_chain_findings[*].explanation` — chain narrative per finding (JSON object)
+- `simulation_runs[*].counterfactuals` — list of counterfactual objects
+- `simulation_runs[*].audit_trail` — chronological regulatory timeline
+
+The `threat_category_rollups` collection links rollups to `run_id`, which links to
+`attack_chain_findings`. The join path for C-04/C-05 is:
+
+```
+threat_category_rollups[tenant_id, bucket_name]
+  → run_id
+  → attack_chain_findings[run_id]
+  → .explanation (chain narrative)
+```
+
+For C-06/C-07 (Board):
+```
+simulation_runs[tenant_id]
+  → .counterfactuals[]
+  → .intervention_description, .impact_if_applied
+```
+
+## Transition Log
+
+| Transition ID | Date | From | To | Reason |
+|---|---|---|---|---|
+| T-000 | 2026-04-16 | — | 0 | Bootstrap: deferred from cse-engine-accuracy-explainability C-19/C-20 |
+| T-001 | 2026-04-16 | 0 | 1 | Investigation: parent ticket reviewed, data schema confirmed in ArangoDB |
+| T-002 | 2026-04-16 | 1 | 2 | Requirements Design-ready: 12 ACs, 10 change items |
