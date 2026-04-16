@@ -19,7 +19,7 @@
 | 2 | Requirements Refinement | Pass | requirements.md Design-ready; 9 accuracy ACs + 6 explainability ACs; 20 change items |
 | 3 | Design Basis | Pass | proposed-design.md v1 written; 5 ADs, all 20 change items architecturally covered |
 | 4 | Runtime Modeling | Pass | future-state-runtime-call-stack.md v1 written; 16 use cases covering all 20 change items |
-| 5 | Review Gate | In Progress | — |
+| 5 | Review Gate | Go Confirmed | 3-round review: Round 1 BLOCKED (7 findings); Rounds 2+3 clean; Go Confirmed |
 | 6 | Source Implementation | Pending | — |
 | 7 | API/E2E Gate | Pending | — |
 | 8 | Code Review Gate | Pending | — |
@@ -56,3 +56,6 @@
 | T-003 | 2026-04-16 | 2 | 3 | proposed-design.md v1: 5 ADs, component designs, data flow, 20 test scenarios |
 | T-004 | 2026-04-16 | 3 | 4 | future-state-runtime-call-stack.md v1: 16 UCs, all 20 change items covered, cross-cutting get_state_snapshot() documented |
 | T-005 | 2026-04-16 | 4 | 5 | Advancing to Stage 5 review gate |
+| T-006 | 2026-04-16 | 5 | 5 | Round 1: BLOCKED — 7 findings (F-001–F-007); design impact on UC-01, UC-03, UC-05 |
+| T-007 | 2026-04-16 | 5 | 5 | Round 2: Candidate Go — all 7 findings addressed in call-stack v2 + proposed-design.md update |
+| T-008 | 2026-04-16 | 5 | 6 | Round 3: Go Confirmed — no regressions; note report_agent.generate() must become async (minor scope extension C-13/14/15) |

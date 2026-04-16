@@ -3,7 +3,15 @@
 ## Design Basis
 
 - Scope Classification: `Large`
-- Call Stack Version: `v1`
+- Call Stack Version: `v2`
+- Changes from v1:
+  - F-001: UC-01 now shows subprocess consume path (entity_techniques read in attacker loop)
+  - F-002: UC-03 probability modifier split into general (-0.10) + CVE-specific (-0.20) control penalty
+  - F-003: UC-04 RECON→EXPLOITATION gate corrected to round_no >= 2 AND exploitable CVEs found; run_attacker_loop signature updated
+  - F-004: UC-06 JSONL key formula changed to line-index based to prevent collision
+  - F-005: UC-11/12/13 now show asyncio.gather() for parallel LLM calls; AD-06 added
+  - F-006: UC-09 references cse/constants.py for _VALID_FRAMEWORKS (no circular import)
+  - F-007: UC-10 get_state_snapshot() moved BEFORE decision, not after
 - Requirements: `tickets/in-progress/cse-engine-accuracy-explainability/requirements.md` (status `Design-ready`)
 - Source Artifact: `tickets/in-progress/cse-engine-accuracy-explainability/proposed-design.md` v1
 - Referenced Sections: §1 Architecture Decisions, §2 Component Design, §3 Data Flow, §4 Test Plan
@@ -72,28 +80,33 @@ For a CVE with a known CWE in the graph, resolve the correct ATT&CK technique(s)
 ### Call Stack
 
 ```
-[ENTRY] simulation_manager.prepare(db, tenant_id, trigger_type)
+[MAIN PROCESS — prepare()]
+simulation_manager.prepare(db, tenant_id, trigger_type)
 └── CompliraGraphReader(db).get_attack_surface(tenant_id)
     → returns entities: list[CyberEntityNode]
 └── TechniqueResolver(db).resolve_all(entities)              # new
     ├── for each entity in entities:
     │   └── TechniqueResolver.resolve(entity.entity_id, entity.severity, db)
     │       ├── db.aql.execute(_AQL_TECHNIQUE_FROM_CVE, {"cve_key": entity.entity_id})
-    │       │   # AQL:
-    │       │   # FOR v IN vulnerabilities FILTER v._key == @cve_key
-    │       │   #   FOR cwe IN 1..1 OUTBOUND v has_weakness
-    │       │   #     FOR capec IN 1..1 INBOUND cwe capec_relates_to_cwe
-    │       │   #       FOR tech IN 1..1 OUTBOUND capec capec_maps_to_attack
-    │       │   #         RETURN DISTINCT tech.technique_id
     │       ├── [if results]: return (results[0], "graph")
     │       └── [if no results]: fall through to UC-02 fallback
     └── returns entity_techniques: dict[str, list[str]]
-        # e.g. {"CVE_2021_44228": ["T1190", "T1059"], "CVE_2022_22965": ["T1190"]}
-└── CyberSimConfigGenerator.generate(
-        sim_id, tenant_id, trigger_type, profiles, entities, sim_dir,
-        entity_techniques=entity_techniques               # new parameter
-    )
+        # {"CVE_2021_44228": ["T1190", "T1059"], "CVE_2022_22965": ["T1190"]}
+└── CyberSimConfigGenerator.generate(..., entity_techniques=entity_techniques)
     └── writes simulation_config.json["entity_techniques"] = entity_techniques
+
+[SUBPROCESS — F-001 fix: show consume path]
+run_attacker_loop(config, surface_server, logger, memory, scheduled_events)
+└── entity_techniques = config.get("entity_techniques", {})  # read from config
+└── for round_no in range(1, total_rounds + 1):
+    └── _decide_attacker_action(config, surface_server, round_no, available, entity_techniques)
+        └── _parse_action_response(raw, exploitable, available, entity_techniques)
+            └── if action == EXPLOIT_CVE:
+                ├── techniques = entity_techniques.get(cve_id, ["T1190"])
+                ├── technique = random.choice(techniques)
+                ├── source = "graph" if cve_id in entity_techniques else "fallback"
+                └── payload = {"cve_id": cve_id, "technique": technique,
+                               "technique_source": source, "agent_id": "attacker_0"}
 ```
 
 ---
@@ -164,8 +177,13 @@ actions meaningful.
     │
     ├── prob, reasons = _compute_exploit_probability(ctx)   # new
     │   ├── base = 0.85 if is_kev else 0.60
-    │   ├── apply modifiers (monitoring, detection, control, foothold, repeats)
-    │   └── return (clamped_prob, modifier_reasons_list)
+    │   ├── monitoring_active        → -0.15
+    │   ├── detection_event_exists   → -0.20
+    │   ├── any control deployed     → -0.10  (F-002: general deterrent)
+    │   ├── CVE-specific control     → -0.20  (F-002: targeted control, additive)
+    │   ├── privilege_level == 0     → -0.10
+    │   ├── prior_attempts penalty   → -0.10×n capped at -0.30
+    │   └── return (clamped_prob [0.05–0.95], modifier_reasons_list)
     │
     ├── self.exploit_attempts[cve_id] = self.exploit_attempts.get(cve_id, 0) + 1
     │
@@ -217,21 +235,23 @@ first successful exploit, cannot ESCALATE without lateral movement.
 ```
 [ENTRY] run_attacker_loop() — each round
 │
+├── # F-007 fix: snapshot BEFORE decision (captures state agent saw when deciding)
+├── game_state = surface_server.get_state_snapshot()
 ├── available = surface_server.get_available_attacker_actions()  # new method
 │   └── returns subset of ATTACKER_ACTIONS based on attacker_phase
 │
-├── _decide_attacker_action(config, surface_server, round_no, available_actions)
+├── action, payload, decision_source, decision_reasoning =
+│       _decide_attacker_action(config, surface_server, round_no, available, game_state)
 │   ├── [LLM path] prompt includes:
-│   │   "Available actions THIS round: {available_actions}"
+│   │   "Available actions THIS round: {available}"
 │   │   "Current attacker phase: {attacker_phase}"
-│   └── [fallback path] picks best action from available_actions given game state
+│   └── [fallback path] picks best action from available given game_state
 │
-├── action, payload = _parse_action_response(raw, exploitable, available_actions)
-│   └── validates action is in available_actions; rejects if not
+├── # validate action is in available; rejects if not
 │
 └── result = surface_server.apply_action(action, payload, round_no)
-    └── [on success — phase transition check]
-        ├── SCAN_SURFACE success + phase==RECON
+    └── [on success — phase transition check]  # F-003 fix: gate on round + CVEs found
+        ├── SCAN_SURFACE success + phase==RECON + round_no >= 2 + len(get_exploitable_cves()) > 0
         │   → self.attacker_phase = AttackerPhase.EXPLOITATION
         ├── EXPLOIT_CVE success + phase==EXPLOITATION
         │   → self.attacker_phase = AttackerPhase.LATERAL
@@ -344,6 +364,7 @@ for Attacker, Defender, AND Regulator agents.
 │   │           "timestamp":   entry.get("timestamp"),
 │   │       })
 │   │
+│   ├── # F-004 fix: key = f"{sim_id}_{i:06d}" (line index) — prevents collision on multi-action rounds
 │   ├── # Batch upsert in chunks of 500
 │   ├── for chunk in _chunks(entries, 500):
 │   │   └── db.aql.execute(_AQL_UPSERT_AGENT_LOGS, bind_vars={"docs": chunk})
@@ -452,9 +473,11 @@ _decide_attacker_action(config, surface_server, round_no, available_actions)
 [ENTRY] attack_surface_server.apply_action(ISSUE_COMPLIANCE_FINDING, payload, round_no)
 └── _action_issue_compliance_finding(payload, round_no)
     ├── _validate_compliance_payload(payload)              # new
+    │   ├── # F-006 fix: _VALID_FRAMEWORKS imported from cse/constants.py (no circular import)
+    │   ├── from complira_graph.cse.constants import VALID_FRAMEWORKS
     │   ├── if not payload.get("cve_id"):
     │   │   raise ValueError("ISSUE_COMPLIANCE_FINDING requires non-empty cve_id")
-    │   ├── if payload.get("framework") not in _VALID_FRAMEWORKS:
+    │   ├── if payload.get("framework") not in VALID_FRAMEWORKS:
     │   │   raise ValueError(f"Unknown framework: {payload.get('framework')}")
     │   └── return True
     │
@@ -551,6 +574,15 @@ Each narrative has all 5 fields: `entry_point_reasoning`, `success_reasoning`,
 │
 ├── [existing] _generate_board_report(chain_steps, compliance_gaps, config)
 │   → board_narrative, tef_estimate, soc_miss_probability
+│
+├── [F-005 fix: all three new calls run in parallel via asyncio.gather()]
+├── chain_narratives, counterfactuals, audit_trail = await asyncio.gather(
+│       _generate_chain_narratives(chain_steps, defender_actions, config),
+│       _generate_counterfactuals(chain_steps, action_log, config),
+│       _generate_audit_trail(chain_steps, compliance_gaps, action_log, config),
+│   )
+│   # model: config.get("report_model", settings.ANTHROPIC_MODEL_REPORT)
+│   # wall-clock: ~5s (bounded by slowest single call) vs ~15s sequential
 │
 ├── [NEW] _generate_chain_narratives(chain_steps, defender_actions, config)
 │   │
