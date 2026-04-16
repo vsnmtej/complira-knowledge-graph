@@ -204,6 +204,8 @@ export interface CSEActionEvent {
   agent_type: string;
   action_type: string;
   outcome: string;
+  significance?: number;
+  timestamp?: string;
 }
 
 export interface CSERunStatus {
@@ -254,4 +256,6 @@ export interface SituationRoomData {
   regulatory_deadlines: RegulatoryDeadline[];
   patch_priority: PatchPriorityItem[];
   situation_metadata: SituationMetrics;
+  ciso_situation?: CISOSituation;
+  board_situation?: BoardSituation;
 }

@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { getSession } from "next-auth/react";
 import type { CSERunStatus, CSEActionEvent } from "@/lib/types/situation";
+import { SimulationFishboneD3 } from "./SimulationFishboneD3";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-const POLL_INTERVAL_MS = 3000;
 const TERMINAL_STATUSES = new Set(["completed", "failed", "stopped"]);
+const MAX_EVENTS = 50;
 
 interface SimulationLivePanelProps {
   simId: string;
@@ -15,26 +15,32 @@ interface SimulationLivePanelProps {
 }
 
 const ACTION_TYPE_LABEL: Record<string, string> = {
-  SCAN_SURFACE:          "Attack surface scanned",
-  EXPLOIT_CVE:           "CVE exploited",
-  LATERAL_MOVE:          "Lateral movement",
-  ESCALATE_PRIVILEGES:   "Privilege escalation",
-  PIVOT_TARGET:          "Target pivot",
-  MONITOR:               "Monitoring",
-  DETECT:                "Threat detected",
-  INVESTIGATE:           "Investigation",
-  ESCALATE_TO_CISO:      "CISO alerted",
-  PATCH:                 "Patch deployed",
-  DEPLOY_CONTROL:        "Control deployed",
-  ROTATE_CREDENTIAL:     "Credential rotated",
-  FILE_CRA_NOTIFICATION: "CRA notification filed",
-  NOTIFY_BOARD:          "Board notified",
-  ACKNOWLEDGE:           "Acknowledged",
+  SCAN_SURFACE:             "Attack surface scanned",
+  EXPLOIT_CVE:              "CVE exploited",
+  LATERAL_MOVE:             "Lateral movement",
+  ESCALATE_PRIVILEGES:      "Privilege escalation",
+  PIVOT_TARGET:             "Target pivot",
+  MONITOR:                  "Monitoring",
+  DETECT:                   "Threat detected",
+  INVESTIGATE:              "Investigation",
+  ESCALATE_TO_CISO:         "CISO alerted",
+  PATCH:                    "Patch deployed",
+  DEPLOY_CONTROL:           "Control deployed",
+  ROTATE_CREDENTIAL:        "Credential rotated",
+  FILE_CRA_NOTIFICATION:    "CRA notification filed",
+  NOTIFY_BOARD:             "Board notified",
+  ACKNOWLEDGE:              "Acknowledged",
+  AUDIT_VULNERABILITY:      "Vulnerability audited",
+  ISSUE_COMPLIANCE_FINDING: "Compliance gap recorded",
+  FILE_INCIDENT_REPORT:     "Incident report filed",
+  NOTIFY_REGULATOR:         "Regulator notified",
+  APPROVE_EXCEPTION:        "Risk exception approved",
 };
 
 const AGENT_TYPE_COLOR: Record<string, string> = {
   Attacker:   "bg-red-500",
   SOCAnalyst: "bg-blue-500",
+  Defender:   "bg-blue-500",
   DevSecOps:  "bg-green-500",
   CISO:       "bg-purple-500",
   Regulator:  "bg-orange-400",
@@ -66,58 +72,120 @@ function EventRow({ event }: { event: CSEActionEvent }) {
 
 export function SimulationLivePanel({ simId, onComplete }: SimulationLivePanelProps) {
   const [run, setRun] = useState<CSERunStatus | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [events, setEvents] = useState<CSEActionEvent[]>([]);
+  const [liveRound, setLiveRound] = useState<number>(0);
+  const [streamError, setStreamError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"graph" | "feed">("graph");
   const completedRef = useRef(false);
+  const esRef = useRef<EventSource | null>(null);
+
+  // Fetch run metadata (status, agent_count, total_rounds, etc.)
+  async function fetchStatus(): Promise<CSERunStatus | null> {
+    try {
+      const res = await fetch(`${API_URL}/v1/cse/simulations/${simId}/status`);
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  }
 
   useEffect(() => {
     let cancelled = false;
 
-    async function poll() {
-      if (completedRef.current || cancelled) return;
+    async function startStream() {
+      // Fetch initial metadata (only available once sim is in DB — may be null for new runs)
+      const initialRun = await fetchStatus();
+      if (cancelled) return;
 
-      try {
-        const session = await getSession();
-        if (!session?.accessToken) return;
-
-        const res = await fetch(`${API_URL}/v1/cse/simulations/${simId}/status`, {
-          headers: { Authorization: `Bearer ${session.accessToken}` },
-        });
-
-        if (!res.ok) {
-          setError(`Failed to fetch status: ${res.status}`);
+      if (initialRun) {
+        setRun(initialRun);
+        // Already finished before we connected — show final state and exit
+        if (TERMINAL_STATUSES.has(initialRun.status)) {
+          completedRef.current = true;
+          onComplete?.(initialRun);
           return;
         }
-
-        const data: CSERunStatus = await res.json();
-        if (cancelled) return;
-
-        setRun(data);
-        setError(null);
-
-        if (TERMINAL_STATUSES.has(data.status)) {
-          completedRef.current = true;
-          if (pollingRef.current) clearInterval(pollingRef.current);
-          onComplete?.(data);
-        }
-      } catch (err) {
-        if (!cancelled) setError(String(err));
+      } else {
+        // Sim not in DB yet (in-progress) — synthesize a running state so the panel renders
+        setRun({
+          sim_id: simId,
+          tenant_id: "",
+          status: "running",
+          trigger_type: "monthly_posture_sim",
+          started_at: new Date().toISOString(),
+          current_round: null,
+          total_rounds: null,
+          agent_count: null,
+          chain_count: null,
+          chain_probability: null,
+          board_narrative: null,
+          top_3_actions: [],
+          recent_events: [],
+        });
       }
+
+      // Stream endpoint is auth-free (sim_id UUID is the capability token)
+      const streamUrl = `${API_URL}/v1/cse/simulations/${simId}/stream`;
+      const es = new EventSource(streamUrl);
+      esRef.current = es;
+
+      es.onmessage = (e: MessageEvent) => {
+        if (cancelled) return;
+        try {
+          const event = JSON.parse(e.data) as CSEActionEvent;
+          setEvents((prev) => [event, ...prev].slice(0, MAX_EVENTS));
+          if (event.round_no) setLiveRound((prev) => Math.max(prev, event.round_no));
+        } catch {
+          // malformed event — ignore
+        }
+      };
+
+      es.addEventListener("done", async () => {
+        if (cancelled) return;
+        es.close();
+        completedRef.current = true;
+        // Poll for final status — writeback may take a few seconds after stream closes
+        let finalRun: CSERunStatus | null = null;
+        for (let i = 0; i < 6; i++) {
+          await new Promise((r) => setTimeout(r, 2000));
+          finalRun = await fetchStatus();
+          if (finalRun) break;
+        }
+        if (cancelled) return;
+        if (finalRun) {
+          setRun(finalRun);
+          onComplete?.(finalRun);
+        } else {
+          // Writeback still pending — mark completed with what we know from the stream
+          setRun((prev) => prev ? { ...prev, status: "completed" } : null);
+          onComplete?.({ sim_id: simId } as CSERunStatus);
+        }
+      });
+
+      es.onerror = () => {
+        if (cancelled) return;
+        es.close();
+        if (!completedRef.current) {
+          setStreamError("Stream connection lost — simulation may still be running.");
+        }
+      };
     }
 
-    poll();
-    pollingRef.current = setInterval(poll, POLL_INTERVAL_MS);
+    startStream();
 
     return () => {
       cancelled = true;
-      if (pollingRef.current) clearInterval(pollingRef.current);
+      esRef.current?.close();
+      esRef.current = null;
     };
-  }, [simId, onComplete]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [simId]);
 
-  if (error) {
+  if (streamError && !run) {
     return (
       <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
-        {error}
+        {streamError}
       </div>
     );
   }
@@ -134,9 +202,13 @@ export function SimulationLivePanel({ simId, onComplete }: SimulationLivePanelPr
   }
 
   const isRunning = !TERMINAL_STATUSES.has(run.status);
+  const currentRound = liveRound || run.current_round || 0;
   const roundDisplay = run.total_rounds
-    ? `${run.current_round ?? 0} / ${run.total_rounds}`
-    : String(run.current_round ?? 0);
+    ? `${currentRound} / ${run.total_rounds}`
+    : liveRound > 0 ? String(liveRound) : "—";
+
+  // Merge SSE events with any recent_events from the status snapshot
+  const displayEvents = events.length > 0 ? events : (run.recent_events ?? []);
 
   return (
     <div className="rounded-lg border border-border bg-card overflow-hidden">
@@ -176,22 +248,67 @@ export function SimulationLivePanel({ simId, onComplete }: SimulationLivePanelPr
         </div>
       </div>
 
-      {/* Live event feed */}
+      {/* Tab bar */}
+      <div className="flex border-b border-border">
+        {(["graph", "feed"] as const).map(tab => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-colors ${
+              activeTab === tab
+                ? "text-foreground border-b-2 border-primary -mb-px"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {tab === "graph" ? "Fish Graph" : "Agent Feed"}
+          </button>
+        ))}
+        {isRunning && (
+          <span className="ml-auto px-4 py-2 text-[10px] text-green-500 font-medium">● live</span>
+        )}
+      </div>
+
+      {/* Fish graph */}
+      {activeTab === "graph" && (
+        <div className="p-2">
+          {streamError && <p className="text-[11px] text-amber-500 mb-1 px-2">{streamError}</p>}
+          {displayEvents.length === 0 ? (
+            <p className="text-xs text-muted-foreground py-4 text-center">Waiting for simulation events…</p>
+          ) : (
+            <SimulationFishboneD3
+              events={[...displayEvents].reverse()}
+              totalRounds={run.total_rounds ?? 720}
+              isRunning={isRunning}
+            />
+          )}
+        </div>
+      )}
+
+      {/* Agent feed */}
+      {activeTab === "feed" && (
       <div className="px-4 pt-3 pb-1">
         <div className="flex items-center justify-between mb-2">
           <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">
             Agent actions
           </span>
-          <span className="text-[10px] text-muted-foreground">most recent first</span>
+          <span className="text-[10px] text-muted-foreground">
+            {isRunning ? "live" : "most recent first"}
+          </span>
         </div>
+        {streamError && (
+          <p className="text-[11px] text-amber-500 mb-1">{streamError}</p>
+        )}
         <div className="max-h-52 overflow-y-auto">
-          {run.recent_events.length === 0 ? (
+          {displayEvents.length === 0 ? (
             <p className="text-xs text-muted-foreground py-2">No agent events yet.</p>
           ) : (
-            run.recent_events.map((ev, i) => <EventRow key={`${ev.round_no}-${ev.agent_type}-${i}`} event={ev} />)
+            displayEvents.map((ev, i) => (
+              <EventRow key={`${ev.round_no}-${ev.agent_type}-${i}`} event={ev} />
+            ))
           )}
         </div>
       </div>
+      )}
     </div>
   );
 }

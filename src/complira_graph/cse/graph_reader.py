@@ -14,7 +14,7 @@ Target: < 200ms for tenants with < 100 CVEs (uses tenant_id indexes).
 
 from __future__ import annotations
 
-import logging
+import structlog
 import time
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
@@ -22,7 +22,25 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from arango.database import StandardDatabase
 
-log = logging.getLogger(__name__)
+log = structlog.get_logger(__name__)
+
+# AQL: global CVE fallback for dev/demo tenants with no scan data
+_AQL_GLOBAL_CVE_FALLBACK = """
+FOR v IN vulnerabilities
+    FILTER LEFT(v._key, 3) == "CVE"
+    FILTER v.cvss_v3_score != null
+    FILTER TO_NUMBER(v.cvss_v3_score) >= 7.0
+    SORT (v.is_kev == true OR v.kev == true) DESC, TO_NUMBER(v.cvss_v3_score) DESC
+    LIMIT 15
+    RETURN {
+        entity_id:      v._key,
+        entity_type:    "cve",
+        severity:       TO_NUMBER(v.cvss_v3_score),
+        is_kev:         (v.is_kev == true OR v.kev == true),
+        component_name: v.cve_id,
+        regulatory_refs: []
+    }
+"""
 
 
 @dataclass
@@ -35,38 +53,38 @@ class CyberEntityNode:
     component_name: str = ""
 
 
-# AQL: fetch CVEs + components + regulatory obligations for a tenant
+# AQL: fetch CVEs + components for a tenant via component_has_vuln edges
 _AQL_ATTACK_SURFACE = """
 LET tenant_key = @tenant_id
 
 LET cves = (
-    FOR scan IN scans
-        FILTER scan.customer_key == tenant_key
-        FOR v IN 1..2 OUTBOUND scan scan_has_vulnerability
-            FILTER v._id != null
-            RETURN DISTINCT {
-                entity_id:     v._key,
-                entity_type:   "cve",
-                severity:      TO_NUMBER(v.cvss_base_score),
-                is_kev:        (v.is_kev == true OR v.kev == true),
-                component_name: CONCAT(v.product_name, " ", v.version),
-                regulatory_refs: []
-            }
+    FOR edge IN component_has_vuln
+        FILTER edge.tenant_id == tenant_key
+        LET v = DOCUMENT(edge._to)
+        FILTER v != null
+        RETURN DISTINCT {
+            entity_id:     v._key,
+            entity_type:   "cve",
+            severity:      TO_NUMBER(v.cvss_v3_score != null ? v.cvss_v3_score : v.cvss_base_score),
+            is_kev:        (v.is_kev == true OR v.kev == true),
+            component_name: v.cve_id != null ? v.cve_id : CONCAT(v.product_name, " ", v.version),
+            regulatory_refs: []
+        }
 )
 
 LET components = (
-    FOR scan IN scans
-        FILTER scan.customer_key == tenant_key
-        FOR c IN 1..1 OUTBOUND scan scan_has_component
-            FILTER c._id != null
-            RETURN DISTINCT {
-                entity_id:     c._key,
-                entity_type:   "component",
-                severity:      0.0,
-                is_kev:        false,
-                component_name: CONCAT(c.name, " ", c.version),
-                regulatory_refs: []
-            }
+    FOR edge IN component_has_vuln
+        FILTER edge.tenant_id == tenant_key
+        LET c = DOCUMENT(edge._from)
+        FILTER c != null
+        RETURN DISTINCT {
+            entity_id:     c._key,
+            entity_type:   "component",
+            severity:      0.0,
+            is_kev:        false,
+            component_name: CONCAT(c.name, " ", c.version),
+            regulatory_refs: []
+        }
 )
 
 RETURN {cves: cves, components: components}
@@ -113,13 +131,36 @@ class CompliraGraphReader:
                 seen.add(n.entity_id)
                 unique_nodes.append(n)
 
+        if unique_nodes:
+            log.info(
+                "cse_graph_reader_fetched",
+                tenant_id=tenant_id,
+                entity_count=len(unique_nodes),
+                elapsed_ms=elapsed_ms,
+            )
+            return unique_nodes
+
+        # No tenant-specific scan data — fall back to global CVE sample (dev/demo)
+        log.warning(
+            "cse_graph_reader_no_tenant_data_fallback",
+            tenant_id=tenant_id,
+            fallback="global_cve_sample",
+        )
+        try:
+            fb_cursor = self._db.aql.execute(_AQL_GLOBAL_CVE_FALLBACK)
+            fb_nodes = [_dict_to_node(r) for r in fb_cursor]
+        except Exception as exc:
+            log.error("cse_graph_reader_fallback_error", error=str(exc))
+            fb_nodes = []
+
         log.info(
             "cse_graph_reader_fetched",
             tenant_id=tenant_id,
-            entity_count=len(unique_nodes),
-            elapsed_ms=elapsed_ms,
+            entity_count=len(fb_nodes),
+            source="global_fallback",
+            elapsed_ms=int((time.monotonic() - t0) * 1000),
         )
-        return unique_nodes
+        return fb_nodes
 
 
 def _dict_to_node(d: dict[str, Any]) -> CyberEntityNode:

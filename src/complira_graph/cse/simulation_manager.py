@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import asyncio
 import json
-import logging
+import structlog
 import time
 import uuid
 from datetime import datetime, timezone
@@ -32,7 +32,7 @@ from complira_graph.simulation.writeback_service import SimulationWritebackServi
 if TYPE_CHECKING:
     from arango.database import StandardDatabase
 
-log = logging.getLogger(__name__)
+log = structlog.get_logger(__name__)
 
 _COMPLETION_POLL_INTERVAL_S = 2.0
 _COMPLETION_TIMEOUT_S = 7200.0  # 2 hours max
@@ -54,6 +54,7 @@ class CyberSimulationManager:
         db: "StandardDatabase",
         tenant_id: str,
         trigger_type: str = "kev_triggered",
+        total_rounds: int | None = None,
     ) -> tuple[str, CyberSimulationRunner]:
         """
         Run prepare pipeline. Returns (sim_id, runner).
@@ -78,7 +79,8 @@ class CyberSimulationManager:
 
         # Config synthesis
         config_gen = CyberSimConfigGenerator()
-        config_gen.generate(sim_id, tenant_id, trigger_type, profiles, entities, sim_dir)
+        config_gen.generate(sim_id, tenant_id, trigger_type, profiles, entities, sim_dir,
+                           total_rounds_override=total_rounds)
 
         # Upsert simulation_runs in ArangoDB
         self._upsert_simulation_run(db, sim_id, tenant_id, trigger_type, "ready")
@@ -119,9 +121,12 @@ class CyberSimulationManager:
             log.error("cse_complete_subprocess_failed", sim_id=sim_id)
             return {"sim_id": sim_id, "status": "failed"}
 
+        # Flush JSONL action logs → ArangoDB before report agent queries them
+        self._flush_action_logs_to_arango(db, sim_id, tenant_id, runner.sim_dir)
+
         # Run report agent
         report_agent = CyberReportAgent()
-        report = report_agent.run(db, sim_id, tenant_id)
+        report = report_agent.run(db, sim_id, tenant_id, sim_dir=runner.sim_dir)
 
         # Write-back
         try:
@@ -140,6 +145,66 @@ class CyberSimulationManager:
     # ------------------------------------------------------------------
     # Internal
     # ------------------------------------------------------------------
+
+    def _flush_action_logs_to_arango(
+        self,
+        db: "StandardDatabase",
+        sim_id: str,
+        tenant_id: str,
+        sim_dir: Path,
+    ) -> None:
+        """Read cyber_actions.jsonl and upsert action entries into agent_action_logs."""
+        import json as _json
+        jsonl_path = sim_dir / "cyber_actions.jsonl"
+        if not jsonl_path.exists():
+            return
+        try:
+            lines = jsonl_path.read_text(encoding="utf-8").splitlines()
+        except Exception as exc:
+            log.warning("cse_flush_logs_read_error", sim_id=sim_id, error=str(exc))
+            return
+
+        _AQL = """
+        UPSERT { _key: @key }
+        INSERT {
+          _key: @key, sim_id: @sim_id, tenant_id: @tenant_id,
+          agent_id: @agent_id, agent_type: @agent_type,
+          action_type: @action_type, outcome: @outcome,
+          round_no: @round_no, significance: @significance,
+          episode_text: @episode_text, timestamp: @timestamp
+        }
+        UPDATE {}
+        IN agent_action_logs
+        """
+        written = 0
+        for i, line in enumerate(lines):
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                entry = _json.loads(line)
+            except Exception:
+                continue
+            if entry.get("type") != "action":
+                continue
+            try:
+                db.aql.execute(_AQL, bind_vars={
+                    "key":         f"{sim_id}_{i}",
+                    "sim_id":      sim_id,
+                    "tenant_id":   tenant_id,
+                    "agent_id":    entry.get("agent_id", ""),
+                    "agent_type":  entry.get("agent_type", ""),
+                    "action_type": entry.get("action_type", ""),
+                    "outcome":     entry.get("outcome", ""),
+                    "round_no":    entry.get("round_no", 0),
+                    "significance": entry.get("significance", 0.0),
+                    "episode_text": entry.get("episode_text", ""),
+                    "timestamp":   entry.get("timestamp", ""),
+                })
+                written += 1
+            except Exception as exc:
+                log.warning("cse_flush_log_write_error", sim_id=sim_id, error=str(exc))
+        log.info("cse_action_logs_flushed", sim_id=sim_id, count=written)
 
     def _create_sim_directories(self, sim_dir: Path) -> None:
         (sim_dir / "ipc_commands").mkdir(parents=True, exist_ok=True)
@@ -192,6 +257,8 @@ class CyberSimulationManager:
         except Exception:
             pass
 
+        jsonl_actions = _read_jsonl_actions(runner.sim_dir)
+
         return {
             "run_id":      sim_id,
             "tenant_id":   tenant_id,
@@ -203,23 +270,107 @@ class CyberSimulationManager:
             "status":      "completed",
             "agent_count": len(config.get("agent_profiles", [])),
             "round_count": config.get("total_rounds", 0),
-            "attack_chains": _build_attack_chains(report),
+            "attack_chains": _build_attack_chains(report, sim_id, jsonl_actions),
             "playbook_steps": _build_playbook_steps(report, sim_id),
-            "compliance_gaps": [],
+            "compliance_gaps": _build_compliance_gaps(report, sim_id, tenant_id, jsonl_actions),
             "agent_outputs": _build_agent_outputs(report),
         }
 
 
-def _build_attack_chains(report: dict[str, Any]) -> list[dict[str, Any]]:
-    if not report.get("chain_probability"):
+def _read_jsonl_actions(sim_dir: Path) -> list[dict[str, Any]]:
+    """Read action entries from cyber_actions.jsonl."""
+    jsonl_path = sim_dir / "cyber_actions.jsonl"
+    if not jsonl_path.exists():
         return []
+    result = []
+    try:
+        for line in jsonl_path.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                entry = json.loads(line)
+                if entry.get("type") == "action":
+                    result.append(entry)
+            except Exception:
+                pass
+    except Exception:
+        pass
+    return result
+
+
+def _build_compliance_gaps(
+    report: dict[str, Any],
+    sim_id: str,
+    tenant_id: str,
+    jsonl_actions: list[dict[str, Any]] | None = None,
+) -> list[dict[str, Any]]:
+    """Map Regulator compliance gaps from report; synthesize from AUDIT actions if empty."""
+    gaps = report.get("compliance_gaps") or []
+    if not gaps and jsonl_actions:
+        # Synthesize gaps from Regulator AUDIT_VULNERABILITY actions
+        audit_actions = [a for a in jsonl_actions if a.get("action_type") == "AUDIT_VULNERABILITY"]
+        for i, action in enumerate(audit_actions[:5]):
+            cve = action.get("payload", {}).get("cve_id", f"unknown_{i}")
+            gaps.append({
+                "requirement_key": f"CRA_ART13_{i}",
+                "framework": "CRA",
+                "description": f"Vulnerability {cve} exploited in simulation without timely remediation",
+                "severity": "high",
+                "cve_id": cve,
+                "round_no": action.get("round_no", 0),
+            })
+    result = []
+    for i, gap in enumerate(gaps):
+        result.append({
+            "gap_key":         f"{sim_id}_gap_{i}",
+            "run_id":          sim_id,
+            "tenant_id":       tenant_id,
+            "requirement_key": gap.get("requirement_key", "unknown"),
+            "framework":       gap.get("framework", "CRA"),
+            "description":     gap.get("description", ""),
+            "severity":        gap.get("severity", "medium"),
+            "cve_id":          gap.get("cve_id"),
+            "round_no":        gap.get("round_no", 0),
+        })
+    return result
+
+
+def _build_attack_chains(
+    report: dict[str, Any],
+    sim_id: str,
+    jsonl_actions: list[dict[str, Any]] | None = None,
+) -> list[dict[str, Any]]:
+    """Build attack chain finding from report + JSONL technique data."""
+    probability = report.get("chain_probability") or 0.0
+
+    # Extract techniques from attacker exploit actions in JSONL
+    chain_steps: list[dict[str, Any]] = []
+    if jsonl_actions:
+        exploit_actions = [a for a in jsonl_actions if a.get("action_type") == "EXPLOIT_CVE"]
+        seen_techniques: set[str] = set()
+        for action in exploit_actions:
+            technique = action.get("payload", {}).get("technique", "T1190")
+            if technique not in seen_techniques:
+                chain_steps.append({"technique": technique, "outcome": action.get("outcome", "")})
+                seen_techniques.add(technique)
+        if not probability and exploit_actions:
+            # Derive probability from exploit success rate
+            successes = sum(1 for a in exploit_actions if "success" in a.get("outcome", "").lower())
+            probability = min(0.95, successes / max(len(exploit_actions), 1) * 0.9)
+
+    if not probability and not chain_steps:
+        return []
+
     return [{
-        "finding_key":      f"cse_chain_{report.get('sim_id', 'unknown')}",
+        "finding_key":      f"cse_chain_{sim_id}",
         "cve_id":           "attack_surface_sim",
         "chain_nodes":      [],
         "chain_edges":      [],
+        "chain_steps":      chain_steps,
         "soc_blind_spots":  [],
-        "confidence":       float(report.get("chain_probability", 0.0)),
+        "confidence":       float(probability),
+        "chain_probability": float(probability),
         "vex_statement_key": None,
         "component_keys":   [],
         "fair_scenario_key": None,
@@ -241,15 +392,31 @@ def _build_playbook_steps(report: dict[str, Any], sim_id: str) -> list[dict[str,
 
 def _build_agent_outputs(report: dict[str, Any]) -> list[dict[str, Any]]:
     narrative = report.get("board_narrative", "")
-    if not narrative:
-        return []
-    return [{
-        "agent_type":    "CISO",
-        "impact_type":   "board_narrative",
-        "narrative":     narrative,
-        "tef_estimate":  report.get("tef_estimate"),
-        "soc_miss_probability": report.get("soc_miss_probability"),
-    }]
+    tef = report.get("tef_estimate") or 0.0
+    outputs = []
+    if narrative:
+        # board_member_agent — written to business_impact_findings by step 8b
+        outputs.append({
+            "agent_type":      "board_member_agent",
+            "impact_type":     "reputational_risk",
+            "narrative":       narrative,
+            "estimated_value": 0.0,
+            "currency":        "USD",
+            "framework":       None,
+            "confidence":      report.get("soc_miss_probability") or 0.7,
+        })
+        # cfo_agent — financial exposure from tef_estimate
+        if tef:
+            outputs.append({
+                "agent_type":      "cfo_agent",
+                "impact_type":     "financial_exposure",
+                "narrative":       f"Annualised loss expectancy estimated at ${tef:.1f}M based on exploit chain analysis.",
+                "estimated_value": float(tef) * 1_000_000,
+                "currency":        "USD",
+                "framework":       None,
+                "confidence":      0.65,
+            })
+    return outputs
 
 
 def _read_run_state(sim_dir: Path) -> dict[str, Any] | None:

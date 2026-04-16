@@ -197,6 +197,15 @@ async def get_customer_from_api_key(api_key: str):
         return None
 
 
+_DEV_CUSTOMER = CustomerProfile(
+    _key="19349158",
+    name="MedCore Systems (dev)",
+    tier="enterprise",
+    frameworks=["FDA_524B", "IEC_62443", "CRA"],
+    database_name="complira_graph",
+)
+
+
 async def get_current_customer(
     api_key: Optional[str] = Depends(api_key_header),
     token: Optional[str] = Depends(oauth2_scheme),
@@ -230,6 +239,17 @@ async def get_current_customer(
             # customer.database_name is the customer's isolated database
             ...
     """
+    import os
+    _env = os.environ.get("ENVIRONMENT")
+    if not _env:
+        # pydantic-settings reads .env but doesn't push to os.environ — load manually
+        try:
+            from dotenv import dotenv_values
+            _env = dotenv_values(".env").get("ENVIRONMENT", "")
+        except Exception:
+            _env = ""
+    _is_dev = _env == "development"
+
     # Strategy 1: Try JWT authentication first (web UI users)
     if token:
         try:
@@ -292,6 +312,11 @@ async def get_current_customer(
                 status_code=401,
                 detail="Invalid API key",
             )
+
+    # Dev bypass — no valid credentials but running in development mode
+    if _is_dev:
+        logger.debug("dev_bypass_auth", tenant=_DEV_CUSTOMER._key, reason="no_valid_credentials")
+        return _DEV_CUSTOMER
 
     # No authentication provided
     logger.warning("No authentication provided (missing both JWT and API key)")
