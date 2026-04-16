@@ -302,7 +302,7 @@ def _action_exploit_cve(server: AttackSurfaceServer, payload: dict, round_no: in
     if server.attacker_phase == AttackerPhase.EXPLOITATION:
         server.attacker_phase = AttackerPhase.LATERAL
 
-    # SOC blind spot: success when detection event exists
+    # SOC blind spot: exploit succeeded but defender never detected it
     detected_ids = {e["cve_id"] for e in server.detection_events if e.get("cve_id")}
     is_blind_spot = cve_id not in detected_ids
 

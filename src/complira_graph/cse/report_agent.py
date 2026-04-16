@@ -245,7 +245,7 @@ def _parse_report(raw: str, sim_id: str) -> dict[str, Any]:
     except json.JSONDecodeError:
         pass
     # Try to find JSON object embedded in text
-    match = _re.search(r'\{.*\}', raw, _re.DOTALL)
+    match = _re.search(r'\{.*?\}', raw, _re.DOTALL)
     if match:
         try:
             report = json.loads(match.group())
