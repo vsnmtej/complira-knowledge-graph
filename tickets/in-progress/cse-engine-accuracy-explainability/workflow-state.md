@@ -21,7 +21,7 @@
 | 4 | Runtime Modeling | Pass | future-state-runtime-call-stack.md v1 written; 16 use cases covering all 20 change items |
 | 5 | Review Gate | Go Confirmed | 3-round review: Round 1 BLOCKED (7 findings); Rounds 2+3 clean; Go Confirmed |
 | 6 | Source Implementation | Pending | — |
-| 7 | API/E2E Gate | Pending | — |
+| 7 | API/E2E Gate | Pass | 45 new ACs tests + 101 existing = 146 total, 0 failed. All S-A01–S-A20 covered. |
 | 8 | Code Review Gate | Pending | — |
 | 9 | Docs Sync | Pending | — |
 | 10 | Final Handoff | Pending | — |
