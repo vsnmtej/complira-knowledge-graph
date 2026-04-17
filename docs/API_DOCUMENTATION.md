@@ -128,9 +128,29 @@ trending.
     }
   ],
   "snapshot_timestamp": "2026-04-14T00:00:00Z",
-  "data_staleness_warning": null
+  "data_staleness_warning": null,
+  "threat_category_explanations": [
+    {
+      "bucket_name": "remote_code_execution",
+      "driving_events": [
+        "Unmonitored public-facing service exploited via command injection technique",
+        "No patch deployed after 12 rounds of exposure"
+      ],
+      "turning_point_round": null,
+      "effective_defender_actions": ["CISO alerted at round 18 after 3 chain steps"],
+      "what_would_have_helped": "Enable endpoint monitoring before round 6 to detect the exploitation attempt"
+    }
+  ]
 }
 ```
+
+**`threat_category_explanations`** *(optional, `[]` when no simulation has run)*  
+Per-bucket explanation of what drove breach probability, sourced from chain narrative data
+stored in `attack_chain_findings[].explanation` after each simulation. Fields:
+- `driving_events` — 1–2 sentences on what the attacker did (no CVE IDs)
+- `effective_defender_actions` — what the defender did in response
+- `what_would_have_helped` — single countermeasure that would have broken the chain
+- `turning_point_round` — `null` (enrichment-ready: round where probability jumped most)
 
 **Posture score formula:**
 `100 − round(mean_chain_probability × 40) − (gap_count × 3) − round(soc_miss_rate × 20) + round(attck_coverage × 0.1)` clamped [0, 100].
@@ -162,9 +182,23 @@ Returns `BoardSituation` — breach probability, financial exposure range, regul
   ],
   "reputational_risk_score": 0.35,
   "board_priorities": [],
-  "snapshot_timestamp": "2026-04-14T00:00:00Z"
+  "snapshot_timestamp": "2026-04-14T00:00:00Z",
+  "exposure_derivation": {
+    "narrative": "Exposure of $0.5M–$2.5M derived from 2 confirmed attack chains (42% breach probability). Deploying endpoint detection on internet-facing devices would reduce the upper bound by ~60%.",
+    "contributing_chains": 2,
+    "highest_confidence_chain": "Public-facing service exploited at round 6, no prior detection events",
+    "investment_recommendation": "Deploy endpoint detection on internet-facing devices"
+  }
 }
 ```
+
+**`exposure_derivation`** *(optional, `null` when no simulation has run)*  
+Plain-English explanation of how the financial exposure figure was calculated, sourced from
+`simulation_runs.counterfactuals` written by the report agent after each simulation. Fields:
+- `narrative` — 1–2 sentence derivation (no CVE IDs); includes top counterfactual impact
+- `contributing_chains` — number of attack chains feeding the TEF estimate
+- `highest_confidence_chain` — description of the top chain (no CVE IDs)
+- `investment_recommendation` — single intervention that would reduce exposure most
 
 ---
 

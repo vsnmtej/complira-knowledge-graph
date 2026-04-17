@@ -23,7 +23,7 @@
 | 6 | Source Implementation | Pending | — |
 | 7 | API/E2E Gate | Pass | 21 new AC tests + 146 existing = 167 total, 0 failed. All AC-01–AC-12 covered. |
 | 8 | Code Review Gate | Pass | 5 files reviewed: 0 Blockers, 0 Majors, 0 Minors, 2 Nitpicks (noted, not fixed). Gate: PASS |
-| 9 | Docs Sync | Pending | — |
+| 9 | Docs Sync | Pass | API_DOCUMENTATION.md: threat_category_explanations added to /ciso response; exposure_derivation added to /board response |
 | 10 | Final Handoff | Pending | — |
 
 ## Context from Parent Ticket
