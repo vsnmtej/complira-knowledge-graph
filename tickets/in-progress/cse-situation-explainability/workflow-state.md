@@ -18,8 +18,8 @@
 | 1 | Investigation + Triage | Pass | Parent ticket cse-engine-accuracy-explainability reviewed; scope = Small confirmed |
 | 2 | Requirements Refinement | Pass | requirements.md Design-ready: 12 ACs, 10 change items |
 | 3 | Design Basis | Pass | proposed-design.md v1: 5 ADs, 2 new models, 2 AQL queries, ~140 lines additive delta |
-| 4 | Runtime Modeling | Pending | — |
-| 5 | Review Gate | Pending | — |
+| 4 | Runtime Modeling | Pass | future-state-runtime-call-stack.md v1: 6 UCs, all 10 change items covered, graceful-empty paths documented |
+| 5 | Review Gate | In Progress | — |
 | 6 | Source Implementation | Pending | — |
 | 7 | API/E2E Gate | Pending | — |
 | 8 | Code Review Gate | Pending | — |
