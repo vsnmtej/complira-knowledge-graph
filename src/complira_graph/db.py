@@ -399,6 +399,28 @@ INDEXES = {
         {"type": "persistent", "fields": ["framework"]},
         {"type": "persistent", "fields": ["control_id"]},
     ],
+
+    # CSE simulation indexes
+    "simulation_runs": [
+        {"type": "persistent", "fields": ["tenant_id", "status"]},
+        {"type": "persistent", "fields": ["tenant_id", "completed_at"]},
+    ],
+    "attack_chain_findings": [
+        # Primary lookup: run_id + confidence DESC (used by chain narrative AQL)
+        {"type": "persistent", "fields": ["run_id", "confidence"]},
+        {"type": "persistent", "fields": ["tenant_id"]},
+    ],
+    "threat_category_rollups": [
+        # F-001 fix AQL: FILTER tenant_id + bucket_name, SORT computed_at DESC
+        {"type": "persistent", "fields": ["tenant_id", "bucket_name", "computed_at"]},
+    ],
+    "agent_action_logs": [
+        {"type": "persistent", "fields": ["sim_id", "round_no"]},
+        {"type": "persistent", "fields": ["tenant_id"]},
+    ],
+    "compliance_gap_findings": [
+        {"type": "persistent", "fields": ["tenant_id", "run_id"]},
+    ],
 }
 
 

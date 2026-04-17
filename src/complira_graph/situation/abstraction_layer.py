@@ -687,12 +687,18 @@ def _build_exposure_derivation(
     chain_count     = run_data.get("chain_count") or 0
     top_cf          = counterfactuals[0] if counterfactuals else {}
 
-    low_m  = (financial_exposure_low  or 0) / 1_000_000
-    high_m = (financial_exposure_high or 0) / 1_000_000
-
     impact = (top_cf.get("impact_if_applied") or "").strip()
+
+    # Build exposure range — omit range when no financial data yet
+    if financial_exposure_low is not None and financial_exposure_high is not None:
+        low_m  = financial_exposure_low  / 1_000_000
+        high_m = financial_exposure_high / 1_000_000
+        range_str = f"${low_m:.1f}M\u2013${high_m:.1f}M "
+    else:
+        range_str = "financial exposure "
+
     narrative = (
-        f"Exposure of ${low_m:.1f}M\u2013${high_m:.1f}M derived from "
+        f"Estimated {range_str}derived from "
         f"{chain_count} confirmed attack chain"
         f"{'s' if chain_count != 1 else ''} "
         f"({breach_probability_pct:.0f}% breach probability)."
