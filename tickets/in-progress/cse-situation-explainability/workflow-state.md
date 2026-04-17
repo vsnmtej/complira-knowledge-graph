@@ -17,7 +17,7 @@
 | 0 | Bootstrap + Draft Requirement | Pass | Ticket folder created; requirements.md written |
 | 1 | Investigation + Triage | Pass | Parent ticket cse-engine-accuracy-explainability reviewed; scope = Small confirmed |
 | 2 | Requirements Refinement | Pass | requirements.md Design-ready: 12 ACs, 10 change items |
-| 3 | Design Basis | Pending | — |
+| 3 | Design Basis | Pass | proposed-design.md v1: 5 ADs, 2 new models, 2 AQL queries, ~140 lines additive delta |
 | 4 | Runtime Modeling | Pending | — |
 | 5 | Review Gate | Pending | — |
 | 6 | Source Implementation | Pending | — |
@@ -57,3 +57,4 @@ simulation_runs[tenant_id]
 | T-000 | 2026-04-16 | — | 0 | Bootstrap: deferred from cse-engine-accuracy-explainability C-19/C-20 |
 | T-001 | 2026-04-16 | 0 | 1 | Investigation: parent ticket reviewed, data schema confirmed in ArangoDB |
 | T-002 | 2026-04-16 | 1 | 2 | Requirements Design-ready: 12 ACs, 10 change items |
+| T-003 | 2026-04-17 | 2 | 3 | proposed-design.md v1: 5 ADs, 2 new models, 2 AQL queries, ~140 lines additive |
