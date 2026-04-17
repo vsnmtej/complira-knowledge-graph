@@ -4,8 +4,8 @@
 
 | Field | Value |
 |---|---|
-| Current Stage | 2 — Requirements Refinement |
-| Code Edit Permission | Locked |
+| Current Stage | 6 — Source Implementation |
+| Code Edit Permission | Unlocked |
 | Scope | Small |
 | Branch | codex/cse-situation-explainability |
 | Last Updated | 2026-04-16 |
@@ -19,7 +19,7 @@
 | 2 | Requirements Refinement | Pass | requirements.md Design-ready: 12 ACs, 10 change items |
 | 3 | Design Basis | Pass | proposed-design.md v1: 5 ADs, 2 new models, 2 AQL queries, ~140 lines additive delta |
 | 4 | Runtime Modeling | Pass | future-state-runtime-call-stack.md v1: 6 UCs, all 10 change items covered, graceful-empty paths documented |
-| 5 | Review Gate | In Progress | — |
+| 5 | Review Gate | Go Confirmed | 2 rounds: Round 1 Candidate Go (F-001 AQL sort, F-002 narrative guard, F-003 dep note); Round 2 clean |
 | 6 | Source Implementation | Pending | — |
 | 7 | API/E2E Gate | Pending | — |
 | 8 | Code Review Gate | Pending | — |
@@ -58,3 +58,6 @@ simulation_runs[tenant_id]
 | T-001 | 2026-04-16 | 0 | 1 | Investigation: parent ticket reviewed, data schema confirmed in ArangoDB |
 | T-002 | 2026-04-16 | 1 | 2 | Requirements Design-ready: 12 ACs, 10 change items |
 | T-003 | 2026-04-17 | 2 | 3 | proposed-design.md v1: 5 ADs, 2 new models, 2 AQL queries, ~140 lines additive |
+| T-004 | 2026-04-17 | 3 | 4 | future-state-runtime-call-stack.md v1: 6 UCs, all 10 change items |
+| T-005 | 2026-04-17 | 4 | 5 | Round 1: Candidate Go — F-001 AQL SORT, F-002 narrative guard, F-003 dep note |
+| T-006 | 2026-04-17 | 5 | 6 | Round 2: Go Confirmed — corrections applied to call-stack v2; Stage 5 PASS |

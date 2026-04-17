@@ -83,6 +83,7 @@ narrative data already stored in `attack_chain_findings[].explanation`.
 │       │       # FOR r IN threat_category_rollups
 │       │       #   FILTER r.tenant_id == @tenant_id
 │       │       #   FILTER r.bucket_name == @bucket_name
+│       │       #   SORT r.computed_at DESC    ← F-001: most recent run, not highest prob
 │       │       #   LIMIT 1
 │       │       #   FOR f IN attack_chain_findings
 │       │       #     FILTER f.run_id == r.run_id
@@ -163,11 +164,14 @@ completed simulation exists.
 │           #   low_m  = (financial_exposure_low  or 0) / 1_000_000
 │           #   high_m = (financial_exposure_high or 0) / 1_000_000
 │           #
+│           #   # F-002: guard trailing space when counterfactuals is empty
+│           #   impact = (top_cf.get("impact_if_applied") or "").strip()
 │           #   narrative = (
-│           #     f"Exposure of ${low_m:.1f}M–${high_m:.1f}M is derived from "
-│           #     f"{chain_count} confirmed attack chain(s) with "
-│           #     f"{breach_probability_pct:.0f}% breach probability. "
-│           #     + (top_cf.get("impact_if_applied", "") or "")
+│           #     f"Exposure of ${low_m:.1f}M–${high_m:.1f}M derived from "
+│           #     f"{chain_count} confirmed attack chain"
+│           #     f"{'s' if chain_count != 1 else ''} "
+│           #     f"({breach_probability_pct:.0f}% breach probability)."
+│           #     + (f" {impact}" if impact else "")
 │           #   )
 │           #
 │           #   return ExposureDerivation(
