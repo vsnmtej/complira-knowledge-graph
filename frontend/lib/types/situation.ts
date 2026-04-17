@@ -26,6 +26,21 @@ export interface ActionPriority {
   urgency: string;
 }
 
+export interface ThreatCategoryExplanation {
+  bucket_name: string;
+  driving_events: string[];
+  turning_point_round: number | null;
+  effective_defender_actions: string[];
+  what_would_have_helped: string;
+}
+
+export interface ExposureDerivation {
+  narrative: string;
+  contributing_chains: number;
+  highest_confidence_chain: string;
+  investment_recommendation: string;
+}
+
 export interface CISOSituation {
   posture_score: number;
   posture_delta: number | null;
@@ -42,6 +57,7 @@ export interface CISOSituation {
   action_priorities: ActionPriority[];
   snapshot_timestamp: string;
   data_staleness_warning: string | null;
+  threat_category_explanations?: ThreatCategoryExplanation[];
 }
 
 export interface BoardSituation {
@@ -53,6 +69,7 @@ export interface BoardSituation {
   reputational_risk_score: number;
   board_priorities: ActionPriority[];
   snapshot_timestamp: string;
+  exposure_derivation?: ExposureDerivation | null;
 }
 
 export interface MetricCard {

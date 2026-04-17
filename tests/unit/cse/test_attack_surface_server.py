@@ -57,18 +57,29 @@ def _make_entities(cve_ids: list[str]) -> list[dict]:
 
 class TestExploitCVE:
     def test_exploit_cve_adds_chain_step(self):
-        """AC-CSE-12: EXPLOIT_CVE sets chain step count in state."""
+        """AC-CSE-12: EXPLOIT_CVE eventually succeeds and increments chain step count.
+        Exploit is probabilistic — retry up to 20 times with seed for determinism."""
+        import random as _random
+        _random.seed(0)
         entities = _make_entities(["CVE-2021-44228", "CVE-2022-0001"])
         server = AttackSurfaceServer(entities)
+        # KEV + foothold removes no-foothold penalty → base 0.85
+        server.kev_cves = {"CVE-2021-44228"}
+        server.privilege_level = 1
 
-        initial_state = server.get_state_snapshot()
-        assert initial_state["chain_step_count"] == 0
+        assert server.get_state_snapshot()["chain_step_count"] == 0
 
-        result = server.apply_action(EXPLOIT_CVE, {"cve_id": "CVE-2021-44228"}, round_no=1)
+        succeeded = False
+        for i in range(20):
+            server.exploit_attempts = {}  # reset per-attempt penalty
+            result = server.apply_action(EXPLOIT_CVE, {"cve_id": "CVE-2021-44228"}, round_no=i + 1)
+            if "exploit_success" in result.outcome:
+                succeeded = True
+                break
 
-        state_after = server.get_state_snapshot()
-        assert state_after["chain_step_count"] >= 1, "EXPLOIT_CVE must increment chain step count"
-        assert result.outcome  # outcome string is non-empty
+        assert succeeded, "EXPLOIT_CVE must succeed at least once in 20 attempts at 0.85 probability"
+        assert server.get_state_snapshot()["chain_step_count"] >= 1
+        assert result.outcome
 
     def test_exploit_cve_unknown_cve_graceful(self):
         """EXPLOIT_CVE on unknown CVE returns outcome without crashing."""

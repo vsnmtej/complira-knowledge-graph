@@ -60,24 +60,33 @@ function cisoMetrics(s: CISOSituation): MetricCard[] {
 }
 
 function cisoAlerts(s: CISOSituation): AlertItem[] {
-  const items: AlertItem[] = s.threat_categories.map((tc, i) => ({
-    id: `ciso-tc-${i}`,
-    title: tc.display_name,
-    severity:
-      tc.breach_probability >= 0.7 ? "critical"
-      : tc.breach_probability >= 0.5 ? "high"
-      : tc.breach_probability >= 0.3 ? "medium"
-      : "low",
-    card_type: "attack_chain",
-    summary: `Breach probability ${(tc.breach_probability * 100).toFixed(0)}% · ${tc.critical_asset_count} critical asset(s)${tc.trend ? ` · Trend: ${tc.trend}` : ""}`,
-    ask_prompt: `What is driving the ${tc.display_name} risk category? Summarise top techniques, affected assets, and recommended controls.`,
-    detail_rows: [
-      { key: "Bucket", value: tc.bucket_name },
-      { key: "Breach Probability", value: `${(tc.breach_probability * 100).toFixed(0)}%` },
-      { key: "Critical Assets", value: String(tc.critical_asset_count) },
-      ...(tc.trend ? [{ key: "Trend", value: tc.trend }] : []),
-    ],
-  }));
+  const items: AlertItem[] = s.threat_categories.map((tc, i) => {
+    // C-09: find matching explanation for this bucket
+    const explanation = s.threat_category_explanations?.find(
+      e => e.bucket_name === tc.bucket_name
+    );
+    return {
+      id: `ciso-tc-${i}`,
+      title: tc.display_name,
+      severity:
+        tc.breach_probability >= 0.7 ? "critical"
+        : tc.breach_probability >= 0.5 ? "high"
+        : tc.breach_probability >= 0.3 ? "medium"
+        : "low",
+      card_type: "attack_chain",
+      summary: `Breach probability ${(tc.breach_probability * 100).toFixed(0)}% · ${tc.critical_asset_count} critical asset(s)${tc.trend ? ` · Trend: ${tc.trend}` : ""}`,
+      ask_prompt: `What is driving the ${tc.display_name} risk category? Summarise top techniques, affected assets, and recommended controls.`,
+      detail_rows: [
+        { key: "Bucket", value: tc.bucket_name },
+        { key: "Breach Probability", value: `${(tc.breach_probability * 100).toFixed(0)}%` },
+        { key: "Critical Assets", value: String(tc.critical_asset_count) },
+        ...(tc.trend ? [{ key: "Trend", value: tc.trend }] : []),
+        ...(explanation?.what_would_have_helped
+          ? [{ key: "What would help", value: explanation.what_would_have_helped }]
+          : []),
+      ],
+    };
+  });
 
   s.action_priorities.slice(0, 3).forEach((ap, i) => {
     items.push({
@@ -145,30 +154,51 @@ function boardMetrics(s: BoardSituation): MetricCard[] {
 }
 
 function boardAlerts(s: BoardSituation): AlertItem[] {
-  const items: AlertItem[] = s.regulatory_fine_risk.map((r, i) => ({
-    id: `board-reg-${i}`,
-    title: `${r.framework} — Regulatory Fine Risk`,
-    severity:
-      r.probability >= 0.7 ? "critical"
-      : r.probability >= 0.5 ? "high"
-      : r.probability >= 0.3 ? "medium"
-      : "low",
-    card_type: "compliance",
-    summary: `Estimated fine up to $${(r.estimated_fine_usd / 1_000_000).toFixed(1)}M · Probability ${(r.probability * 100).toFixed(0)}%`,
-    ask_prompt: `What is our regulatory exposure under ${r.framework}? Show the required notifications, fines, and remediation timeline.`,
-    detail_rows: [
-      { key: "Framework", value: r.framework },
-      { key: "Estimated Fine", value: `$${(r.estimated_fine_usd / 1_000_000).toFixed(1)}M` },
-      { key: "Probability", value: `${(r.probability * 100).toFixed(0)}%` },
-    ],
-  }));
+  const items: AlertItem[] = [];
+
+  // C-10: prepend exposure derivation card when available
+  if (s.exposure_derivation) {
+    const ed = s.exposure_derivation;
+    items.push({
+      id: "board-exposure-derivation",
+      title: "Financial Exposure — How We Got Here",
+      severity: "high" as const,
+      card_type: "compliance" as const,
+      summary: ed.narrative,
+      ask_prompt: "Explain the financial exposure derivation in detail. What chains contributed and what would reduce it most?",
+      detail_rows: [
+        { key: "Contributing Chains", value: String(ed.contributing_chains) },
+        ...(ed.highest_confidence_chain ? [{ key: "Top Chain", value: ed.highest_confidence_chain }] : []),
+        ...(ed.investment_recommendation ? [{ key: "Recommended Investment", value: ed.investment_recommendation }] : []),
+      ],
+    });
+  }
+
+  s.regulatory_fine_risk.forEach((r, i) => {
+    items.push({
+      id: `board-reg-${i}`,
+      title: `${r.framework} — Regulatory Fine Risk`,
+      severity: (r.probability >= 0.7 ? "critical"
+        : r.probability >= 0.5 ? "high"
+        : r.probability >= 0.3 ? "medium"
+        : "low") as AlertItem["severity"],
+      card_type: "compliance" as const,
+      summary: `Estimated fine up to $${(r.estimated_fine_usd / 1_000_000).toFixed(1)}M · Probability ${(r.probability * 100).toFixed(0)}%`,
+      ask_prompt: `What is our regulatory exposure under ${r.framework}? Show the required notifications, fines, and remediation timeline.`,
+      detail_rows: [
+        { key: "Framework", value: r.framework },
+        { key: "Estimated Fine", value: `$${(r.estimated_fine_usd / 1_000_000).toFixed(1)}M` },
+        { key: "Probability", value: `${(r.probability * 100).toFixed(0)}%` },
+      ],
+    });
+  });
 
   s.board_priorities.slice(0, 3).forEach((ap, i) => {
     items.push({
       id: `board-ap-${i}`,
       title: `Board Priority #${ap.rank}: ${ap.description}`,
-      severity: ap.urgency === "critical" ? "critical" : ap.urgency === "high" ? "high" : "medium",
-      card_type: "compliance",
+      severity: (ap.urgency === "critical" ? "critical" : ap.urgency === "high" ? "high" : "medium") as AlertItem["severity"],
+      card_type: "compliance" as const,
       summary: `Owner: ${ap.owner} · Due: ${ap.due_label}`,
       ask_prompt: `Give me the board-level summary for: "${ap.description}". Include financial impact, regulatory context, and recommended resolution.`,
       detail_rows: [
