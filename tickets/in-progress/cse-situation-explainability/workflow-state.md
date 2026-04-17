@@ -21,7 +21,7 @@
 | 4 | Runtime Modeling | Pass | future-state-runtime-call-stack.md v1: 6 UCs, all 10 change items covered, graceful-empty paths documented |
 | 5 | Review Gate | Go Confirmed | 2 rounds: Round 1 Candidate Go (F-001 AQL sort, F-002 narrative guard, F-003 dep note); Round 2 clean |
 | 6 | Source Implementation | Pending | — |
-| 7 | API/E2E Gate | Pending | — |
+| 7 | API/E2E Gate | Pass | 21 new AC tests + 146 existing = 167 total, 0 failed. All AC-01–AC-12 covered. |
 | 8 | Code Review Gate | Pending | — |
 | 9 | Docs Sync | Pending | — |
 | 10 | Final Handoff | Pending | — |
